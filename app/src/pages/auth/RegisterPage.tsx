@@ -9,6 +9,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { loginStart, loginSuccess } from '../../store/slices/authSlice';
 import { registerUser } from '../../lib/authService';
+import { createDocument } from '../../lib/firestoreService';
+import type { Associado, Store, StoreConfig, PlanType } from '../../types';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -111,12 +113,63 @@ export default function RegisterPage() {
     const name = form.getFieldValue('name');
     const email = form.getFieldValue('email');
     const password = form.getFieldValue('password');
-    const phone = form.getFieldValue('phone');
-    const cpf = form.getFieldValue('cpf');
-    const plan = selectedPlan as 'basico' | 'intermediario' | 'avancado';
+    const phone = form.getFieldValue('phone') || '';
+    const cpfCnpj = form.getFieldValue('cpf') || '';
+    const plan = selectedPlan as PlanType;
+    const now = new Date().toISOString();
+    const storeSlug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
     try {
-      const profile = await registerUser(email, password, name, plan, { phone, cpfCnpj: cpf });
+      const registerPromise = registerUser(email, password, name, plan, { phone, cpfCnpj });
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('TIMEOUT')), 8000)
+      );
+      const profile = await Promise.race([registerPromise, timeoutPromise]);
+
+      // Create Associado record
+      const associadoData: Omit<Associado, 'id'> & { id: string } = {
+        id: profile.uid,
+        name,
+        email,
+        phone,
+        cpfCnpj,
+        planType: plan,
+        planId: plan,
+        status: 'ativo',
+        storeSlug,
+        storeName: `${name}'s Store`,
+        address: form.getFieldValue('address') || '',
+        city: form.getFieldValue('city') || '',
+        state: form.getFieldValue('state') || '',
+        totalSales: 0,
+        totalCommission: 0,
+        createdAt: now,
+        updatedAt: now,
+      };
+      await createDocument('associados', associadoData, profile.uid);
+
+      // Create default Store
+      const storeConfig: StoreConfig = {
+        primaryColor: '#1677ff',
+        bannerUrl: '',
+        logoUrl: '',
+        description: `Loja de ${name}`,
+        showWhatsapp: !!phone,
+        whatsappNumber: phone,
+      };
+      const storeData: Omit<Store, 'id'> = {
+        associadoId: profile.uid,
+        slug: storeSlug,
+        name: `${name}'s Store`,
+        active: true,
+        productIds: [],
+        config: storeConfig,
+        totalViews: 0,
+        totalSales: 0,
+        createdAt: now,
+      };
+      await createDocument('stores', storeData, profile.uid);
+
       dispatch(
         loginSuccess({
           id: profile.uid,
@@ -128,23 +181,18 @@ export default function RegisterPage() {
         })
       );
       setDone(true);
+      message.success('Conta criada com sucesso!');
     } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : '';
       const code = (err as { code?: string }).code;
-      if (code === 'auth/email-already-in-use') {
+      if (errorMsg === 'TIMEOUT') {
+        message.error('O cadastro demorou demais. Tente novamente.');
+      } else if (code === 'auth/email-already-in-use') {
         message.error('Este email já está cadastrado. Faça login.');
       } else if (code === 'auth/weak-password') {
         message.error('Senha muito fraca. Use pelo menos 6 caracteres.');
       } else {
-        dispatch(
-          loginSuccess({
-            id: 'assoc-1',
-            name,
-            email,
-            role: 'associado',
-            plan,
-          })
-        );
-        setDone(true);
+        message.error('Erro ao criar conta. Tente novamente.');
       }
     }
   };
@@ -152,14 +200,14 @@ export default function RegisterPage() {
   if (done) {
     const plan = plans.find((p) => p.type === selectedPlan);
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #001529 0%, #003a70 100%)' }}>
-        <Card style={{ width: 540, borderRadius: 16, textAlign: 'center' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #001529 0%, #003a70 100%)', padding: '16px' }}>
+        <Card style={{ width: '100%', maxWidth: 540, borderRadius: 16, textAlign: 'center' }}>
           <Result
             status="success"
             title="Bem-vindo à DigitaisBR!"
             subTitle={`Sua conta foi criada com o plano ${plan?.name}. Seus documentos serão validados em até 48h.`}
             extra={[
-              <Button type="primary" key="portal" size="large" onClick={() => navigate('/portal')}>
+              <Button type="primary" key="portal" size="large" onClick={() => navigate('/portal')} autoFocus>
                 Acessar Meu Portal
               </Button>,
             ]}

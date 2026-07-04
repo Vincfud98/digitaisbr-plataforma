@@ -18,8 +18,12 @@ import servicosReducer from './slices/servicosSlice';
 import destaquesReducer from './slices/destaquesSlice';
 import suporteReducer from './slices/suporteSlice';
 import relatoriosReducer from './slices/relatoriosSlice';
+import cartReducer from './slices/cartSlice';
+import firestoreMiddleware from './firestoreMiddleware';
 
 export const store = configureStore({
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(firestoreMiddleware),
   reducer: {
     auth: authReducer,
     associados: associadosReducer,
@@ -38,6 +42,7 @@ export const store = configureStore({
     destaques: destaquesReducer,
     suporte: suporteReducer,
     relatorios: relatoriosReducer,
+    cart: cartReducer,
   },
 });
 

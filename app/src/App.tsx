@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { ConfigProvider } from 'antd';
 import ptBR from 'antd/locale/pt_BR';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -48,12 +49,14 @@ import RedesSociaisPage from './pages/portal/RedesSociaisPage';
 import RankingPage from './pages/portal/RankingPage';
 import ComunicacoesPage from './pages/comunicacoes/ComunicacoesPage';
 import LojaPublicaPage from './pages/public/LojaPublicaPage';
+import CheckoutPage from './pages/public/CheckoutPage';
 import PrivateRoute from './routes/PrivateRoute';
 import DataLoader from './components/DataLoader';
 
 export default function App() {
   return (
     <ErrorBoundary>
+      <HelmetProvider>
       <ConfigProvider locale={ptBR} theme={{ token: { colorPrimary: '#1677ff', borderRadius: 8 } }}>
         <BrowserRouter>
           <DataLoader>
@@ -61,6 +64,7 @@ export default function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/registro" element={<RegisterPage />} />
             <Route path="/loja/:slug" element={<LojaPublicaPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
             <Route
               path="/"
               element={
@@ -127,6 +131,7 @@ export default function App() {
           </DataLoader>
         </BrowserRouter>
       </ConfigProvider>
+      </HelmetProvider>
     </ErrorBoundary>
   );
 }

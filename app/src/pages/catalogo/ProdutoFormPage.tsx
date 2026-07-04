@@ -1,9 +1,10 @@
-import { useEffect } from 'react';
-import { Form, Input, InputNumber, Select, Button, Card, Typography, Row, Col, message, Space } from 'antd';
-import { ArrowLeftOutlined, SaveOutlined } from '@ant-design/icons';
+import { useEffect, useState } from 'react';
+import { Form, Input, InputNumber, Select, Button, Card, Typography, Row, Col, message, Space, Upload } from 'antd';
+import { ArrowLeftOutlined, SaveOutlined, UploadOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../../store';
 import { addProduct, updateProduct } from '../../store/slices/catalogoSlice';
+import { uploadProductImage } from '../../lib/storageService';
 import { categories } from '../../data/categories';
 import type { Product } from '../../types';
 
@@ -16,6 +17,7 @@ export default function ProdutoFormPage() {
   const existing = useAppSelector((s) => s.catalogo.list.find((p) => p.id === id));
   const isEditing = !!id && !!existing;
   const [form] = Form.useForm();
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (isEditing && existing) {
@@ -23,16 +25,28 @@ export default function ProdutoFormPage() {
     }
   }, [isEditing, existing, form]);
 
-  const handleSubmit = (values: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const handleSubmit = async (values: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => {
     const now = new Date().toISOString().split('T')[0];
+    const productId = isEditing ? existing!.id : `prod-${Date.now()}`;
+    let imageUrl = isEditing ? existing!.image : '';
+
+    if (imageFile) {
+      try {
+        imageUrl = await uploadProductImage(imageFile, productId);
+      } catch {
+        message.error('Erro ao enviar imagem.');
+        return;
+      }
+    }
+
     if (isEditing) {
-      dispatch(updateProduct({ ...existing!, ...values, updatedAt: now }));
+      dispatch(updateProduct({ ...existing!, ...values, image: imageUrl, updatedAt: now }));
       message.success('Produto atualizado!');
     } else {
       const newProduct: Product = {
         ...values,
-        id: `prod-${Date.now()}`,
-        image: '',
+        id: productId,
+        image: imageUrl,
         createdAt: now,
         updatedAt: now,
       };
@@ -118,6 +132,28 @@ export default function ProdutoFormPage() {
 
           <Form.Item name="checkoutUrl" label="URL de Checkout Externo">
             <Input placeholder="https://checkout.digitaisbr.com/..." />
+          </Form.Item>
+
+          <Title level={5}>Imagem do Produto</Title>
+          <Form.Item>
+            <Upload
+              listType="picture-card"
+              accept="image/*"
+              maxCount={1}
+              beforeUpload={(file) => { setImageFile(file); return false; }}
+              onRemove={() => setImageFile(null)}
+              defaultFileList={
+                isEditing && existing?.image
+                  ? [{ uid: '-1', name: 'imagem-atual', status: 'done' as const, url: existing.image }]
+                  : []
+              }
+            >
+              <div>
+                <UploadOutlined />
+                <div style={{ marginTop: 8 }}>Upload</div>
+                <div style={{ fontSize: 11, color: '#999' }}>Max. 5MB</div>
+              </div>
+            </Upload>
           </Form.Item>
 
           <Space style={{ marginTop: 16 }}>

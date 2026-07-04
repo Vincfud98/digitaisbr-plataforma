@@ -19,7 +19,10 @@ export default function LoginPage() {
   const onFinish = async (values: { email: string; password: string }) => {
     dispatch(loginStart());
     try {
-      const profile = await loginUser(values.email, values.password);
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('timeout')), 8000)
+      );
+      const profile = await Promise.race([loginUser(values.email, values.password), timeoutPromise]);
       dispatch(
         loginSuccess({
           id: profile.uid,
@@ -34,9 +37,7 @@ export default function LoginPage() {
       navigate(profile.role === 'associado' ? '/portal' : '/');
     } catch (err: unknown) {
       const code = (err as { code?: string }).code;
-      if (code === 'auth/invalid-credential' || code === 'auth/user-not-found' || code === 'auth/wrong-password') {
-        fallbackDemo(values.email, values.password);
-      } else if (code === 'auth/too-many-requests') {
+      if (code === 'auth/too-many-requests') {
         dispatch(loginFailure());
         message.error('Muitas tentativas. Tente novamente em alguns minutos.');
       } else {
@@ -106,8 +107,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #001529 0%, #003a70 100%)' }}>
-      <Card style={{ width: 420, borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #001529 0%, #003a70 100%)', padding: '16px' }}>
+      <Card style={{ width: '100%', maxWidth: 420, borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <img src="/logo.png" alt="DigitaisBR" style={{ height: 80, objectFit: 'contain', marginBottom: 8 }} />
           <div><Text type="secondary">Acesse sua conta</Text></div>

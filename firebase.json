@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "digitaisbr-plataforma",
     "public": "app/dist",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [

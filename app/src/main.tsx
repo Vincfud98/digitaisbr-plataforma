@@ -12,3 +12,7 @@ createRoot(document.getElementById('root')!).render(
     </Provider>
   </StrictMode>,
 );
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/firebase-messaging-sw.js').catch(() => {});
+}

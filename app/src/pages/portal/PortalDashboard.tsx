@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Card, Col, Row, Statistic, Typography, Tag, List, Space, Progress } from 'antd';
 import {
   ShopOutlined, ShoppingCartOutlined, GiftOutlined,
@@ -5,6 +6,10 @@ import {
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAppSelector } from '../../store';
+import {
+  AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
+} from 'recharts';
 import type { PlanType } from '../../types';
 
 const { Title, Text } = Typography;
@@ -12,6 +17,7 @@ const { Title, Text } = Typography;
 const planLabels: Record<PlanType, string> = { basico: 'Básico', intermediario: 'Intermediário', avancado: 'Avançado' };
 const planColors: Record<PlanType, string> = { basico: 'blue', intermediario: 'purple', avancado: 'gold' };
 const planPrices: Record<PlanType, number> = { basico: 49.90, intermediario: 99.90, avancado: 199.90 };
+const CHART_COLORS = ['#52c41a', '#1677ff', '#fa8c16', '#f5222d'];
 
 export default function PortalDashboard() {
   const navigate = useNavigate();
@@ -24,7 +30,7 @@ export default function PortalDashboard() {
   const conteudos = useAppSelector((s) => s.conteudos.list);
   const destaques = useAppSelector((s) => s.destaques.list);
 
-  const associado = associados.find((a) => a.id === 'assoc-1') || associados[0];
+  const associado = associados.find((a) => a.id === user?.id) || associados.find((a) => a.id === 'assoc-1') || associados[0];
   const plan = (associado?.planType || user?.plan || 'basico') as PlanType;
 
   const minhaLoja = lojas.find((l) => l.associadoId === associado?.id);
@@ -54,9 +60,49 @@ export default function PortalDashboard() {
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 5);
 
-  const topBeneficios = [...beneficiosDisponiveis]
-    .sort((a, b) => b.usageCount - a.usageCount)
-    .slice(0, 5);
+  const salesChartData = useMemo(() => {
+    const months: Record<string, { vendas: number; receita: number }> = {};
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = d.toLocaleDateString('pt-BR', { month: 'short' });
+      months[key] = { vendas: 0, receita: 0 };
+    }
+    minhasVendas.forEach((v) => {
+      const d = new Date(v.createdAt);
+      const key = d.toLocaleDateString('pt-BR', { month: 'short' });
+      if (months[key]) {
+        months[key].vendas++;
+        months[key].receita += v.totalPrice;
+      }
+    });
+    return Object.entries(months).map(([mes, data]) => ({ mes, ...data }));
+  }, [minhasVendas]);
+
+  const statusData = useMemo(() => {
+    const counts = { aprovada: 0, pendente: 0, cancelada: 0, reembolsada: 0 };
+    minhasVendas.forEach((v) => {
+      if (counts[v.status] !== undefined) counts[v.status]++;
+    });
+    return Object.entries(counts)
+      .filter(([, v]) => v > 0)
+      .map(([name, value]) => ({ name: name.charAt(0).toUpperCase() + name.slice(1), value }));
+  }, [minhasVendas]);
+
+  const commissionChartData = useMemo(() => {
+    const months: Record<string, number> = {};
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months[d.toLocaleDateString('pt-BR', { month: 'short' })] = 0;
+    }
+    minhasComissoes.forEach((c) => {
+      const d = new Date(c.createdAt);
+      const key = d.toLocaleDateString('pt-BR', { month: 'short' });
+      if (months[key] !== undefined) months[key] += c.commissionValue;
+    });
+    return Object.entries(months).map(([mes, valor]) => ({ mes, valor }));
+  }, [minhasComissoes]);
 
   return (
     <div>
@@ -72,22 +118,91 @@ export default function PortalDashboard() {
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} lg={6}>
           <Card hoverable onClick={() => navigate('/portal/vendas')}>
-            <Statistic title="Vendas Aprovadas" value={vendasAprovadas.length} suffix={`/ ${minhasVendas.length}`} prefix={<ShoppingCartOutlined />} valueStyle={{ color: '#52c41a' }} />
+            <Statistic title="Vendas Aprovadas" value={vendasAprovadas.length} suffix={`/ ${minhasVendas.length}`} prefix={<ShoppingCartOutlined />} styles={{ content: { color: '#52c41a' } }} />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <Card hoverable onClick={() => navigate('/portal/vendas')}>
-            <Statistic title="Receita Total" value={receitaVendas} precision={2} prefix="R$" valueStyle={{ color: '#52c41a' }} />
+            <Statistic title="Receita Total" value={receitaVendas} precision={2} prefix="R$" styles={{ content: { color: '#52c41a' } }} />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <Card>
-            <Statistic title="Comissões Recebidas" value={comissaoPaga} precision={2} prefix="R$" valueStyle={{ color: '#1677ff' }} />
+            <Statistic title="Comissões Recebidas" value={comissaoPaga} precision={2} prefix="R$" styles={{ content: { color: '#1677ff' } }} />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <Card>
-            <Statistic title="Comissões Pendentes" value={comissaoPendente} precision={2} prefix="R$" valueStyle={{ color: '#fa8c16' }} />
+            <Statistic title="Comissões Pendentes" value={comissaoPendente} precision={2} prefix="R$" styles={{ content: { color: '#fa8c16' } }} />
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Charts */}
+      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+        <Col xs={24} lg={16}>
+          <Card title={<><RiseOutlined /> Vendas nos últimos 6 meses</>} size="small">
+            <ResponsiveContainer width="100%" height={250}>
+              <AreaChart data={salesChartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="mes" fontSize={12} />
+                <YAxis fontSize={12} />
+                <Tooltip formatter={(value, name) => [name === 'receita' ? `R$ ${Number(value).toFixed(2)}` : value, name === 'receita' ? 'Receita' : 'Vendas']} />
+                <Area type="monotone" dataKey="vendas" stroke="#52c41a" fill="#52c41a" fillOpacity={0.2} name="Vendas" />
+                <Area type="monotone" dataKey="receita" stroke="#1677ff" fill="#1677ff" fillOpacity={0.1} name="Receita" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </Card>
+        </Col>
+        <Col xs={24} lg={8}>
+          <Card title="Status das Vendas" size="small">
+            {statusData.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: 40 }}>
+                <Text type="secondary">Sem vendas ainda</Text>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}>
+                    {statusData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
+          </Card>
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+        <Col xs={24} lg={12}>
+          <Card title="Comissões Mensais" size="small">
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={commissionChartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="mes" fontSize={12} />
+                <YAxis fontSize={12} />
+                <Tooltip formatter={(value) => [`R$ ${Number(value).toFixed(2)}`, 'Comissão']} />
+                <Bar dataKey="valor" fill="#722ed1" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </Card>
+        </Col>
+        <Col xs={24} lg={12}>
+          <Card title={<><CrownOutlined /> Meu Plano</>} size="small"
+            extra={<a onClick={() => navigate('/portal/plano')}>Detalhes</a>}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <Tag color={planColors[plan]} style={{ fontSize: 14, padding: '4px 12px' }}>{planLabels[plan]}</Tag>
+              <Text strong style={{ fontSize: 18 }}>R$ {planPrices[plan].toFixed(2)}/mês</Text>
+            </div>
+            <div style={{ marginBottom: 8 }}>
+              <Text type="secondary">Benefícios utilizados</Text>
+              <Progress percent={Math.round((beneficiosDisponiveis.length / Math.max(beneficios.filter((b) => b.status === 'ativo').length, 1)) * 100)} size="small" />
+            </div>
+            <div>
+              <Text type="secondary">Conteúdos disponíveis</Text>
+              <Progress percent={Math.round((conteudosDisponiveis.length / Math.max(conteudos.filter((c) => c.status === 'publicado').length, 1)) * 100)} size="small" />
+            </div>
           </Card>
         </Col>
       </Row>
@@ -157,58 +272,24 @@ export default function PortalDashboard() {
         <Col xs={24} lg={12}>
           <Card title={<><GiftOutlined /> Meus Benefícios</>} size="small"
             extra={<a onClick={() => navigate('/portal/beneficios')}>Ver todos</a>}>
-            <List
-              size="small"
-              dataSource={topBeneficios}
-              renderItem={(b) => (
-                <List.Item>
-                  <div style={{ flex: 1 }}>
-                    <Text style={{ fontSize: 13 }}>{b.title}</Text>
-                    <br />
-                    <Text type="secondary" style={{ fontSize: 11 }}>{b.description.slice(0, 60)}...</Text>
-                  </div>
-                  <Tag color="green">{b.value}</Tag>
-                </List.Item>
-              )}
-            />
-          </Card>
-        </Col>
-      </Row>
-
-      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
-        <Col xs={24} lg={12}>
-          <Card title={<><CrownOutlined /> Meu Plano</>} size="small"
-            extra={<a onClick={() => navigate('/portal/plano')}>Detalhes</a>}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <Tag color={planColors[plan]} style={{ fontSize: 14, padding: '4px 12px' }}>{planLabels[plan]}</Tag>
-              <Text strong style={{ fontSize: 18 }}>R$ {planPrices[plan].toFixed(2)}/mês</Text>
-            </div>
-            <div style={{ marginBottom: 8 }}>
-              <Text type="secondary">Benefícios utilizados</Text>
-              <Progress percent={Math.round((beneficiosDisponiveis.length / Math.max(beneficios.filter((b) => b.status === 'ativo').length, 1)) * 100)} size="small" />
-            </div>
-            <div>
-              <Text type="secondary">Conteúdos disponíveis</Text>
-              <Progress percent={Math.round((conteudosDisponiveis.length / Math.max(conteudos.filter((c) => c.status === 'publicado').length, 1)) * 100)} size="small" />
-            </div>
-          </Card>
-        </Col>
-        <Col xs={24} lg={12}>
-          <Card title={<><RiseOutlined /> Desempenho Mensal</>} size="small">
-            <Row gutter={16}>
-              <Col span={8} style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 22, fontWeight: 600, color: '#52c41a' }}>{vendasAprovadas.length}</div>
-                <Text type="secondary" style={{ fontSize: 12 }}>Vendas</Text>
-              </Col>
-              <Col span={8} style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 22, fontWeight: 600, color: '#1677ff' }}>R$ {comissaoPaga.toFixed(0)}</div>
-                <Text type="secondary" style={{ fontSize: 12 }}>Comissões</Text>
-              </Col>
-              <Col span={8} style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 22, fontWeight: 600, color: '#722ed1' }}>{minhaLoja?.totalViews || 0}</div>
-                <Text type="secondary" style={{ fontSize: 12 }}>Visitas</Text>
-              </Col>
-            </Row>
+            {beneficiosDisponiveis.length === 0 ? (
+              <Text type="secondary">Nenhum benefício disponível.</Text>
+            ) : (
+              <List
+                size="small"
+                dataSource={beneficiosDisponiveis.slice(0, 5)}
+                renderItem={(b) => (
+                  <List.Item>
+                    <div style={{ flex: 1 }}>
+                      <Text style={{ fontSize: 13 }}>{b.title}</Text>
+                      <br />
+                      <Text type="secondary" style={{ fontSize: 11 }}>{b.description.slice(0, 60)}...</Text>
+                    </div>
+                    <Tag color="green">{b.value}</Tag>
+                  </List.Item>
+                )}
+              />
+            )}
           </Card>
         </Col>
       </Row>

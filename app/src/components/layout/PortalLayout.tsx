@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Layout, Menu, Avatar, Dropdown, Typography, Tag, Badge, theme } from 'antd';
+import { useState, useEffect } from 'react';
+import { Layout, Menu, Avatar, Dropdown, Typography, Tag, Badge, theme, Drawer } from 'antd';
 import {
   DashboardOutlined,
   ShopOutlined,
@@ -28,6 +28,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { logout } from '../../store/slices/authSlice';
 import { logoutUser } from '../../lib/authService';
+import PushNotificationPrompt from '../PushNotificationPrompt';
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
@@ -63,12 +64,20 @@ function getSelectedKey(pathname: string): string {
 
 export default function PortalLayout() {
   const [collapsed, setCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((s) => s.auth);
   const unreadCount = useAppSelector((s) => s.notificacoes.list.filter((n) => !n.read).length);
   const { token } = theme.useToken();
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const selectedKey = getSelectedKey(location.pathname);
   const plan = user?.plan || 'basico';
@@ -92,41 +101,59 @@ export default function PortalLayout() {
     },
   };
 
+  const siderMenu = (
+    <>
+      <div style={{ height: 64, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, borderBottom: `1px solid ${token.colorBorderSecondary}`, padding: '0 12px' }}>
+        <img src="/logo.png" alt="DigitaisBR" style={{ height: isMobile ? 48 : (collapsed ? 36 : 48), objectFit: 'contain' }} />
+        {(isMobile || !collapsed) && <Tag color={planColors[plan]} style={{ fontSize: 10 }}>{planLabels[plan]}</Tag>}
+      </div>
+      <Menu
+        mode="inline"
+        selectedKeys={[selectedKey]}
+        items={menuItems}
+        onClick={({ key }) => { navigate(key); if (isMobile) setDrawerOpen(false); }}
+        style={{ border: 'none', marginTop: 8 }}
+      />
+    </>
+  );
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider
-        trigger={null}
-        collapsible
-        collapsed={collapsed}
-        width={240}
-        style={{
-          overflow: 'auto',
-          height: '100vh',
-          position: 'fixed',
-          left: 0,
-          top: 0,
-          bottom: 0,
-          background: token.colorBgContainer,
-          borderRight: `1px solid ${token.colorBorderSecondary}`,
-        }}
-      >
-        <div style={{ height: 64, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, borderBottom: `1px solid ${token.colorBorderSecondary}`, padding: '0 12px' }}>
-          <img src="/logo.png" alt="DigitaisBR" style={{ height: collapsed ? 36 : 48, objectFit: 'contain' }} />
-          {!collapsed && <Tag color={planColors[plan]} style={{ fontSize: 10 }}>{planLabels[plan]}</Tag>}
-        </div>
-        <Menu
-          mode="inline"
-          selectedKeys={[selectedKey]}
-          items={menuItems}
-          onClick={({ key }) => navigate(key)}
-          style={{ border: 'none', marginTop: 8 }}
-        />
-      </Sider>
+      {isMobile ? (
+        <Drawer
+          placement="left"
+          open={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          width={256}
+          styles={{ body: { padding: 0 } }}
+        >
+          {siderMenu}
+        </Drawer>
+      ) : (
+        <Sider
+          trigger={null}
+          collapsible
+          collapsed={collapsed}
+          width={240}
+          style={{
+            overflow: 'auto',
+            height: '100vh',
+            position: 'fixed',
+            left: 0,
+            top: 0,
+            bottom: 0,
+            background: token.colorBgContainer,
+            borderRight: `1px solid ${token.colorBorderSecondary}`,
+          }}
+        >
+          {siderMenu}
+        </Sider>
+      )}
 
-      <Layout style={{ marginLeft: collapsed ? 80 : 240, transition: 'all 0.2s' }}>
+      <Layout style={{ marginLeft: isMobile ? 0 : (collapsed ? 80 : 240), transition: 'all 0.2s' }}>
         <Header
           style={{
-            padding: '0 24px',
+            padding: isMobile ? '0 12px' : '0 24px',
             background: token.colorBgContainer,
             display: 'flex',
             alignItems: 'center',
@@ -139,15 +166,15 @@ export default function PortalLayout() {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <div
-              onClick={() => setCollapsed(!collapsed)}
+              onClick={() => isMobile ? setDrawerOpen(true) : setCollapsed(!collapsed)}
               style={{ fontSize: 18, cursor: 'pointer', color: token.colorTextSecondary }}
             >
-              {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              {isMobile || collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
             </div>
-            <Text type="secondary">Portal do Associado</Text>
+            {!isMobile && <Text type="secondary">Portal do Associado</Text>}
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 10 : 16 }}>
             <Badge count={unreadCount} size="small" offset={[-2, 2]}>
               <BellOutlined
                 style={{ fontSize: 18, cursor: 'pointer', color: token.colorTextSecondary }}
@@ -157,14 +184,15 @@ export default function PortalLayout() {
 
             <Dropdown menu={userMenu} placement="bottomRight">
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
-                <Text>{user?.name}</Text>
+                {!isMobile && <Text>{user?.name}</Text>}
                 <Avatar style={{ background: '#1677ff' }} icon={<UserOutlined />} />
               </div>
             </Dropdown>
           </div>
         </Header>
 
-        <Content style={{ margin: 24, minHeight: 280 }}>
+        <PushNotificationPrompt />
+        <Content style={{ margin: isMobile ? 12 : 24, minHeight: 280 }}>
           <Outlet />
         </Content>
       </Layout>

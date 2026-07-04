@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Spin } from 'antd';
+import { Spin, notification } from 'antd';
 import { useAppDispatch } from '../store';
+import { onPushMessage } from '../lib/pushService';
 import { getCollection } from '../lib/firestoreService';
 import { auth } from '../lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -36,6 +37,19 @@ export default function DataLoader({ children }: Props) {
   const [firebaseUser, setFirebaseUser] = useState<boolean | null>(null);
   const dispatch = useAppDispatch();
 
+  const loadFallbackData = async () => {
+    const [{ mockAssociados }, { mockStores }, { mockProducts }, { mockSales }] = await Promise.all([
+      import('../data/associados'),
+      import('../data/stores'),
+      import('../data/products'),
+      import('../data/sales'),
+    ]);
+    dispatch(setAssociados(mockAssociados));
+    dispatch(setLojas(mockStores));
+    dispatch(setCatalogo(mockProducts));
+    dispatch(setVendas(mockSales));
+  };
+
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
       setFirebaseUser(!!user);
@@ -47,6 +61,7 @@ export default function DataLoader({ children }: Props) {
     if (firebaseUser === null) return;
 
     if (!firebaseUser) {
+      loadFallbackData();
       setLoading(false);
       return;
     }
@@ -106,7 +121,12 @@ export default function DataLoader({ children }: Props) {
     }
 
     loadAll();
-    return () => { cancelled = true; };
+
+    const unsubPush = onPushMessage((msg) => {
+      notification.info({ message: msg.title, description: msg.body, placement: 'topRight' });
+    });
+
+    return () => { cancelled = true; if (unsubPush) unsubPush(); };
   }, [firebaseUser, dispatch]);
 
   if (firebaseUser === null || (firebaseUser && loading)) {

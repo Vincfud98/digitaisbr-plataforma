@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Card, Col, Row, Statistic, Typography, Tag, List, Space, Progress } from 'antd';
 import {
   ShopOutlined, TeamOutlined, ShoppingCartOutlined,
@@ -5,10 +6,15 @@ import {
   StarOutlined, CommentOutlined, ReadOutlined,
   CheckCircleOutlined, ClockCircleOutlined, ExclamationCircleOutlined,
 } from '@ant-design/icons';
+import {
+  AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend,
+} from 'recharts';
 import { useAppSelector } from '../../store';
 import type { PlanType } from '../../types';
 
 const { Title, Text } = Typography;
+const CHART_COLORS = ['#1677ff', '#722ed1', '#faad14', '#52c41a', '#f5222d', '#13c2c2'];
 
 const planColors: Record<PlanType, string> = { basico: 'blue', intermediario: 'purple', avancado: 'gold' };
 const planLabels: Record<PlanType, string> = { basico: 'Básico', intermediario: 'Intermediário', avancado: 'Avançado' };
@@ -75,6 +81,30 @@ export default function DashboardPage() {
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 5);
 
+  const revenueChartData = useMemo(() => {
+    const months: Record<string, { receita: number; comissoes: number; vendas: number }> = {};
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months[d.toLocaleDateString('pt-BR', { month: 'short' })] = { receita: 0, comissoes: 0, vendas: 0 };
+    }
+    vendas.filter((v) => v.status === 'aprovada').forEach((v) => {
+      const key = new Date(v.createdAt).toLocaleDateString('pt-BR', { month: 'short' });
+      if (months[key]) { months[key].receita += v.totalPrice; months[key].vendas++; }
+    });
+    comissoes.forEach((c) => {
+      const key = new Date(c.createdAt).toLocaleDateString('pt-BR', { month: 'short' });
+      if (months[key]) months[key].comissoes += c.commissionValue;
+    });
+    return Object.entries(months).map(([mes, data]) => ({ mes, ...data }));
+  }, [vendas, comissoes]);
+
+  const planChartData = useMemo(() => [
+    { name: 'Básico', value: planDistribution.basico },
+    { name: 'Intermediário', value: planDistribution.intermediario },
+    { name: 'Avançado', value: planDistribution.avancado },
+  ].filter((d) => d.value > 0), [planDistribution]);
+
   return (
     <div>
       <div style={{ marginBottom: 24 }}>
@@ -113,6 +143,53 @@ export default function DashboardPage() {
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <Card><Statistic title="Produtos Ativos" value={produtosAtivos} suffix={`/ ${produtos.length}`} prefix={<ShoppingCartOutlined />} valueStyle={{ color: '#13c2c2' }} /></Card>
+        </Col>
+      </Row>
+
+      {/* Charts */}
+      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+        <Col xs={24} lg={16}>
+          <Card title={<><RiseOutlined /> Receita e Comissões (6 meses)</>} size="small">
+            <ResponsiveContainer width="100%" height={280}>
+              <AreaChart data={revenueChartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="mes" fontSize={12} />
+                <YAxis fontSize={12} />
+                <Tooltip formatter={(value, name) => [`R$ ${Number(value).toFixed(2)}`, name === 'receita' ? 'Receita' : 'Comissões']} />
+                <Area type="monotone" dataKey="receita" stroke="#52c41a" fill="#52c41a" fillOpacity={0.2} name="Receita" />
+                <Area type="monotone" dataKey="comissoes" stroke="#722ed1" fill="#722ed1" fillOpacity={0.15} name="Comissões" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </Card>
+        </Col>
+        <Col xs={24} lg={8}>
+          <Card title="Associados por Plano" size="small">
+            <ResponsiveContainer width="100%" height={280}>
+              <PieChart>
+                <Pie data={planChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}>
+                  {planChartData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                </Pie>
+                <Legend />
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </Card>
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+        <Col xs={24}>
+          <Card title="Vendas por Mês" size="small">
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={revenueChartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="mes" fontSize={12} />
+                <YAxis fontSize={12} />
+                <Tooltip />
+                <Bar dataKey="vendas" fill="#1677ff" radius={[4, 4, 0, 0]} name="Vendas" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Card>
         </Col>
       </Row>
 

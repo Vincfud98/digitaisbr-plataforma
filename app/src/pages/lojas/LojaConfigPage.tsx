@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react';
-import { Card, Typography, Button, Row, Col, Input, Switch, ColorPicker, Form, message, Space, Tag, Checkbox, Empty, Divider } from 'antd';
-import { ArrowLeftOutlined, SaveOutlined, ShopOutlined, EyeOutlined } from '@ant-design/icons';
+import { Card, Typography, Button, Row, Col, Input, Switch, ColorPicker, Form, message, Space, Tag, Checkbox, Empty, Divider, Upload } from 'antd';
+import { ArrowLeftOutlined, SaveOutlined, ShopOutlined, EyeOutlined, UploadOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../../store';
 import { updateStore } from '../../store/slices/lojasSlice';
+import { uploadStoreLogo, uploadStoreBanner } from '../../lib/storageService';
 import { categories } from '../../data/categories';
 import type { Store, Product, ProductExclusivity, PlanType } from '../../types';
 
@@ -26,6 +27,9 @@ export default function LojaConfigPage() {
 
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>(store?.productIds || []);
   const [config, setConfig] = useState(store?.config || { primaryColor: '#1677ff', bannerUrl: '', logoUrl: '', description: '', showWhatsapp: false, whatsappNumber: '' });
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   const availableProducts = useMemo(() => {
     if (!associado) return [];
@@ -48,15 +52,29 @@ export default function LojaConfigPage() {
     }
   };
 
-  const handleSave = () => {
-    const updated: Store = {
-      ...store,
-      productIds: selectedProductIds,
-      config,
-    };
-    dispatch(updateStore(updated));
-    message.success('Loja atualizada com sucesso!');
-    navigate('/lojas');
+  const handleSave = async () => {
+    setUploading(true);
+    try {
+      const updatedConfig = { ...config };
+      if (logoFile) {
+        updatedConfig.logoUrl = await uploadStoreLogo(logoFile, store.id);
+      }
+      if (bannerFile) {
+        updatedConfig.bannerUrl = await uploadStoreBanner(bannerFile, store.id);
+      }
+      const updated: Store = {
+        ...store,
+        productIds: selectedProductIds,
+        config: updatedConfig,
+      };
+      dispatch(updateStore(updated));
+      message.success('Loja atualizada com sucesso!');
+      navigate('/lojas');
+    } catch {
+      message.error('Erro ao fazer upload das imagens.');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const groupedProducts = categories.map((cat) => ({
@@ -74,7 +92,7 @@ export default function LojaConfigPage() {
         </Space>
         <Space>
           <Button icon={<EyeOutlined />} onClick={() => navigate(`/lojas/${id}/preview`)}>Preview</Button>
-          <Button type="primary" icon={<SaveOutlined />} onClick={handleSave}>Salvar</Button>
+          <Button type="primary" icon={<SaveOutlined />} onClick={handleSave} loading={uploading}>Salvar</Button>
         </Space>
       </div>
 
@@ -135,11 +153,31 @@ export default function LojaConfigPage() {
               <Form.Item label="Cor Principal">
                 <ColorPicker value={config.primaryColor} disabled={!canCustomize} onChange={(_, hex) => setConfig({ ...config, primaryColor: hex })} />
               </Form.Item>
-              <Form.Item label="URL do Banner">
-                <Input value={config.bannerUrl} disabled={!canCustomize} onChange={(e) => setConfig({ ...config, bannerUrl: e.target.value })} placeholder="https://..." />
+              <Form.Item label="Logo da Loja">
+                <Upload
+                  listType="picture-card"
+                  accept="image/*"
+                  maxCount={1}
+                  disabled={!canCustomize}
+                  beforeUpload={(file) => { setLogoFile(file); return false; }}
+                  onRemove={() => { setLogoFile(null); setConfig({ ...config, logoUrl: '' }); }}
+                  defaultFileList={config.logoUrl ? [{ uid: '-1', name: 'logo', status: 'done', url: config.logoUrl }] : []}
+                >
+                  {!logoFile && !config.logoUrl && <div><UploadOutlined /><div style={{ marginTop: 8 }}>Logo</div></div>}
+                </Upload>
               </Form.Item>
-              <Form.Item label="URL do Logo">
-                <Input value={config.logoUrl} disabled={!canCustomize} onChange={(e) => setConfig({ ...config, logoUrl: e.target.value })} placeholder="https://..." />
+              <Form.Item label="Banner da Loja">
+                <Upload
+                  listType="picture-card"
+                  accept="image/*"
+                  maxCount={1}
+                  disabled={!canCustomize}
+                  beforeUpload={(file) => { setBannerFile(file); return false; }}
+                  onRemove={() => { setBannerFile(null); setConfig({ ...config, bannerUrl: '' }); }}
+                  defaultFileList={config.bannerUrl ? [{ uid: '-1', name: 'banner', status: 'done', url: config.bannerUrl }] : []}
+                >
+                  {!bannerFile && !config.bannerUrl && <div><UploadOutlined /><div style={{ marginTop: 8 }}>Banner</div></div>}
+                </Upload>
               </Form.Item>
               <Divider />
               <Form.Item label="Mostrar WhatsApp">

@@ -268,6 +268,42 @@ export interface ReportConfig {
   favorite: boolean;
 }
 
+export type PaymentMethod = 'pix' | 'cartao' | 'boleto';
+export type OrderStatus = 'aguardando_pagamento' | 'pago' | 'enviado' | 'entregue' | 'cancelado';
+
+export interface CartItem {
+  productId: string;
+  name: string;
+  price: number;
+  image: string;
+  quantity: number;
+}
+
+export interface OrderCustomer {
+  name: string;
+  email: string;
+  phone: string;
+  cpf: string;
+  cep: string;
+}
+
+export interface Order {
+  id: string;
+  storeSlug: string;
+  storeName: string;
+  associadoId: string;
+  customer: OrderCustomer;
+  items: CartItem[];
+  subtotal: number;
+  total: number;
+  paymentMethod: PaymentMethod;
+  status: OrderStatus;
+  pixCode?: string;
+  boletoUrl?: string;
+  createdAt: string;
+  paidAt?: string;
+}
+
 export interface Associado {
   id: string;
   name: string;

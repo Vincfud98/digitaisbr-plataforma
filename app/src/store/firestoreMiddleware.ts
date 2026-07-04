@@ -1,0 +1,201 @@
+import type { Middleware } from '@reduxjs/toolkit';
+import {
+  createDocument, updateDocument, deleteDocument,
+} from '../lib/firestoreService';
+
+const COLLECTION_MAP: Record<string, string> = {
+  'associados': 'associados',
+  'catalogo': 'products',
+  'lojas': 'stores',
+  'vendas': 'sales',
+  'comissoes': 'commissions',
+  'financeiro': 'financial',
+  'beneficios': 'benefits',
+  'parceiros': 'partners',
+  'conteudos': 'contents',
+  'comunidade': 'forumTopics',
+  'notificacoes': 'notifications',
+  'servicos': 'services',
+  'destaques': 'highlights',
+  'suporte': 'tickets',
+  'planos': 'plans',
+};
+
+const firestoreMiddleware: Middleware = (_store) => (next) => (action: unknown) => {
+  const result = next(action);
+
+  const act = action as { type: string; payload: Record<string, unknown> };
+  if (!act.type || typeof act.type !== 'string') return result;
+
+  const [sliceName, actionName] = act.type.split('/');
+  const collection = COLLECTION_MAP[sliceName];
+  if (!collection) return result;
+
+  const payload = act.payload;
+  if (!payload) return result;
+
+  try {
+    switch (actionName) {
+      case 'addAssociado':
+      case 'addProduct':
+      case 'addSale':
+      case 'addTransaction':
+      case 'addBenefit':
+      case 'addPartner':
+      case 'addContent':
+      case 'addTopic':
+      case 'addHighlight':
+      case 'addTicket':
+      case 'addServiceRequest': {
+        const { id, ...data } = payload as { id: string; [key: string]: unknown };
+        if (id) {
+          createDocument(collection, data, id).catch(console.error);
+        }
+        break;
+      }
+
+      case 'updateAssociado':
+      case 'updateProduct':
+      case 'updateStore':
+      case 'updatePlan':
+      case 'updateBenefit':
+      case 'updatePartner':
+      case 'updateContent': {
+        const { id, ...data } = payload as { id: string; [key: string]: unknown };
+        if (id) {
+          updateDocument(collection, id, data).catch(console.error);
+        }
+        break;
+      }
+
+      case 'removeAssociado':
+      case 'removeProduct':
+      case 'removeBenefit':
+      case 'removePartner':
+      case 'removeContent':
+      case 'removeHighlight':
+      case 'removeNotification': {
+        const id = typeof payload === 'string' ? payload : (payload as { id: string }).id;
+        if (id) {
+          deleteDocument(collection, id).catch(console.error);
+        }
+        break;
+      }
+
+      case 'updateSaleStatus': {
+        const { id, status } = payload as { id: string; status: string };
+        if (id) {
+          updateDocument(collection, id, { status }).catch(console.error);
+        }
+        break;
+      }
+
+      case 'updateCommissionStatus': {
+        const { id, status } = payload as { id: string; status: string };
+        const data: Record<string, unknown> = { status };
+        if (status === 'paga') data.paidAt = new Date().toISOString();
+        if (id) {
+          updateDocument(collection, id, data).catch(console.error);
+        }
+        break;
+      }
+
+      case 'changeStatus': {
+        const { id, status } = payload as { id: string; status: string };
+        if (id) {
+          updateDocument(collection, id, { status, updatedAt: new Date().toISOString() }).catch(console.error);
+        }
+        break;
+      }
+
+      case 'toggleStoreActive': {
+        const id = typeof payload === 'string' ? payload : (payload as { id: string }).id;
+        if (id) {
+          const state = _store.getState() as { lojas: { list: Array<{ id: string; active: boolean }> } };
+          const store = state.lojas.list.find((s) => s.id === id);
+          if (store) {
+            updateDocument(collection, id, { active: !store.active }).catch(console.error);
+          }
+        }
+        break;
+      }
+
+      case 'toggleHighlightActive': {
+        const id = typeof payload === 'string' ? payload : (payload as { id: string }).id;
+        if (id) {
+          const state = _store.getState() as { destaques: { list: Array<{ id: string; active: boolean }> } };
+          const item = state.destaques.list.find((h) => h.id === id);
+          if (item) {
+            updateDocument(collection, id, { active: item.active }).catch(console.error);
+          }
+        }
+        break;
+      }
+
+      case 'updateStoreProducts': {
+        const { storeId, productIds } = payload as { storeId: string; productIds: string[] };
+        if (storeId) {
+          updateDocument(collection, storeId, { productIds }).catch(console.error);
+        }
+        break;
+      }
+
+      case 'markAsRead': {
+        const id = typeof payload === 'string' ? payload : (payload as { id: string }).id;
+        if (id) {
+          updateDocument(collection, id, { read: true }).catch(console.error);
+        }
+        break;
+      }
+
+      case 'updateTicketStatus': {
+        const { id, status } = payload as { id: string; status: string };
+        const data: Record<string, unknown> = { status, updatedAt: new Date().toISOString() };
+        if (status === 'resolvido') data.resolvedAt = new Date().toISOString();
+        if (id) {
+          updateDocument(collection, id, data).catch(console.error);
+        }
+        break;
+      }
+
+      case 'assignTicket': {
+        const { id, assignedTo } = payload as { id: string; assignedTo: string };
+        if (id) {
+          updateDocument(collection, id, { assignedTo, updatedAt: new Date().toISOString() }).catch(console.error);
+        }
+        break;
+      }
+
+      case 'addMessage': {
+        const msg = payload as { id: string; ticketId: string; [key: string]: unknown };
+        if (msg.id) {
+          const { id, ...data } = msg;
+          createDocument('ticketMessages', data, id).catch(console.error);
+        }
+        break;
+      }
+
+      case 'updateTopicStatus': {
+        const { id, status } = payload as { id: string; status: string };
+        if (id) {
+          updateDocument(collection, id, { status }).catch(console.error);
+        }
+        break;
+      }
+
+      case 'updateServiceStatus': {
+        const { id, status } = payload as { id: string; status: string };
+        if (id) {
+          updateDocument(collection, id, { status }).catch(console.error);
+        }
+        break;
+      }
+    }
+  } catch (err) {
+    console.error('Firestore sync error:', err);
+  }
+
+  return result;
+};
+
+export default firestoreMiddleware;

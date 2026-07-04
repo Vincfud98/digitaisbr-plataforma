@@ -1,11 +1,13 @@
-import { Card, Typography, Row, Col, Tag, Button, Empty, Divider, Avatar, Space, Input } from 'antd';
+import { Card, Typography, Row, Col, Tag, Button, Empty, Divider, Avatar, Space, Input, Badge, message } from 'antd';
 import {
   ShopOutlined, WhatsAppOutlined, ShoppingCartOutlined, SearchOutlined,
   UserOutlined, StarFilled, SafetyCertificateOutlined,
 } from '@ant-design/icons';
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { useAppSelector } from '../../store';
+import { useParams, useNavigate } from 'react-router-dom';
+import SEO from '../../components/SEO';
+import { useAppSelector, useAppDispatch } from '../../store';
+import { addToCart } from '../../store/slices/cartSlice';
 import { categories } from '../../data/categories';
 import type { Product, PlanType } from '../../types';
 
@@ -19,12 +21,25 @@ const planBadge: Record<PlanType, { label: string; color: string }> = {
 
 export default function LojaPublicaPage() {
   const { slug } = useParams();
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const lojas = useAppSelector((s) => s.lojas.list);
   const associados = useAppSelector((s) => s.associados.list);
   const allProducts = useAppSelector((s) => s.catalogo.list);
   const vendas = useAppSelector((s) => s.vendas.list);
+  const cartItems = useAppSelector((s) => s.cart.items);
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
+  const cartCount = cartItems.reduce((acc, i) => acc + i.quantity, 0);
+
+  const handleAddToCart = (product: Product) => {
+    dispatch(addToCart({
+      item: { productId: product.id, name: product.name, price: product.price, image: product.image, quantity: 1 },
+      storeSlug: slug || '',
+    }));
+    message.success(`${product.name} adicionado ao carrinho`);
+  };
 
   const store = lojas.find((l) => l.slug === slug);
   const associado = associados.find((a) => a.id === store?.associadoId);
@@ -66,6 +81,11 @@ export default function LojaPublicaPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#f5f5f5' }}>
+      <SEO
+        title={store.name}
+        description={store.config.description || `Loja de ${associado.name}`}
+        url={`https://digitaisbr-plataforma.web.app/loja/${slug}`}
+      />
       {/* Header */}
       <div style={{
         background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}dd)`,
@@ -133,7 +153,7 @@ export default function LojaPublicaPage() {
             prefix={<SearchOutlined />}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{ width: 260, borderRadius: 20 }}
+            style={{ width: '100%', maxWidth: 260, borderRadius: 20 }}
             allowClear
           />
           <Tag.CheckableTag
@@ -164,7 +184,7 @@ export default function LojaPublicaPage() {
           <Row gutter={[16, 16]} style={{ marginTop: 8 }}>
             {filteredProducts.map((product) => (
               <Col xs={24} sm={12} md={8} lg={6} key={product.id}>
-                <ProductCard product={product} primaryColor={primaryColor} />
+                <ProductCard product={product} primaryColor={primaryColor} onAdd={handleAddToCart} />
               </Col>
             ))}
           </Row>
@@ -177,7 +197,7 @@ export default function LojaPublicaPage() {
               <Row gutter={[16, 16]}>
                 {group.products.map((product) => (
                   <Col xs={24} sm={12} md={8} lg={6} key={product.id}>
-                    <ProductCard product={product} primaryColor={primaryColor} />
+                    <ProductCard product={product} primaryColor={primaryColor} onAdd={handleAddToCart} />
                   </Col>
                 ))}
               </Row>
@@ -185,6 +205,22 @@ export default function LojaPublicaPage() {
           ))
         )}
       </div>
+
+      {/* Cart FAB */}
+      {cartCount > 0 && (
+        <div style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 1000 }}>
+          <Badge count={cartCount} size="default">
+            <Button
+              type="primary"
+              shape="circle"
+              size="large"
+              icon={<ShoppingCartOutlined />}
+              onClick={() => navigate('/checkout')}
+              style={{ width: 56, height: 56, fontSize: 24, background: primaryColor, borderColor: primaryColor, boxShadow: '0 4px 16px rgba(0,0,0,0.3)' }}
+            />
+          </Badge>
+        </div>
+      )}
 
       {/* Footer */}
       <div style={{ background: '#fff', borderTop: '1px solid #e8e8e8', padding: '24px', textAlign: 'center' }}>
@@ -202,7 +238,7 @@ export default function LojaPublicaPage() {
   );
 }
 
-function ProductCard({ product, primaryColor }: { product: Product; primaryColor: string }) {
+function ProductCard({ product, primaryColor, onAdd }: { product: Product; primaryColor: string; onAdd: (p: Product) => void }) {
   return (
     <Card
       hoverable
@@ -240,7 +276,7 @@ function ProductCard({ product, primaryColor }: { product: Product; primaryColor
               <Text strong style={{ fontSize: 20, color: primaryColor }}>
                 R$ {product.price.toFixed(2)}
               </Text>
-              <Button type="primary" size="small" icon={<ShoppingCartOutlined />} style={{ background: primaryColor, borderColor: primaryColor, borderRadius: 16 }}>
+              <Button type="primary" size="small" icon={<ShoppingCartOutlined />} style={{ background: primaryColor, borderColor: primaryColor, borderRadius: 16 }} onClick={() => onAdd(product)}>
                 Comprar
               </Button>
             </div>
