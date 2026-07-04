@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DigitaisBR — Mapa de SaaS Components</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border-bottom: 1px solid #1e293b;
+      padding: 32px 40px;
+    }
+
+    header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+
+    header h1 span { color: #3b82f6; }
+
+    header p {
+      margin-top: 6px;
+      font-size: 14px;
+      color: #94a3b8;
+    }
+
+    .legend {
+      display: flex;
+      gap: 20px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: #cbd5e1;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+    }
+
+    .stats {
+      display: flex;
+      gap: 16px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 13px;
+      color: #94a3b8;
+    }
+
+    .stat strong {
+      font-size: 20px;
+      display: block;
+      color: #f1f5f9;
+    }
+
+    main {
+      display: flex;
+      gap: 0;
+      min-height: calc(100vh - 160px);
+    }
+
+    .tree-panel {
+      width: 420px;
+      min-width: 420px;
+      border-right: 1px solid #1e293b;
+      overflow-y: auto;
+      padding: 16px 0;
+    }
+
+    .tree-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      cursor: pointer;
+      transition: background 0.15s;
+      border-left: 3px solid transparent;
+    }
+
+    .tree-item:hover { background: #1e293b; }
+    .tree-item.active { background: #1e293b; border-left-color: #3b82f6; }
+
+    .tree-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .tree-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: #e2e8f0;
+    }
+
+    .tree-badge {
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .tree-subs {
+      padding: 0 20px 0 52px;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .tree-subs.open { max-height: 300px; }
+
+    .tree-sub {
+      font-size: 12px;
+      color: #64748b;
+      padding: 2px 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tree-sub::before {
+      content: '─';
+      font-family: monospace;
+      color: #334155;
+    }
+
+    .detail-panel {
+      flex: 1;
+      padding: 32px 40px;
+      overflow-y: auto;
+    }
+
+    .detail-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #475569;
+      font-size: 15px;
+      text-align: center;
+      gap: 8px;
+    }
+
+    .detail-empty svg { opacity: 0.3; }
+
+    .detail-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .detail-header h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+
+    .detail-obj {
+      font-size: 15px;
+      color: #94a3b8;
+      margin-bottom: 24px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .detail-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .detail-card.full { grid-column: 1 / -1; }
+
+    .detail-card h4 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #64748b;
+      margin-bottom: 10px;
+    }
+
+    .detail-card p {
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.6;
+    }
+
+    .detail-card ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .detail-card li {
+      font-size: 13px;
+      color: #cbd5e1;
+      padding: 3px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .detail-card li::before {
+      content: '›';
+      color: #475569;
+      flex-shrink: 0;
+      font-weight: bold;
+    }
+
+    .chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chip {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: #94a3b8;
+    }
+
+    .dep-tag {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      background: #3b82f610;
+      border: 1px solid #3b82f630;
+      color: #60a5fa;
+      margin: 2px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .dep-tag:hover { background: #3b82f625; }
+
+    @media (max-width: 900px) {
+      main { flex-direction: column; }
+      .tree-panel { width: 100%; min-width: 0; border-right: none; border-bottom: 1px solid #1e293b; max-height: 40vh; }
+      .detail-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1><span>DigitaisBR</span> — Mapa de SaaS Components</h1>
+  <p>PASSO 01 — Definição dos componentes funcionais da plataforma</p>
+  <div class="stats">
+    <div class="stat"><strong>18</strong> Componentes</div>
+    <div class="stat"><strong>10</strong> Core</div>
+    <div class="stat"><strong>6</strong> Essencial</div>
+    <div class="stat"><strong>2</strong> Expansão</div>
+  </div>
+  <div class="legend">
+    <span class="legend-item"><span class="legend-dot" style="background:#3b82f6;"></span> Core — obrigatório</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#8b5cf6;"></span> Essencial — MVP</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#64748b;"></span> Expansão — pós-MVP</span>
+  </div>
+</header>
+
+<main>
+  <div class="tree-panel" id="tree"></div>
+  <div class="detail-panel" id="detail">
+    <div class="detail-empty">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span>Selecione um componente para ver os detalhes</span>
+    </div>
+  </div>
+</main>
+
+<script>
+const COLORS = { core: '#3b82f6', essencial: '#8b5cf6', expansao: '#64748b' };
+const LABELS = { core: 'Core', essencial: 'Essencial', expansao: 'Expansão' };
+
+const components = [
+  {
+    id: 1, name: 'Gestão de Identidade e Acesso (IAM)', level: 'core',
+    obj: 'Controlar autenticação, autorização e perfis de todos os usuários da plataforma.',
+    subs: ['Autenticação (login, registro, recuperação)', 'Autorização e Papéis (Associado, Parceiro, Admin)', 'Gestão de Sessões e Tokens', 'Controle de Permissões por Plano'],
+    funcs: ['Cadastro e login (email/senha, social)', 'Recuperação de senha', 'Perfil de usuário', 'Gerenciamento de papéis', 'Ativação/desativação de contas', 'Log de acessos'],
+    deps: [],
+    depsText: 'Nenhuma (componente raiz)',
+    data: ['Credenciais de acesso', 'Perfis de usuário', 'Papéis e permissões', 'Histórico de sessões'],
+    rules: ['Cada usuário possui exatamente um papel principal', 'Associado só acessa funcionalidades do seu plano ativo', 'Admin tem acesso total ao painel administrativo', 'Conta inativa bloqueia acesso à loja e benefícios']
+  },
+  {
+    id: 2, name: 'Gestão de Associados', level: 'core',
+    obj: 'Gerenciar o ciclo de vida completo dos associados na plataforma.',
+    subs: ['Cadastro e Onboarding', 'Perfil e Dados Cadastrais', 'Ciclo de Vida (ativo, inativo, suspenso)', 'Gestão de Documentos'],
+    funcs: ['Formulário de adesão', 'Painel do associado (Minha Conta)', 'Histórico de atividades', 'Busca e filtros (admin)', 'Exportação de dados'],
+    deps: [1, 3],
+    data: ['Dados cadastrais (nome, CPF/CNPJ, contato)', 'Status do associado', 'Data de adesão e histórico', 'Documentos enviados'],
+    rules: ['Ao cadastrar, associado deve selecionar um plano', 'CPF/CNPJ é único e validado', 'Inativo não gera comissões e loja fica indisponível', 'Onboarding provisiona automaticamente a loja virtual']
+  },
+  {
+    id: 3, name: 'Gestão de Planos e Assinaturas', level: 'core',
+    obj: 'Gerenciar planos disponíveis, assinaturas e controle de acesso por nível.',
+    subs: ['Catálogo de Planos (Básico, Intermediário, Avançado)', 'Contratação e Troca de Plano', 'Feature Flags por Plano', 'Carência e Fidelidade'],
+    funcs: ['CRUD de planos (admin)', 'Comparativo de planos', 'Contratação e troca', 'Histórico de assinaturas', 'Configuração de features por plano'],
+    deps: [1, 2],
+    data: ['Catálogo de planos', 'Assinaturas ativas e históricas', 'Feature flags', 'Regras de carência'],
+    rules: ['Três planos: Básico, Intermediário, Avançado — herança incremental', 'Upgrade imediato; downgrade no próximo ciclo', 'Plano define benefícios, personalização, produtos exclusivos, destaque, suporte', 'Sem plano ativo = conta suspensa']
+  },
+  {
+    id: 4, name: 'Gestão de Benefícios', level: 'core',
+    obj: 'Administrar benefícios disponibilizados aos associados conforme seu plano.',
+    subs: ['Catálogo de Benefícios', 'Elegibilidade por Plano', 'Resgate e Utilização', 'Relatório de Adesão'],
+    funcs: ['CRUD de benefícios (admin)', 'Catálogo (associado)', 'Filtro por categoria e plano', 'Resgate/ativação', 'Histórico de utilização', 'Relatório de adesão (admin)'],
+    deps: [3, 11],
+    data: ['Catálogo de benefícios', 'Elegibilidade por plano', 'Registros de utilização', 'Vínculo com parceiros'],
+    rules: ['Benefício só acessível se plano contempla', 'Alguns com limite de uso (mensal, anual, único)', 'Podem ter validade', 'Jurídicos/contábeis a partir do Intermediário']
+  },
+  {
+    id: 5, name: 'Catálogo de Produtos (Prateleira Central)', level: 'core',
+    obj: 'Gerenciar o catálogo centralizado de produtos e serviços para as lojas.',
+    subs: ['CRUD de Produtos/Serviços', 'Categorização Hierárquica', 'Tabela de Comissões', 'Exclusividade por Plano', 'Gestão de Estoque'],
+    funcs: ['CRUD com múltiplas imagens', 'Categorização hierárquica', 'Marcação de exclusividade', 'Definição de comissão por produto', 'Controle de estoque', 'Ativação/desativação'],
+    deps: [11],
+    data: ['Produtos (nome, descrição, preço, imagens, SKU)', 'Categorias', 'Tabela de comissões', 'Regras de exclusividade', 'Vínculo produto-parceiro'],
+    rules: ['Somente admins cadastram na prateleira central', 'Exclusivos visíveis apenas para plano Avançado', 'Cada produto define percentual de comissão', 'Preços definidos centralmente']
+  },
+  {
+    id: 6, name: 'Loja Virtual do Associado', level: 'core',
+    obj: 'Gerar e gerenciar loja virtual individual com produtos da prateleira central.',
+    subs: ['Provisionamento Automático', 'Seleção de Produtos', 'Personalização Visual (por plano)', 'URL Única e Página Pública', 'Links Rastreáveis', 'Preview e Publicação'],
+    funcs: ['Criação automática no onboarding', 'Painel de gestão', 'Seleção de produtos', 'Personalização (cores, banner, logo)', 'URL única', 'Link com rastreamento', 'Preview da loja'],
+    deps: [2, 3, 5, 7],
+    data: ['Configuração da loja', 'Seleção de produtos', 'Ordenação e destaque', 'Status da loja'],
+    rules: ['Provisionada automaticamente no cadastro', 'Básico: template padrão, sem customização', 'Intermediário+: personalização visual', 'Avançado: destaque na plataforma', 'Inativo = loja offline', 'Checkout externo com parâmetros de atribuição']
+  },
+  {
+    id: 7, name: 'Rastreamento de Vendas e Atribuição', level: 'core',
+    obj: 'Rastrear origem de vendas via checkout externo e atribuir ao associado.',
+    subs: ['Geração de Links Rastreáveis', 'Webhooks de Checkout Externo', 'Atribuição ao Associado', 'Reconciliação de Transações'],
+    funcs: ['Links com parâmetros UTM/referral', 'Endpoint de webhook', 'Painel de vendas (associado)', 'Relatório detalhado (admin)', 'Reconciliação', 'Log de eventos'],
+    deps: [6, 5],
+    data: ['Links rastreáveis', 'Eventos de clique', 'Transações confirmadas', 'Status (pendente, confirmada, cancelada, estornada)'],
+    rules: ['Toda venda atribuída a um associado', 'Checkout externo envia confirmação via webhook', 'Não confirmadas ficam pendentes por X dias', 'Estornos revertem comissão', 'Janela de atribuição configurável']
+  },
+  {
+    id: 8, name: 'Sistema de Comissões', level: 'core',
+    obj: 'Calcular, gerenciar e liquidar comissões geradas pelas vendas.',
+    subs: ['Cálculo Automático', 'Saldo e Extrato', 'Regras por Produto/Categoria', 'Saque e Liquidação'],
+    funcs: ['Cálculo automático ao confirmar venda', 'Extrato (associado)', 'Relatório (admin)', 'Config de percentuais', 'Solicitação de saque', 'Histórico de pagamentos'],
+    deps: [7, 5, 2],
+    data: ['Tabela de percentuais', 'Saldo por associado', 'Extrato de movimentações', 'Solicitações de pagamento'],
+    rules: ['Percentual do valor da venda', 'Varia por produto, categoria ou parceiro', 'Crédito só após confirmação', 'Estorno debita comissão', 'Valor mínimo para saque', 'Inativo não recebe novas comissões']
+  },
+  {
+    id: 9, name: 'Gestão Financeira e Cobranças', level: 'core',
+    obj: 'Cobranças recorrentes, pagamentos e controle de inadimplência.',
+    subs: ['Cobrança Recorrente', 'Gateways (cartão, boleto, PIX)', 'Régua de Cobrança', 'Recibos e NFs', 'Reembolsos e Cancelamentos'],
+    funcs: ['Cobrança recorrente', 'Múltiplos meios de pagamento', 'Régua de cobrança', 'Gestão de inadimplência', 'Emissão de recibos', 'Relatório financeiro'],
+    deps: [3, 2],
+    data: ['Faturas e cobranças', 'Transações de pagamento', 'Status de adimplência', 'Métodos tokenizados', 'Recibos'],
+    rules: ['Vencida e não paga suspende após carência', 'Suspensão desativa loja e bloqueia benefícios', 'Reativação após regularização', 'Dados tokenizados', 'Upgrade gera cobrança proporcional']
+  },
+  {
+    id: 10, name: 'Painel Administrativo (Ext JS)', level: 'core',
+    obj: 'Interface de gestão completa da plataforma para administradores.',
+    subs: ['Gestão Centralizada', 'Configurações da Plataforma', 'Logs de Auditoria', 'Relatórios Operacionais'],
+    funcs: ['Gestão de associados, planos, benefícios', 'Gestão de parceiros e catálogo', 'Gestão de conteúdos', 'Moderação', 'Configurações gerais', 'Logs de auditoria'],
+    deps: [1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17,18],
+    depsText: 'Todos os componentes',
+    data: ['Configurações globais', 'Logs de auditoria', 'Parâmetros do sistema'],
+    rules: ['Acesso restrito a Admins', 'Ações críticas geram audit log', 'Config só por admin master', 'Interface separada em Ext JS']
+  },
+  {
+    id: 11, name: 'Gestão de Parceiros', level: 'essencial',
+    obj: 'Gerenciar parceiros que fornecem produtos, serviços ou benefícios.',
+    subs: ['Cadastro e Aprovação', 'Portal do Parceiro', 'Gestão de Contratos', 'Dashboard de Performance'],
+    funcs: ['CRUD de parceiros (admin)', 'Portal de autogestão', 'Fluxo de aprovação', 'Upload de documentos', 'Dashboard de performance'],
+    deps: [1],
+    data: ['Dados cadastrais (razão social, CNPJ)', 'Status', 'Contratos e condições', 'Categorias'],
+    rules: ['Aprovação obrigatória pelo admin', 'Pode fornecer benefícios, produtos ou ambos', 'Suspenso = benefícios/produtos ocultos', 'Condições definidas por contrato']
+  },
+  {
+    id: 12, name: 'Conteúdo Educacional', level: 'essencial',
+    obj: 'Disponibilizar conteúdos educacionais controlados por plano.',
+    subs: ['Artigos, Vídeos, E-books, Cursos', 'Trilhas de Aprendizado', 'Controle de Progresso', 'Comentários e Avaliações'],
+    funcs: ['CRUD de conteúdos (admin)', 'Categorização e tags', 'Trilhas', 'Progresso', 'Busca e filtros', 'Favoritos', 'Destaques'],
+    deps: [1, 3],
+    data: ['Conteúdos (título, corpo, mídia)', 'Trilhas e módulos', 'Progresso', 'Avaliações', 'Métricas de consumo'],
+    rules: ['Todos os planos acessam conteúdos básicos', 'Premium restrito por plano', 'Publicação programada', 'Progresso individual']
+  },
+  {
+    id: 13, name: 'Comunidade e Comunicação', level: 'essencial',
+    obj: 'Interação entre associados e comunicação da plataforma.',
+    subs: ['Fórum/Comunidade', 'Feed de Novidades', 'Mensageria Interna', 'Central de Anúncios'],
+    funcs: ['Fórum com tópicos', 'Feed de novidades', 'Notificações', 'Central de comunicados', 'Newsletter segmentada'],
+    deps: [1, 2, 3],
+    data: ['Posts e tópicos', 'Notificações', 'Preferências de comunicação', 'Templates'],
+    rules: ['Comunidade acessível a todos os planos', 'Moderação pelo admin', 'Segmentação por plano/status', 'Avançado = canal dedicado']
+  },
+  {
+    id: 14, name: 'Sistema de Notificações', level: 'essencial',
+    obj: 'Envio de notificações multicanal de forma centralizada.',
+    subs: ['Engine de Templates', 'Multicanal (email, push, in-app)', 'Notificações Transacionais', 'Preferências do Usuário'],
+    funcs: ['Templates dinâmicos', 'Email, push, in-app', 'Transacionais e marketing', 'Opt-in/opt-out', 'Histórico', 'Relatório de engajamento'],
+    deps: [1, 2],
+    data: ['Templates', 'Fila de envio', 'Logs de entrega', 'Preferências'],
+    rules: ['Transacionais obrigatórias', 'Marketing respeita opt-in', 'Avançado pode ter canal exclusivo', 'Rate limiting']
+  },
+  {
+    id: 15, name: 'Serviços Jurídico e Contábil', level: 'essencial',
+    obj: 'Atendimento jurídico e contábil para Intermediário e Avançado.',
+    subs: ['Solicitação de Atendimento', 'Agendamento de Consultas', 'Documentos e Histórico', 'Gestão de Profissionais'],
+    funcs: ['Solicitação de atendimento', 'Agendamento', 'Chat com profissionais', 'Upload de documentos', 'Avaliação do atendimento'],
+    deps: [3, 11, 1],
+    data: ['Solicitações', 'Agendamentos', 'Documentos', 'Histórico de interações', 'Avaliações'],
+    rules: ['Disponível a partir do Intermediário', 'Limite de atendimentos por plano', 'Profissionais vinculados como parceiros', 'Documentos confidenciais']
+  },
+  {
+    id: 16, name: 'Dashboard e Analytics', level: 'essencial',
+    obj: 'Métricas, indicadores e relatórios para associados e admins.',
+    subs: ['Dashboard do Associado', 'Dashboard Administrativo', 'Relatórios Exportáveis', 'Ranking de Associados'],
+    funcs: ['Dashboard associado (vendas, comissões)', 'Dashboard admin (KPIs globais)', 'Exportação CSV/PDF', 'Gráficos de tendência', 'Ranking top vendedores'],
+    deps: [1,2,3,4,5,6,7,8,9],
+    depsText: 'Todos os componentes (consome dados)',
+    data: ['Métricas agregadas', 'Séries temporais', 'Configurações de dashboard', 'Relatórios gerados'],
+    rules: ['Associado vê apenas seus dados', 'Admin vê consolidado e individual', 'Ranking configurável pelo admin', 'Financeiro exige reconciliação']
+  },
+  {
+    id: 17, name: 'Destaque e Vitrine', level: 'expansao',
+    obj: 'Visibilidade e posicionamento privilegiado de lojas e produtos.',
+    subs: ['Lojas em Destaque', 'Produtos Recomendados', 'Rotação Automática/Manual'],
+    funcs: ['Listagem de lojas em destaque', 'Produtos recomendados', 'Banners de parceiros', 'Rotação automática', 'Config manual (admin)'],
+    deps: [6, 3, 5],
+    data: ['Posições de destaque', 'Regras de rotação', 'Configurações de vitrine'],
+    rules: ['Exclusivo plano Avançado', 'Admin pode adicionar destaques manuais', 'Rotação automática por performance ou manual']
+  },
+  {
+    id: 18, name: 'Suporte e Atendimento', level: 'expansao',
+    obj: 'Canais de suporte e base de conhecimento.',
+    subs: ['Central de Ajuda e FAQ', 'Sistema de Tickets', 'Chat de Suporte', 'SLA por Plano'],
+    funcs: ['FAQ e artigos', 'Tickets', 'Chat com/sem bot', 'Priorização por plano', 'Gestão de tickets (admin)', 'NPS/CSAT'],
+    deps: [1, 3],
+    data: ['Tickets', 'Base de conhecimento', 'Métricas de atendimento', 'Avaliações'],
+    rules: ['Todos têm suporte básico', 'Avançado: SLA menor + canal dedicado', 'Tickets escaláveis', 'FAQ pública']
+  }
+];
+
+let activeId = null;
+
+function getName(id) {
+  const c = components.find(x => x.id === id);
+  return c ? c.name : '';
+}
+
+function renderTree() {
+  const el = document.getElementById('tree');
+  let html = '';
+  components.forEach(c => {
+    const color = COLORS[c.level];
+    const label = LABELS[c.level];
+    html += `
+      <div class="tree-item" id="item-${c.id}" onclick="selectComponent(${c.id})" style="border-left-color:transparent;">
+        <span class="tree-dot" style="background:${color};"></span>
+        <span class="tree-name">${c.name}</span>
+        <span class="tree-badge" style="background:${color}18;color:${color};">${label}</span>
+      </div>
+      <div class="tree-subs" id="subs-${c.id}">
+        ${c.subs.map(s => `<div class="tree-sub">${s}</div>`).join('')}
+      </div>`;
+  });
+  el.innerHTML = html;
+}
+
+function selectComponent(id) {
+  if (activeId) {
+    const prev = document.getElementById('item-' + activeId);
+    if (prev) prev.classList.remove('active');
+    const prevSubs = document.getElementById('subs-' + activeId);
+    if (prevSubs) prevSubs.classList.remove('open');
+  }
+
+  activeId = id;
+  const item = document.getElementById('item-' + id);
+  if (item) item.classList.add('active');
+  const subs = document.getElementById('subs-' + id);
+  if (subs) subs.classList.add('open');
+
+  const c = components.find(x => x.id === id);
+  if (!c) return;
+
+  const color = COLORS[c.level];
+  const label = LABELS[c.level];
+
+  const depsHtml = c.depsText
+    ? `<p>${c.depsText}</p>`
+    : c.deps.length === 0
+      ? '<p>Nenhuma (componente raiz)</p>'
+      : `<div style="display:flex;flex-wrap:wrap;gap:4px;">${c.deps.map(d => `<span class="dep-tag" onclick="selectComponent(${d})">${getName(d)}</span>`).join('')}</div>`;
+
+  document.getElementById('detail').innerHTML = `
+    <div class="detail-header">
+      <span class="tree-dot" style="background:${color};width:12px;height:12px;"></span>
+      <h2>${c.name}</h2>
+      <span class="tree-badge" style="background:${color}18;color:${color};font-size:12px;padding:3px 10px;">${label}</span>
+    </div>
+    <p class="detail-obj">${c.obj}</p>
+
+    <div class="detail-grid">
+      <div class="detail-card">
+        <h4>Funcionalidades</h4>
+        <ul>${c.funcs.map(f => `<li>${f}</li>`).join('')}</ul>
+      </div>
+      <div class="detail-card">
+        <h4>Dados que Gerencia</h4>
+        <ul>${c.data.map(d => `<li>${d}</li>`).join('')}</ul>
+      </div>
+      <div class="detail-card">
+        <h4>Dependências</h4>
+        ${depsHtml}
+      </div>
+      <div class="detail-card">
+        <h4>Subcomponentes</h4>
+        <div class="chip-list">${c.subs.map(s => `<span class="chip">${s}</span>`).join('')}</div>
+      </div>
+      <div class="detail-card full">
+        <h4>Regras de Negócio</h4>
+        <ul>${c.rules.map(r => `<li>${r}</li>`).join('')}</ul>
+      </div>
+    </div>`;
+}
+
+renderTree();
+</script>
+
+</body>
+</html>
