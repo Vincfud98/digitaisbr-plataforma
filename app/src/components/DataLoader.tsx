@@ -38,16 +38,48 @@ export default function DataLoader({ children }: Props) {
   const dispatch = useAppDispatch();
 
   const loadFallbackData = async () => {
-    const [{ mockAssociados }, { mockStores }, { mockProducts }, { mockSales }] = await Promise.all([
+    const [
+      { mockAssociados }, { mockStores }, { mockProducts }, { mockSales },
+      { plans }, { mockCommissions }, { mockTransactions }, { mockBenefits },
+      { mockPartners }, { mockContents }, { forumTopics }, { notifications },
+      { serviceRequests }, { highlights }, { supportTickets }, { reportConfigs },
+      { ticketMessages },
+    ] = await Promise.all([
       import('../data/associados'),
       import('../data/stores'),
       import('../data/products'),
       import('../data/sales'),
+      import('../data/plans'),
+      import('../data/commissions'),
+      import('../data/financial'),
+      import('../data/benefits'),
+      import('../data/partners'),
+      import('../data/contents'),
+      import('../data/forum'),
+      import('../data/notifications'),
+      import('../data/services'),
+      import('../data/highlights'),
+      import('../data/tickets'),
+      import('../data/reports'),
+      import('../data/ticketMessages'),
     ]);
     dispatch(setAssociados(mockAssociados));
     dispatch(setLojas(mockStores));
     dispatch(setCatalogo(mockProducts));
     dispatch(setVendas(mockSales));
+    dispatch(setPlanos(plans));
+    dispatch(setComissoes(mockCommissions));
+    dispatch(setFinanceiro(mockTransactions));
+    dispatch(setBeneficios(mockBenefits));
+    dispatch(setParceiros(mockPartners));
+    dispatch(setConteudos(mockContents));
+    dispatch(setComunidade(forumTopics));
+    dispatch(setNotificacoes(notifications));
+    dispatch(setServicos(serviceRequests));
+    dispatch(setDestaques(highlights));
+    dispatch(setSuporteTickets(supportTickets));
+    dispatch(setRelatorios(reportConfigs));
+    dispatch(setSuporteMsgs(ticketMessages));
   };
 
   useEffect(() => {
