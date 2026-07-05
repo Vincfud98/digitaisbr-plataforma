@@ -1,7 +1,9 @@
-import { Card, Typography, Row, Col, Tag, Button, Empty, Divider, Avatar, Space, Input, Badge, message } from 'antd';
+import { Card, Typography, Row, Col, Tag, Button, Empty, Divider, Avatar, Input, Badge, message } from 'antd';
 import {
   ShopOutlined, WhatsAppOutlined, ShoppingCartOutlined, SearchOutlined,
-  UserOutlined, StarFilled, SafetyCertificateOutlined,
+  UserOutlined, StarFilled, SafetyCertificateOutlined, InstagramOutlined,
+  YoutubeOutlined, GlobalOutlined, TeamOutlined, FireOutlined,
+  ThunderboltOutlined, HeartOutlined,
 } from '@ant-design/icons';
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -14,10 +16,16 @@ import type { Product, PlanType } from '../../types';
 const { Title, Text, Paragraph } = Typography;
 
 const planBadge: Record<PlanType, { label: string; color: string }> = {
-  basico: { label: 'Associado', color: '#1677ff' },
-  intermediario: { label: 'Associado Pro', color: '#722ed1' },
-  avancado: { label: 'Associado Premium', color: '#faad14' },
+  basico: { label: 'Creator', color: '#1677ff' },
+  intermediario: { label: 'Creator Pro', color: '#722ed1' },
+  avancado: { label: 'Creator Premium', color: '#faad14' },
 };
+
+function formatFollowers(n: number): string {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace('.0', '') + 'M';
+  if (n >= 1_000) return (n / 1_000).toFixed(1).replace('.0', '') + 'K';
+  return String(n);
+}
 
 export default function LojaPublicaPage() {
   const { slug } = useParams();
@@ -50,7 +58,7 @@ export default function LojaPublicaPage() {
         <Empty
           description={
             <div>
-              <Title level={4}>Loja não encontrada</Title>
+              <Title level={4}>Perfil não encontrado</Title>
               <Text type="secondary">Verifique o endereço e tente novamente.</Text>
             </div>
           }
@@ -79,77 +87,144 @@ export default function LojaPublicaPage() {
     products: filteredProducts.filter((p) => p.categoryId === cat.id),
   })).filter((g) => g.products.length > 0);
 
+  const socialLinks = [
+    associado.instagram && { icon: <InstagramOutlined />, label: associado.instagram, color: '#E4405F', url: `https://instagram.com/${associado.instagram.replace('@', '')}` },
+    associado.youtube && { icon: <YoutubeOutlined />, label: associado.youtube, color: '#FF0000', url: `https://youtube.com/${associado.youtube}` },
+    associado.tiktok && { icon: <span style={{ fontWeight: 800, fontSize: 13 }}>T</span>, label: associado.tiktok, color: '#000', url: `https://tiktok.com/${associado.tiktok.replace('@', '')}` },
+    associado.website && { icon: <GlobalOutlined />, label: 'Meu Site', color: '#1677ff', url: associado.website },
+  ].filter(Boolean) as { icon: React.ReactNode; label: string; color: string; url: string }[];
+
   return (
-    <div style={{ minHeight: '100vh', background: '#f5f5f5' }}>
+    <div style={{ minHeight: '100vh', background: '#f0f2f5' }}>
       <SEO
-        title={store.name}
-        description={store.config.description || `Loja de ${associado.name}`}
+        title={`${associado.name} | DigitaisBR`}
+        description={associado.bio || `Perfil de ${associado.name} na DigitaisBR`}
         url={`https://digitaisbr-plataforma.web.app/loja/${slug}`}
       />
-      {/* Header */}
+
+      {/* Hero Profile */}
       <div style={{
-        background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}dd)`,
-        padding: '40px 24px 32px',
+        background: `linear-gradient(135deg, ${primaryColor}, ${primaryColor}cc, #722ed1)`,
+        padding: '48px 24px 40px',
         textAlign: 'center',
         color: '#fff',
         position: 'relative',
       }}>
         <div style={{ position: 'absolute', top: 16, right: 24 }}>
-          <Tag style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', border: 'none', fontSize: 11 }}>
+          <Tag style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: 'none', fontSize: 11 }}>
             <SafetyCertificateOutlined /> DigitaisBR
           </Tag>
         </div>
 
-        <Avatar size={80} style={{ background: 'rgba(255,255,255,0.2)', marginBottom: 12, border: '3px solid rgba(255,255,255,0.4)' }} icon={<UserOutlined />} />
+        <Avatar
+          size={100}
+          style={{ background: 'rgba(255,255,255,0.2)', marginBottom: 16, border: '4px solid rgba(255,255,255,0.4)' }}
+          icon={<UserOutlined />}
+          src={associado.avatar}
+        />
 
-        <Title level={2} style={{ color: '#fff', margin: '0 0 4px' }}>{store.name}</Title>
-        <Text style={{ color: 'rgba(255,255,255,0.85)', fontSize: 16 }}>{associado.name}</Text>
+        <Title level={2} style={{ color: '#fff', margin: '0 0 4px' }}>{associado.name}</Title>
 
-        <div style={{ margin: '12px 0' }}>
-          <Tag style={{ background: badge.color, color: '#fff', border: 'none', fontSize: 12, padding: '2px 10px' }}>
+        <div style={{ margin: '8px 0 4px' }}>
+          {associado.niche && (
+            <Tag style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: 'none', fontSize: 13, padding: '2px 12px', borderRadius: 12 }}>
+              <FireOutlined /> {associado.niche}
+            </Tag>
+          )}
+          <Tag style={{ background: badge.color, color: '#fff', border: 'none', fontSize: 12, padding: '2px 10px', borderRadius: 12 }}>
             <StarFilled /> {badge.label}
           </Tag>
         </div>
 
-        {store.config.description && (
-          <Paragraph style={{ color: 'rgba(255,255,255,0.8)', maxWidth: 500, margin: '0 auto', fontSize: 14 }}>
-            {store.config.description}
+        {associado.bio && (
+          <Paragraph style={{ color: 'rgba(255,255,255,0.9)', maxWidth: 480, margin: '12px auto 0', fontSize: 15, lineHeight: 1.6 }}>
+            {associado.bio}
           </Paragraph>
         )}
 
-        <Space style={{ marginTop: 16 }}>
+        {/* Audience Metrics */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 32, marginTop: 20, flexWrap: 'wrap' }}>
+          {associado.followers && (
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 24, fontWeight: 700 }}>
+                <TeamOutlined style={{ marginRight: 4 }} />
+                {formatFollowers(associado.followers)}
+              </div>
+              <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>Seguidores</Text>
+            </div>
+          )}
+          {associado.engagementRate && (
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 24, fontWeight: 700 }}>
+                <ThunderboltOutlined style={{ marginRight: 4 }} />
+                {associado.engagementRate}%
+              </div>
+              <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>Engajamento</Text>
+            </div>
+          )}
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 20, fontWeight: 700 }}>{storeProducts.length}</div>
-            <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>Produtos</Text>
+            <div style={{ fontSize: 24, fontWeight: 700 }}>
+              <HeartOutlined style={{ marginRight: 4 }} />
+              {storeProducts.length}
+            </div>
+            <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>Recomendações</Text>
           </div>
-          <Divider type="vertical" style={{ background: 'rgba(255,255,255,0.3)', height: 30 }} />
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 20, fontWeight: 700 }}>{store.totalViews.toLocaleString()}</div>
-            <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>Visitas</Text>
-          </div>
-          <Divider type="vertical" style={{ background: 'rgba(255,255,255,0.3)', height: 30 }} />
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 20, fontWeight: 700 }}>{storeVendas.length}</div>
+            <div style={{ fontSize: 24, fontWeight: 700 }}>
+              <ShoppingCartOutlined style={{ marginRight: 4 }} />
+              {storeVendas.length}
+            </div>
             <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>Vendas</Text>
           </div>
-        </Space>
-
-        <div style={{ marginTop: 16 }}>
-          <Space>
-            {store.config.showWhatsapp && store.config.whatsappNumber && (
-              <Button icon={<WhatsAppOutlined />} style={{ background: '#25D366', borderColor: '#25D366', color: '#fff' }} size="large">
-                WhatsApp
-              </Button>
-            )}
-          </Space>
         </div>
+
+        {/* Social Links */}
+        {socialLinks.length > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginTop: 20, flexWrap: 'wrap' }}>
+            {socialLinks.map((link, i) => (
+              <Button
+                key={i}
+                size="large"
+                style={{
+                  background: 'rgba(255,255,255,0.15)',
+                  borderColor: 'rgba(255,255,255,0.3)',
+                  color: '#fff',
+                  borderRadius: 24,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                }}
+                icon={link.icon}
+                onClick={() => window.open(link.url, '_blank')}
+              >
+                {link.label}
+              </Button>
+            ))}
+          </div>
+        )}
+
+        {/* WhatsApp */}
+        {store.config.showWhatsapp && store.config.whatsappNumber && (
+          <div style={{ marginTop: 16 }}>
+            <Button icon={<WhatsAppOutlined />} style={{ background: '#25D366', borderColor: '#25D366', color: '#fff', borderRadius: 24 }} size="large">
+              Fale comigo no WhatsApp
+            </Button>
+          </div>
+        )}
       </div>
 
-      {/* Filtros */}
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '20px 24px 0' }}>
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+      {/* Section: Minhas Recomendações */}
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 24px 0' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <Title level={4} style={{ margin: 0 }}>
+            <HeartOutlined style={{ color: primaryColor, marginRight: 8 }} />
+            Minhas Recomendações
+          </Title>
+        </div>
+
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', marginBottom: 16 }}>
           <Input
-            placeholder="Buscar produto..."
+            placeholder="Buscar recomendação..."
             prefix={<SearchOutlined />}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -176,15 +251,15 @@ export default function LojaPublicaPage() {
         </div>
       </div>
 
-      {/* Produtos */}
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '16px 24px 40px' }}>
+      {/* Products Grid */}
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 40px' }}>
         {filteredProducts.length === 0 ? (
-          <Empty description="Nenhum produto encontrado" style={{ padding: 60 }} />
+          <Empty description="Nenhuma recomendação encontrada" style={{ padding: 60 }} />
         ) : selectedCategory !== 'all' ? (
           <Row gutter={[16, 16]} style={{ marginTop: 8 }}>
             {filteredProducts.map((product) => (
               <Col xs={24} sm={12} md={8} lg={6} key={product.id}>
-                <ProductCard product={product} primaryColor={primaryColor} onAdd={handleAddToCart} />
+                <ProductCard product={product} primaryColor={primaryColor} onAdd={handleAddToCart} creatorName={associado.name.split(' ')[0]} />
               </Col>
             ))}
           </Row>
@@ -197,7 +272,7 @@ export default function LojaPublicaPage() {
               <Row gutter={[16, 16]}>
                 {group.products.map((product) => (
                   <Col xs={24} sm={12} md={8} lg={6} key={product.id}>
-                    <ProductCard product={product} primaryColor={primaryColor} onAdd={handleAddToCart} />
+                    <ProductCard product={product} primaryColor={primaryColor} onAdd={handleAddToCart} creatorName={associado.name.split(' ')[0]} />
                   </Col>
                 ))}
               </Row>
@@ -227,7 +302,7 @@ export default function LojaPublicaPage() {
         <ShopOutlined style={{ fontSize: 20, color: primaryColor, marginBottom: 8 }} />
         <br />
         <Text type="secondary" style={{ fontSize: 13 }}>
-          Loja virtual de <Text strong>{associado.name}</Text>
+          Perfil de <Text strong>{associado.name}</Text>
         </Text>
         <br />
         <Text type="secondary" style={{ fontSize: 11 }}>
@@ -238,7 +313,7 @@ export default function LojaPublicaPage() {
   );
 }
 
-function ProductCard({ product, primaryColor, onAdd }: { product: Product; primaryColor: string; onAdd: (p: Product) => void }) {
+function ProductCard({ product, primaryColor, onAdd, creatorName }: { product: Product; primaryColor: string; onAdd: (p: Product) => void; creatorName: string }) {
   return (
     <Card
       hoverable
@@ -262,6 +337,9 @@ function ProductCard({ product, primaryColor, onAdd }: { product: Product; prima
               <StarFilled /> Exclusivo
             </Tag>
           )}
+          <Tag style={{ position: 'absolute', bottom: 8, left: 8, fontSize: 10, background: 'rgba(0,0,0,0.6)', color: '#fff', border: 'none', borderRadius: 8 }}>
+            <HeartOutlined /> Indicação {creatorName}
+          </Tag>
         </div>
       }
     >

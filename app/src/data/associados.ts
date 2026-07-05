@@ -27,6 +27,48 @@ const planTypes = ['basico', 'intermediario', 'avancado'] as const;
 const planIds = ['plan-basico', 'plan-intermediario', 'plan-avancado'];
 const statuses = ['ativo', 'ativo', 'ativo', 'ativo', 'inativo', 'suspenso'] as const;
 
+const niches = [
+  'Lifestyle', 'Fitness', 'Beleza', 'Tech', 'Gastronomia',
+  'Moda', 'Viagens', 'Educação', 'Finanças', 'Humor',
+  'Games', 'Música', 'Saúde', 'Maternidade', 'Pets',
+  'DIY & Decor', 'Esportes', 'Empreendedorismo', 'Sustentabilidade', 'Fotografia',
+  'Lifestyle', 'Fitness', 'Beleza', 'Tech', 'Gastronomia',
+  'Moda', 'Viagens', 'Educação', 'Finanças', 'Humor',
+];
+
+const bios = [
+  'Criadora de conteúdo lifestyle. Compartilho dicas de organização e bem-estar.',
+  'Personal trainer e criador de conteúdo fitness. Transformando vidas!',
+  'Maquiadora profissional e beauty influencer. Tutoriais e reviews.',
+  'Tech reviewer e early adopter. Tudo sobre gadgets e tecnologia.',
+  'Chef e food blogger. Receitas fáceis e deliciosas para o dia a dia.',
+  'Fashion influencer e consultora de imagem. Tendências e looks acessíveis.',
+  'Travel creator. Já visitei 28 países e conto tudo aqui!',
+  'Professor e criador de conteúdo educacional. Simplificando o complexo.',
+  'Educador financeiro. Investimentos, economia e liberdade financeira.',
+  'Humorista digital. Conteúdo leve para alegrar seu dia!',
+  'Gamer e streamer. Reviews, gameplays e dicas.',
+  'Músico e produtor. Covers, originais e dicas de produção.',
+  'Nutricionista e influencer de saúde. Alimentação saudável na prática.',
+  'Mãe real e criadora de conteúdo. Maternidade sem filtro.',
+  'Apaixonada por pets. Dicas de cuidados e conteúdo fofo!',
+  'DIY, decoração e organização de ambientes com criatividade.',
+  'Atleta e influencer de esportes. Treinos, competições e motivação.',
+  'Empreendedor serial. Negócios, startups e produtividade.',
+  'Ativista ambiental e criadora de conteúdo sustentável.',
+  'Fotógrafo profissional. Dicas, presets e bastidores.',
+  'Compartilho minha rotina e dicas do dia a dia.',
+  'Treinos funcionais e nutrição esportiva.',
+  'Skincare, cabelos e autoestima.',
+  'Unboxings e análises de tecnologia.',
+  'Receitas rápidas e saudáveis.',
+  'Moda sustentável e slow fashion.',
+  'Roteiros de viagem com orçamento real.',
+  'Didática e conteúdo para concursos.',
+  'Cripto, renda fixa e variável para iniciantes.',
+  'Esquetes, memes e paródias.',
+];
+
 function seededRandom(seed: number) {
   const x = Math.sin(seed) * 10000;
   return x - Math.floor(x);
@@ -66,5 +108,12 @@ export const mockAssociados: Associado[] = names.map((name, i) => {
     updatedAt: new Date().toISOString().split('T')[0],
     totalSales: Math.floor(seededRandom(i + 200) * 500),
     totalCommission: Math.floor(seededRandom(i + 300) * 5000 * 100) / 100,
+    niche: niches[i],
+    bio: bios[i],
+    instagram: `@${slug}`,
+    youtube: i % 3 === 0 ? name.split(' ')[0] + ' Channel' : undefined,
+    tiktok: i % 2 === 0 ? `@${slug}` : undefined,
+    followers: Math.floor(seededRandom(i + 400) * 980000) + 1000,
+    engagementRate: Math.round((seededRandom(i + 500) * 8 + 1.5) * 10) / 10,
   };
 });

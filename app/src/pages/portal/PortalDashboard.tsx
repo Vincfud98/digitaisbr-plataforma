@@ -1,8 +1,10 @@
 import { useMemo } from 'react';
-import { Card, Col, Row, Statistic, Typography, Tag, List, Space, Progress } from 'antd';
+import { Card, Col, Row, Statistic, Typography, Tag, List, Space, Progress, Button, message } from 'antd';
 import {
   ShopOutlined, ShoppingCartOutlined, GiftOutlined,
   EyeOutlined, CrownOutlined, RiseOutlined, StarOutlined,
+  TeamOutlined, ThunderboltOutlined, FireOutlined,
+  LinkOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAppSelector } from '../../store';
@@ -114,6 +116,47 @@ export default function PortalDashboard() {
           Plano <Tag color={planColors[plan]}>{planLabels[plan]}</Tag> · R$ {planPrices[plan].toFixed(2)}/mês
         </Text>
       </div>
+
+      {/* Creator Metrics */}
+      <Card size="small" style={{ marginBottom: 16, background: 'linear-gradient(135deg, #f0f5ff, #f9f0ff)', border: '1px solid #d6e4ff' }}>
+        <Row gutter={[16, 12]} align="middle">
+          <Col xs={24} sm={6}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 48, height: 48, borderRadius: 24, background: 'linear-gradient(135deg, #1677ff, #722ed1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <FireOutlined style={{ color: '#fff', fontSize: 20 }} />
+              </div>
+              <div>
+                <Text strong style={{ fontSize: 13 }}>{associado?.niche || 'Creator'}</Text>
+                <br />
+                <Text type="secondary" style={{ fontSize: 11 }}>{associado?.instagram || '@creator'}</Text>
+              </div>
+            </div>
+          </Col>
+          <Col xs={8} sm={4} style={{ textAlign: 'center' }}>
+            <TeamOutlined style={{ color: '#1677ff', fontSize: 16 }} />
+            <div style={{ fontSize: 18, fontWeight: 700, color: '#1677ff' }}>
+              {associado?.followers ? (associado.followers >= 1000 ? (associado.followers / 1000).toFixed(1).replace('.0', '') + 'K' : associado.followers) : '—'}
+            </div>
+            <Text type="secondary" style={{ fontSize: 11 }}>Seguidores</Text>
+          </Col>
+          <Col xs={8} sm={4} style={{ textAlign: 'center' }}>
+            <ThunderboltOutlined style={{ color: '#722ed1', fontSize: 16 }} />
+            <div style={{ fontSize: 18, fontWeight: 700, color: '#722ed1' }}>{associado?.engagementRate || 0}%</div>
+            <Text type="secondary" style={{ fontSize: 11 }}>Engajamento</Text>
+          </Col>
+          <Col xs={8} sm={4} style={{ textAlign: 'center' }}>
+            <EyeOutlined style={{ color: '#52c41a', fontSize: 16 }} />
+            <div style={{ fontSize: 18, fontWeight: 700, color: '#52c41a' }}>{minhaLoja?.totalViews?.toLocaleString() || 0}</div>
+            <Text type="secondary" style={{ fontSize: 11 }}>Visitas</Text>
+          </Col>
+          <Col xs={24} sm={6} style={{ textAlign: 'center' }}>
+            <Button type="primary" size="small" icon={<LinkOutlined />} style={{ borderRadius: 16 }}
+              onClick={() => { const url = `https://digitaisbr-plataforma.web.app/loja/${associado?.storeSlug}`; navigator.clipboard.writeText(url).then(() => message.success('Link copiado!')); }}>
+              Copiar meu link
+            </Button>
+          </Col>
+        </Row>
+      </Card>
 
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} lg={6}>

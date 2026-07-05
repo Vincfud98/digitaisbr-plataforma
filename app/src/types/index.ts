@@ -330,4 +330,8 @@ export interface Associado {
   website?: string;
   showEmail?: boolean;
   showPhone?: boolean;
+  niche?: string;
+  followers?: number;
+  engagementRate?: number;
+  mediaKitUrl?: string;
 }

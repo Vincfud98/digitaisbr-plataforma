@@ -4,6 +4,7 @@ import {
   UserOutlined, LinkOutlined, InstagramOutlined, YoutubeOutlined,
   GlobalOutlined, CopyOutlined, EditOutlined, EyeOutlined,
   ShopOutlined, MailOutlined, PhoneOutlined, SaveOutlined, UploadOutlined,
+  FireOutlined, TeamOutlined, ThunderboltOutlined,
 } from '@ant-design/icons';
 import { useAppSelector, useAppDispatch } from '../../store';
 import { updateAssociado } from '../../store/slices/associadosSlice';
@@ -30,6 +31,7 @@ export default function MeuPerfilPage() {
   const [showPhone, setShowPhone] = useState(associado?.showPhone ?? false);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [niche, setNiche] = useState(associado?.niche || '');
   const [saving, setSaving] = useState(false);
 
   const profileUrl = `https://digitaisbr-plataforma.web.app/loja/${loja?.slug || 'minha-loja'}`;
@@ -64,6 +66,7 @@ export default function MeuPerfilPage() {
         showEmail,
         showPhone,
         avatar,
+        niche,
       }));
       message.success('Perfil atualizado com sucesso!');
       setEditing(false);
@@ -109,10 +112,28 @@ export default function MeuPerfilPage() {
                 </div>
               )}
               <Title level={4} style={{ margin: '0 0 4px' }}>{associado?.name || 'Associado'}</Title>
+              {associado?.niche && (
+                <Tag color="magenta" style={{ marginBottom: 4 }}><FireOutlined /> {associado.niche}</Tag>
+              )}
               <Tag color="purple">Influencer DigitaisBR</Tag>
+              {associado?.followers && (
+                <div style={{ marginTop: 8, display: 'flex', justifyContent: 'center', gap: 16 }}>
+                  <Text type="secondary" style={{ fontSize: 12 }}><TeamOutlined /> {associado.followers >= 1000 ? (associado.followers / 1000).toFixed(1).replace('.0', '') + 'K' : associado.followers} seguidores</Text>
+                  {associado.engagementRate && <Text type="secondary" style={{ fontSize: 12 }}><ThunderboltOutlined /> {associado.engagementRate}% eng.</Text>}
+                </div>
+              )}
             </div>
 
             <Divider />
+
+            <div style={{ marginBottom: 16 }}>
+              <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>Nicho</Text>
+              {editing ? (
+                <Input value={niche} onChange={(e) => setNiche(e.target.value)} placeholder="Ex: Lifestyle, Fitness, Tech..." />
+              ) : (
+                <Text>{niche || <Text type="secondary">Não definido</Text>}</Text>
+              )}
+            </div>
 
             <div style={{ marginBottom: 16 }}>
               <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>Bio</Text>
