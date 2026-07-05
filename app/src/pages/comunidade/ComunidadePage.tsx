@@ -118,13 +118,13 @@ export default function ComunidadePage() {
 
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Tópicos Ativos" value={totalOpen} prefix={<CommentOutlined />} valueStyle={{ color: '#52c41a' }} /></Card>
+          <Card><Statistic title="Tópicos Ativos" value={totalOpen} prefix={<CommentOutlined />} styles={{ content: { color: '#52c41a' } }} /></Card>
         </Col>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Total de Respostas" value={totalReplies} prefix={<MessageOutlined />} valueStyle={{ color: '#1677ff' }} /></Card>
+          <Card><Statistic title="Total de Respostas" value={totalReplies} prefix={<MessageOutlined />} styles={{ content: { color: '#1677ff' } }} /></Card>
         </Col>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Total de Visualizações" value={totalViews} prefix={<EyeOutlined />} valueStyle={{ color: '#722ed1' }} /></Card>
+          <Card><Statistic title="Total de Visualizações" value={totalViews} prefix={<EyeOutlined />} styles={{ content: { color: '#722ed1' } }} /></Card>
         </Col>
       </Row>
 

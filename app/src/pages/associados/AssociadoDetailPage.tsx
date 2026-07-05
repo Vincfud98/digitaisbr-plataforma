@@ -46,22 +46,22 @@ export default function AssociadoDetailPage() {
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} lg={6}>
           <Card>
-            <Statistic title="Total de Vendas" value={assoc.totalSales} prefix={<ShoppingCartOutlined />} valueStyle={{ color: '#52c41a' }} />
+            <Statistic title="Total de Vendas" value={assoc.totalSales} prefix={<ShoppingCartOutlined />} styles={{ content: { color: '#52c41a' } }} />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <Card>
-            <Statistic title="Comissão Acumulada" value={assoc.totalCommission} precision={2} prefix={<DollarOutlined />} suffix="R$" valueStyle={{ color: '#faad14' }} />
+            <Statistic title="Comissão Acumulada" value={assoc.totalCommission} precision={2} prefix={<DollarOutlined />} suffix="R$" styles={{ content: { color: '#faad14' } }} />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <Card>
-            <Statistic title="Loja" value={assoc.storeName} prefix={<ShopOutlined />} valueStyle={{ fontSize: 18 }} />
+            <Statistic title="Loja" value={assoc.storeName} prefix={<ShopOutlined />} styles={{ content: { fontSize: 18 } }} />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <Card>
-            <Statistic title="Membro desde" value={new Date(assoc.createdAt).toLocaleDateString('pt-BR')} prefix={<CalendarOutlined />} valueStyle={{ fontSize: 18 }} />
+            <Statistic title="Membro desde" value={new Date(assoc.createdAt).toLocaleDateString('pt-BR')} prefix={<CalendarOutlined />} styles={{ content: { fontSize: 18 } }} />
           </Card>
         </Col>
       </Row>

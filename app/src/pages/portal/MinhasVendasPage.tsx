@@ -108,10 +108,10 @@ export default function MinhasVendasPage() {
           <Card><Statistic title="Total de Vendas" value={minhasVendas.length} prefix={<ShoppingCartOutlined />} /></Card>
         </Col>
         <Col xs={24} sm={6}>
-          <Card><Statistic title="Receita Aprovada" value={receitaTotal} precision={2} prefix="R$" valueStyle={{ color: '#52c41a' }} /></Card>
+          <Card><Statistic title="Receita Aprovada" value={receitaTotal} precision={2} prefix="R$" styles={{ content: { color: '#52c41a' } }} /></Card>
         </Col>
         <Col xs={24} sm={6}>
-          <Card><Statistic title="Pendentes" value={pendentes.length} prefix={<ClockCircleOutlined />} valueStyle={{ color: '#fa8c16' }} /></Card>
+          <Card><Statistic title="Pendentes" value={pendentes.length} prefix={<ClockCircleOutlined />} styles={{ content: { color: '#fa8c16' } }} /></Card>
         </Col>
         <Col xs={24} sm={6}>
           <Card><Statistic title="Ticket Médio" value={ticketMedio} precision={2} prefix="R$" /></Card>

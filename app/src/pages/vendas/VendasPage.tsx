@@ -131,13 +131,13 @@ export default function VendasPage() {
 
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Receita Total (aprovadas)" value={totalRevenue} precision={2} prefix="R$" valueStyle={{ color: '#52c41a' }} /></Card>
+          <Card><Statistic title="Receita Total (aprovadas)" value={totalRevenue} precision={2} prefix="R$" styles={{ content: { color: '#52c41a' } }} /></Card>
         </Col>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Vendas Aprovadas" value={totalApproved} prefix={<CheckCircleOutlined />} valueStyle={{ color: '#1677ff' }} /></Card>
+          <Card><Statistic title="Vendas Aprovadas" value={totalApproved} prefix={<CheckCircleOutlined />} styles={{ content: { color: '#1677ff' } }} /></Card>
         </Col>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Pendentes" value={totalPending} prefix={<ClockCircleOutlined />} valueStyle={{ color: '#faad14' }} /></Card>
+          <Card><Statistic title="Pendentes" value={totalPending} prefix={<ClockCircleOutlined />} styles={{ content: { color: '#faad14' } }} /></Card>
         </Col>
       </Row>
 

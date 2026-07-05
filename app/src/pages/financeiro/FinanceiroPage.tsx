@@ -89,16 +89,16 @@ export default function FinanceiroPage() {
 
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={24} sm={6}>
-          <Card><Statistic title="Total Entradas" value={totalEntrada} precision={2} prefix="R$" valueStyle={{ color: '#52c41a' }} /></Card>
+          <Card><Statistic title="Total Entradas" value={totalEntrada} precision={2} prefix="R$" styles={{ content: { color: '#52c41a' } }} /></Card>
         </Col>
         <Col xs={24} sm={6}>
-          <Card><Statistic title="Total Saídas" value={totalSaida} precision={2} prefix="R$" valueStyle={{ color: '#ff4d4f' }} /></Card>
+          <Card><Statistic title="Total Saídas" value={totalSaida} precision={2} prefix="R$" styles={{ content: { color: '#ff4d4f' } }} /></Card>
         </Col>
         <Col xs={24} sm={6}>
-          <Card><Statistic title="Saldo" value={saldo} precision={2} prefix="R$" valueStyle={{ color: saldo >= 0 ? '#52c41a' : '#ff4d4f' }} /></Card>
+          <Card><Statistic title="Saldo" value={saldo} precision={2} prefix="R$" styles={{ content: { color: saldo >= 0 ? '#52c41a' : '#ff4d4f' } }} /></Card>
         </Col>
         <Col xs={24} sm={6}>
-          <Card><Statistic title="Transações" value={transactions.length} prefix={<FundOutlined />} valueStyle={{ color: '#1677ff' }} /></Card>
+          <Card><Statistic title="Transações" value={transactions.length} prefix={<FundOutlined />} styles={{ content: { color: '#1677ff' } }} /></Card>
         </Col>
       </Row>
 
@@ -109,7 +109,7 @@ export default function FinanceiroPage() {
           return (
             <Col xs={24} sm={8} key={month}>
               <Card size="small" title={label}>
-                <Space direction="vertical" style={{ width: '100%' }}>
+                <Space orientation="vertical" style={{ width: '100%' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <Text type="success"><ArrowUpOutlined /> Entradas</Text>
                     <Text strong>R$ {data.entrada.toFixed(2)}</Text>

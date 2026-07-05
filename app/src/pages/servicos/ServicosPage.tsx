@@ -134,13 +134,13 @@ export default function ServicosPage() {
 
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Em Aberto" value={totalAberto} prefix={<AuditOutlined />} valueStyle={{ color: '#1677ff' }} /></Card>
+          <Card><Statistic title="Em Aberto" value={totalAberto} prefix={<AuditOutlined />} styles={{ content: { color: '#1677ff' } }} /></Card>
         </Col>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Em Andamento" value={totalAndamento} prefix={<CalendarOutlined />} valueStyle={{ color: '#fa8c16' }} /></Card>
+          <Card><Statistic title="Em Andamento" value={totalAndamento} prefix={<CalendarOutlined />} styles={{ content: { color: '#fa8c16' } }} /></Card>
         </Col>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Concluídos" value={totalConcluido} prefix={<AuditOutlined />} valueStyle={{ color: '#52c41a' }} /></Card>
+          <Card><Statistic title="Concluídos" value={totalConcluido} prefix={<AuditOutlined />} styles={{ content: { color: '#52c41a' } }} /></Card>
         </Col>
       </Row>
 

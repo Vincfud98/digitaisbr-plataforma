@@ -56,13 +56,13 @@ export default function NotificacoesPage() {
 
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Não Lidas" value={unreadCount} prefix={<BellOutlined />} valueStyle={{ color: '#ff4d4f' }} /></Card>
+          <Card><Statistic title="Não Lidas" value={unreadCount} prefix={<BellOutlined />} styles={{ content: { color: '#ff4d4f' } }} /></Card>
         </Col>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Total" value={notifications.length} prefix={<BellOutlined />} valueStyle={{ color: '#1677ff' }} /></Card>
+          <Card><Statistic title="Total" value={notifications.length} prefix={<BellOutlined />} styles={{ content: { color: '#1677ff' } }} /></Card>
         </Col>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Hoje" value={todayCount} prefix={<BellOutlined />} valueStyle={{ color: '#52c41a' }} /></Card>
+          <Card><Statistic title="Hoje" value={todayCount} prefix={<BellOutlined />} styles={{ content: { color: '#52c41a' } }} /></Card>
         </Col>
       </Row>
 

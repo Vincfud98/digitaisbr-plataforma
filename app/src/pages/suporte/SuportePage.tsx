@@ -346,13 +346,13 @@ export default function SuportePage() {
 
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={24} sm={6}>
-          <Card><Statistic title="Em Aberto" value={totalAberto} prefix={<ExclamationCircleOutlined />} valueStyle={{ color: '#1677ff' }} /></Card>
+          <Card><Statistic title="Em Aberto" value={totalAberto} prefix={<ExclamationCircleOutlined />} styles={{ content: { color: '#1677ff' } }} /></Card>
         </Col>
         <Col xs={24} sm={6}>
-          <Card><Statistic title="Em Andamento" value={totalAndamento} prefix={<ClockCircleOutlined />} valueStyle={{ color: '#fa8c16' }} /></Card>
+          <Card><Statistic title="Em Andamento" value={totalAndamento} prefix={<ClockCircleOutlined />} styles={{ content: { color: '#fa8c16' } }} /></Card>
         </Col>
         <Col xs={24} sm={6}>
-          <Card><Statistic title="Resolvidos" value={totalResolvido} prefix={<CheckCircleOutlined />} valueStyle={{ color: '#52c41a' }} /></Card>
+          <Card><Statistic title="Resolvidos" value={totalResolvido} prefix={<CheckCircleOutlined />} styles={{ content: { color: '#52c41a' } }} /></Card>
         </Col>
         <Col xs={24} sm={6}>
           <Card><Statistic title="Tempo Médio (h)" value={avgResolution} prefix={<ClockCircleOutlined />} /></Card>

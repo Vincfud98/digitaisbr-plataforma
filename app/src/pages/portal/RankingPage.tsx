@@ -94,18 +94,18 @@ export default function RankingPage() {
               title="Sua Posição"
               value={myRank > 0 ? `${myRank}º` : '-'}
               prefix={<CrownOutlined />}
-              valueStyle={{ color: myRank <= 3 ? '#faad14' : myRank <= 10 ? '#1677ff' : undefined }}
+              styles={{ content: { color: myRank <= 3 ? '#faad14' : myRank <= 10 ? '#1677ff' : undefined } }}
             />
           </Card>
         </Col>
         <Col xs={12} sm={6}>
-          <Card><Statistic title="Pontuação" value={myEntry?.score || 0} prefix={<StarOutlined />} valueStyle={{ color: '#722ed1' }} /></Card>
+          <Card><Statistic title="Pontuação" value={myEntry?.score || 0} prefix={<StarOutlined />} styles={{ content: { color: '#722ed1' } }} /></Card>
         </Col>
         <Col xs={12} sm={6}>
-          <Card><Statistic title="Top" value={percentile} suffix="%" prefix={<RiseOutlined />} valueStyle={{ color: '#52c41a' }} /></Card>
+          <Card><Statistic title="Top" value={percentile} suffix="%" prefix={<RiseOutlined />} styles={{ content: { color: '#52c41a' } }} /></Card>
         </Col>
         <Col xs={12} sm={6}>
-          <Card><Statistic title="Conquistas" value={unlockedCount} suffix={`/ ${achievements.length}`} prefix={<TrophyOutlined />} valueStyle={{ color: '#faad14' }} /></Card>
+          <Card><Statistic title="Conquistas" value={unlockedCount} suffix={`/ ${achievements.length}`} prefix={<TrophyOutlined />} styles={{ content: { color: '#faad14' } }} /></Card>
         </Col>
       </Row>
 

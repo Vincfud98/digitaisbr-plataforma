@@ -285,7 +285,7 @@ export default function ComunicacoesPage() {
           <Card><Statistic title="Total de Envios" value={totalDestinatarios} prefix={<TeamOutlined />} /></Card>
         </Col>
         <Col xs={24} sm={6}>
-          <Card><Statistic title="Taxa de Abertura" value={avgOpenRate} suffix="%" prefix={<EyeOutlined />} valueStyle={{ color: '#52c41a' }} /></Card>
+          <Card><Statistic title="Taxa de Abertura" value={avgOpenRate} suffix="%" prefix={<EyeOutlined />} styles={{ content: { color: '#52c41a' } }} /></Card>
         </Col>
         <Col xs={24} sm={6}>
           <Card><Statistic title="Rascunhos" value={campaigns.filter((c) => c.status === 'rascunho').length} prefix={<FileTextOutlined />} /></Card>
@@ -403,13 +403,13 @@ export default function ComunicacoesPage() {
             </Card>
             <Row gutter={16}>
               <Col span={8}>
-                <Statistic title="Público" value={previewOpen.targetPlans.length === 3 ? 'Todos' : previewOpen.targetPlans.map((p) => planLabels[p]).join(', ')} valueStyle={{ fontSize: 14 }} />
+                <Statistic title="Público" value={previewOpen.targetPlans.length === 3 ? 'Todos' : previewOpen.targetPlans.map((p) => planLabels[p]).join(', ')} styles={{ content: { fontSize: 14 } }} />
               </Col>
               <Col span={8}>
-                <Statistic title="Enviados" value={previewOpen.sentTo} valueStyle={{ fontSize: 14 }} />
+                <Statistic title="Enviados" value={previewOpen.sentTo} styles={{ content: { fontSize: 14 } }} />
               </Col>
               <Col span={8}>
-                <Statistic title="Abertura" value={previewOpen.openRate > 0 ? `${previewOpen.openRate}%` : '—'} valueStyle={{ fontSize: 14, color: '#52c41a' }} />
+                <Statistic title="Abertura" value={previewOpen.openRate > 0 ? `${previewOpen.openRate}%` : '—'} styles={{ content: { fontSize: 14, color: '#52c41a' } }} />
               </Col>
             </Row>
           </div>

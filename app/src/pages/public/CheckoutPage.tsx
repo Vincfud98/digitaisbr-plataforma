@@ -241,7 +241,7 @@ export default function CheckoutPage() {
                 onChange={(e) => setPayment(e.target.value)}
                 style={{ width: '100%' }}
               >
-                <Space direction="vertical" style={{ width: '100%' }}>
+                <Space orientation="vertical" style={{ width: '100%' }}>
                   <Radio.Button value="pix" style={{ width: '100%', height: 56, display: 'flex', alignItems: 'center', borderRadius: 8, marginBottom: 8 }}>
                     <Space>
                       <QrcodeOutlined style={{ fontSize: 20, color: '#32BCAD' }} />

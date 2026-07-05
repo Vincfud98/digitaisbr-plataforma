@@ -156,13 +156,13 @@ export default function LinksAfiliadoPage() {
           <Card><Statistic title="Conversões" value={totalConversions} prefix={<ShoppingCartOutlined />} /></Card>
         </Col>
         <Col xs={12} sm={4}>
-          <Card><Statistic title="Taxa Média" value={avgConversion} precision={1} suffix="%" prefix={<RiseOutlined />} valueStyle={{ color: avgConversion > 3 ? '#52c41a' : '#faad14' }} /></Card>
+          <Card><Statistic title="Taxa Média" value={avgConversion} precision={1} suffix="%" prefix={<RiseOutlined />} styles={{ content: { color: avgConversion > 3 ? '#52c41a' : '#faad14' } }} /></Card>
         </Col>
         <Col xs={12} sm={4}>
           <Card><Statistic title="Receita Total" value={totalRevenue} precision={2} prefix="R$" /></Card>
         </Col>
         <Col xs={12} sm={4}>
-          <Card><Statistic title="Comissão Total" value={totalCommission} precision={2} prefix="R$" valueStyle={{ color: '#52c41a' }} /></Card>
+          <Card><Statistic title="Comissão Total" value={totalCommission} precision={2} prefix="R$" styles={{ content: { color: '#52c41a' } }} /></Card>
         </Col>
       </Row>
 

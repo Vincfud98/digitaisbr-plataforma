@@ -126,16 +126,16 @@ export default function DestaquesPage() {
 
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={24} sm={6}>
-          <Card><Statistic title="Destaques Ativos" value={totalActive} prefix={<StarOutlined />} valueStyle={{ color: '#faad14' }} /></Card>
+          <Card><Statistic title="Destaques Ativos" value={totalActive} prefix={<StarOutlined />} styles={{ content: { color: '#faad14' } }} /></Card>
         </Col>
         <Col xs={24} sm={6}>
-          <Card><Statistic title="Total de Cliques" value={totalClicks} prefix={<EyeOutlined />} valueStyle={{ color: '#1677ff' }} /></Card>
+          <Card><Statistic title="Total de Cliques" value={totalClicks} prefix={<EyeOutlined />} styles={{ content: { color: '#1677ff' } }} /></Card>
         </Col>
         <Col xs={24} sm={6}>
-          <Card><Statistic title="Impressões" value={totalImpressions} prefix={<EyeOutlined />} valueStyle={{ color: '#722ed1' }} /></Card>
+          <Card><Statistic title="Impressões" value={totalImpressions} prefix={<EyeOutlined />} styles={{ content: { color: '#722ed1' } }} /></Card>
         </Col>
         <Col xs={24} sm={6}>
-          <Card><Statistic title="CTR Médio" value={`${avgCtr}%`} prefix={<RiseOutlined />} valueStyle={{ color: '#52c41a' }} /></Card>
+          <Card><Statistic title="CTR Médio" value={`${avgCtr}%`} prefix={<RiseOutlined />} styles={{ content: { color: '#52c41a' } }} /></Card>
         </Col>
       </Row>
 

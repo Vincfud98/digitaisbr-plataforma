@@ -161,7 +161,7 @@ export default function CuponsPage() {
 
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={12} sm={6}>
-          <Card><Statistic title="Cupons Ativos" value={activeCoupons.length} prefix={<TagOutlined />} valueStyle={{ color: '#52c41a' }} /></Card>
+          <Card><Statistic title="Cupons Ativos" value={activeCoupons.length} prefix={<TagOutlined />} styles={{ content: { color: '#52c41a' } }} /></Card>
         </Col>
         <Col xs={12} sm={6}>
           <Card><Statistic title="Total de Usos" value={totalUses} prefix={<ShoppingCartOutlined />} /></Card>

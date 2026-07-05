@@ -118,31 +118,31 @@ export default function DashboardPage() {
 
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} lg={6}>
-          <Card><Statistic title="Associados Ativos" value={assocAtivos} suffix={`/ ${totalAssociados}`} prefix={<TeamOutlined />} valueStyle={{ color: '#1677ff' }} /></Card>
+          <Card><Statistic title="Associados Ativos" value={assocAtivos} suffix={`/ ${totalAssociados}`} prefix={<TeamOutlined />} styles={{ content: { color: '#1677ff' } }} /></Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card><Statistic title="Vendas Aprovadas" value={vendasAprovadas} suffix={`/ ${totalVendas}`} prefix={<ShoppingCartOutlined />} valueStyle={{ color: '#52c41a' }} /></Card>
+          <Card><Statistic title="Vendas Aprovadas" value={vendasAprovadas} suffix={`/ ${totalVendas}`} prefix={<ShoppingCartOutlined />} styles={{ content: { color: '#52c41a' } }} /></Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card><Statistic title="Receita Total" value={receitaTotal} precision={2} prefix="R$" valueStyle={{ color: '#52c41a' }} /></Card>
+          <Card><Statistic title="Receita Total" value={receitaTotal} precision={2} prefix="R$" styles={{ content: { color: '#52c41a' } }} /></Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card><Statistic title="Lojas Ativas" value={lojasAtivas} suffix={`/ ${lojas.length}`} prefix={<ShopOutlined />} valueStyle={{ color: '#722ed1' }} /></Card>
+          <Card><Statistic title="Lojas Ativas" value={lojasAtivas} suffix={`/ ${lojas.length}`} prefix={<ShopOutlined />} styles={{ content: { color: '#722ed1' } }} /></Card>
         </Col>
       </Row>
 
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
         <Col xs={24} sm={12} lg={6}>
-          <Card><Statistic title="Comissões Pagas" value={comissaoPaga} precision={2} prefix="R$" valueStyle={{ color: '#faad14' }} /></Card>
+          <Card><Statistic title="Comissões Pagas" value={comissaoPaga} precision={2} prefix="R$" styles={{ content: { color: '#faad14' } }} /></Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card><Statistic title="Comissões Pendentes" value={comissaoPendente} precision={2} prefix="R$" valueStyle={{ color: '#fa8c16' }} /></Card>
+          <Card><Statistic title="Comissões Pendentes" value={comissaoPendente} precision={2} prefix="R$" styles={{ content: { color: '#fa8c16' } }} /></Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card><Statistic title="Saldo Financeiro" value={saldo} precision={2} prefix="R$" valueStyle={{ color: saldo >= 0 ? '#52c41a' : '#ff4d4f' }} /></Card>
+          <Card><Statistic title="Saldo Financeiro" value={saldo} precision={2} prefix="R$" styles={{ content: { color: saldo >= 0 ? '#52c41a' : '#ff4d4f' } }} /></Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card><Statistic title="Produtos Ativos" value={produtosAtivos} suffix={`/ ${produtos.length}`} prefix={<ShoppingCartOutlined />} valueStyle={{ color: '#13c2c2' }} /></Card>
+          <Card><Statistic title="Produtos Ativos" value={produtosAtivos} suffix={`/ ${produtos.length}`} prefix={<ShoppingCartOutlined />} styles={{ content: { color: '#13c2c2' } }} /></Card>
         </Col>
       </Row>
 

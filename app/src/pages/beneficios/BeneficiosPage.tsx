@@ -56,13 +56,13 @@ export default function BeneficiosPage() {
 
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Benefícios Ativos" value={totalActive} prefix={<GiftOutlined />} valueStyle={{ color: '#52c41a' }} /></Card>
+          <Card><Statistic title="Benefícios Ativos" value={totalActive} prefix={<GiftOutlined />} styles={{ content: { color: '#52c41a' } }} /></Card>
         </Col>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Parceiros Ativos" value={partners.filter((p) => p.status === 'ativo').length} prefix={<HeartOutlined />} valueStyle={{ color: '#1677ff' }} /></Card>
+          <Card><Statistic title="Parceiros Ativos" value={partners.filter((p) => p.status === 'ativo').length} prefix={<HeartOutlined />} styles={{ content: { color: '#1677ff' } }} /></Card>
         </Col>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Total de Utilizações" value={totalUsage} prefix={<PercentageOutlined />} valueStyle={{ color: '#722ed1' }} /></Card>
+          <Card><Statistic title="Total de Utilizações" value={totalUsage} prefix={<PercentageOutlined />} styles={{ content: { color: '#722ed1' } }} /></Card>
         </Col>
       </Row>
 

@@ -64,13 +64,13 @@ export default function ConteudosPage() {
 
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Publicados" value={totalPublished} prefix={<ReadOutlined />} valueStyle={{ color: '#52c41a' }} /></Card>
+          <Card><Statistic title="Publicados" value={totalPublished} prefix={<ReadOutlined />} styles={{ content: { color: '#52c41a' } }} /></Card>
         </Col>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Total de Visualizações" value={totalViews} prefix={<EyeOutlined />} valueStyle={{ color: '#1677ff' }} /></Card>
+          <Card><Statistic title="Total de Visualizações" value={totalViews} prefix={<EyeOutlined />} styles={{ content: { color: '#1677ff' } }} /></Card>
         </Col>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Total de Curtidas" value={totalLikes} prefix={<HeartOutlined />} valueStyle={{ color: '#ff4d4f' }} /></Card>
+          <Card><Statistic title="Total de Curtidas" value={totalLikes} prefix={<HeartOutlined />} styles={{ content: { color: '#ff4d4f' } }} /></Card>
         </Col>
       </Row>
 

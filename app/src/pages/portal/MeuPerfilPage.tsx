@@ -148,7 +148,7 @@ export default function MeuPerfilPage() {
 
             <div>
               <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 8 }}>Redes Sociais</Text>
-              <Space direction="vertical" style={{ width: '100%' }}>
+              <Space orientation="vertical" style={{ width: '100%' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <InstagramOutlined style={{ fontSize: 18, color: '#E4405F' }} />
                   {editing ? <Input value={instagram} onChange={(e) => setInstagram(e.target.value)} placeholder="@usuario" size="small" /> : <Text>{instagram || '-'}</Text>}
@@ -172,7 +172,7 @@ export default function MeuPerfilPage() {
 
             <div>
               <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 8 }}>Privacidade</Text>
-              <Space direction="vertical">
+              <Space orientation="vertical">
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <Switch size="small" checked={showEmail} onChange={setShowEmail} disabled={!editing} />
                   <Text style={{ fontSize: 12 }}>Mostrar email no perfil</Text>

@@ -136,7 +136,7 @@ export default function MinhaLojaPage() {
           <Card><Statistic title="Vendas" value={minhasVendas.length} prefix={<ShoppingCartOutlined />} /></Card>
         </Col>
         <Col xs={12} sm={6}>
-          <Card><Statistic title="Receita" value={receitaTotal} precision={2} prefix="R$" valueStyle={{ color: '#52c41a' }} /></Card>
+          <Card><Statistic title="Receita" value={receitaTotal} precision={2} prefix="R$" styles={{ content: { color: '#52c41a' } }} /></Card>
         </Col>
       </Row>
 

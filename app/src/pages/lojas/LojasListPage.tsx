@@ -108,13 +108,13 @@ export default function LojasListPage() {
 
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Lojas Ativas" value={totalAtivas} suffix={`/ ${stores.length}`} prefix={<ShopOutlined />} valueStyle={{ color: '#52c41a' }} /></Card>
+          <Card><Statistic title="Lojas Ativas" value={totalAtivas} suffix={`/ ${stores.length}`} prefix={<ShopOutlined />} styles={{ content: { color: '#52c41a' } }} /></Card>
         </Col>
         <Col xs={24} sm={8}>
           <Card><Statistic title="Produtos nas Lojas" value={totalProducts} prefix={<ShoppingCartOutlined />} /></Card>
         </Col>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Total Visualizações" value={totalViews} prefix={<BarChartOutlined />} valueStyle={{ color: '#1677ff' }} /></Card>
+          <Card><Statistic title="Total Visualizações" value={totalViews} prefix={<BarChartOutlined />} styles={{ content: { color: '#1677ff' } }} /></Card>
         </Col>
       </Row>
 

@@ -136,10 +136,10 @@ export default function CatalogoListPage() {
           <Card><Statistic title="Total de Produtos" value={products.length} prefix={<AppstoreOutlined />} /></Card>
         </Col>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Produtos Ativos" value={totalAtivos} prefix={<InboxOutlined />} valueStyle={{ color: '#52c41a' }} /></Card>
+          <Card><Statistic title="Produtos Ativos" value={totalAtivos} prefix={<InboxOutlined />} styles={{ content: { color: '#52c41a' } }} /></Card>
         </Col>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Comissão Média" value={avgCommission.toFixed(1)} suffix="%" prefix={<DollarOutlined />} valueStyle={{ color: '#faad14' }} /></Card>
+          <Card><Statistic title="Comissão Média" value={avgCommission.toFixed(1)} suffix="%" prefix={<DollarOutlined />} styles={{ content: { color: '#faad14' } }} /></Card>
         </Col>
       </Row>
 

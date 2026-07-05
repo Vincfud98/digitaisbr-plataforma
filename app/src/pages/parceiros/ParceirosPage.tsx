@@ -93,10 +93,10 @@ export default function ParceirosPage() {
 
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Parceiros Ativos" value={totalActive} prefix={<TeamOutlined />} valueStyle={{ color: '#52c41a' }} /></Card>
+          <Card><Statistic title="Parceiros Ativos" value={totalActive} prefix={<TeamOutlined />} styles={{ content: { color: '#52c41a' } }} /></Card>
         </Col>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Benefícios Ativos" value={totalBenefits} prefix={<GiftOutlined />} valueStyle={{ color: '#1677ff' }} /></Card>
+          <Card><Statistic title="Benefícios Ativos" value={totalBenefits} prefix={<GiftOutlined />} styles={{ content: { color: '#1677ff' } }} /></Card>
         </Col>
         <Col xs={24} sm={8}>
           <Card><Statistic title="Total de Parceiros" value={partners.length} prefix={<PartitionOutlined />} /></Card>

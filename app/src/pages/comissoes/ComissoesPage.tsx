@@ -131,13 +131,13 @@ export default function ComissoesPage() {
 
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Total Pago" value={totalPaid} precision={2} prefix="R$" valueStyle={{ color: '#52c41a' }} /></Card>
+          <Card><Statistic title="Total Pago" value={totalPaid} precision={2} prefix="R$" styles={{ content: { color: '#52c41a' } }} /></Card>
         </Col>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Pendente / A Pagar" value={totalPending} precision={2} prefix="R$" valueStyle={{ color: '#faad14' }} /></Card>
+          <Card><Statistic title="Pendente / A Pagar" value={totalPending} precision={2} prefix="R$" styles={{ content: { color: '#faad14' } }} /></Card>
         </Col>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Total de Comissões" value={totalCommissions} prefix={<DollarOutlined />} valueStyle={{ color: '#1677ff' }} /></Card>
+          <Card><Statistic title="Total de Comissões" value={totalCommissions} prefix={<DollarOutlined />} styles={{ content: { color: '#1677ff' } }} /></Card>
         </Col>
       </Row>
 

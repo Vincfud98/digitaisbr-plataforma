@@ -99,24 +99,24 @@ export default function FinanceiroPortalPage() {
 
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={12} sm={6}>
-          <Card><Statistic title="Total Ganho" value={totalEarned} precision={2} prefix="R$" valueStyle={{ color: '#1677ff' }} /></Card>
+          <Card><Statistic title="Total Ganho" value={totalEarned} precision={2} prefix="R$" styles={{ content: { color: '#1677ff' } }} /></Card>
         </Col>
         <Col xs={12} sm={6}>
           <Card>
-            <Statistic title="Disponível para Saque" value={available} precision={2} prefix="R$" valueStyle={{ color: '#52c41a', fontWeight: 700 }} />
+            <Statistic title="Disponível para Saque" value={available} precision={2} prefix="R$" styles={{ content: { color: '#52c41a', fontWeight: 700 } }} />
           </Card>
         </Col>
         <Col xs={12} sm={6}>
           <Card><Statistic title="Saques Realizados" value={totalWithdrawn} precision={2} prefix={<><ArrowUpOutlined /> R$</>} /></Card>
         </Col>
         <Col xs={12} sm={6}>
-          <Card><Statistic title="Em Processamento" value={pending} precision={2} prefix={<><ClockCircleOutlined /> R$</>} valueStyle={{ color: '#faad14' }} /></Card>
+          <Card><Statistic title="Em Processamento" value={pending} precision={2} prefix={<><ClockCircleOutlined /> R$</>} styles={{ content: { color: '#faad14' } }} /></Card>
         </Col>
       </Row>
 
       {available >= 50 && (
         <Alert
-          message={`Você tem R$ ${available.toFixed(2)} disponível para saque!`}
+          title={`Você tem R$ ${available.toFixed(2)} disponível para saque!`}
           type="success"
           showIcon
           action={<Button type="primary" size="small" icon={<PlusOutlined />} onClick={() => setFormOpen(true)}>Solicitar Saque</Button>}
@@ -139,7 +139,7 @@ export default function FinanceiroPortalPage() {
         okText="Solicitar Saque"
         cancelText="Cancelar"
       >
-        <Alert message={`Saldo disponível: R$ ${available.toFixed(2)}`} type="info" showIcon style={{ marginBottom: 16 }} />
+        <Alert title={`Saldo disponível: R$ ${available.toFixed(2)}`} type="info" showIcon style={{ marginBottom: 16 }} />
         <Form form={form} layout="vertical" onFinish={handleWithdraw} initialValues={{ method: 'pix' }}>
           <Form.Item name="amount" label="Valor do saque (R$)" rules={[{ required: true, message: 'Informe o valor' }]}>
             <Input type="number" min={50} step={0.01} placeholder="Mínimo R$ 50,00" prefix={<DollarOutlined />} />

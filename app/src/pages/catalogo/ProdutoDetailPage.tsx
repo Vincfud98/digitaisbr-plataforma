@@ -46,16 +46,16 @@ export default function ProdutoDetailPage() {
 
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={12} lg={6}>
-          <Card><Statistic title="Preço" value={product.price} precision={2} prefix="R$" valueStyle={{ color: '#1677ff' }} /></Card>
+          <Card><Statistic title="Preço" value={product.price} precision={2} prefix="R$" styles={{ content: { color: '#1677ff' } }} /></Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card><Statistic title="Comissão" value={product.commissionPercent} suffix="%" prefix={<DollarOutlined />} valueStyle={{ color: '#52c41a' }} /></Card>
+          <Card><Statistic title="Comissão" value={product.commissionPercent} suffix="%" prefix={<DollarOutlined />} styles={{ content: { color: '#52c41a' } }} /></Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <Card><Statistic title="Estoque" value={product.stock === -1 ? 'Ilimitado' : product.stock} prefix={<InboxOutlined />} /></Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card><Statistic title="Em Lojas" value={storesWithProduct.length} prefix={<ShoppingCartOutlined />} valueStyle={{ color: '#722ed1' }} /></Card>
+          <Card><Statistic title="Em Lojas" value={storesWithProduct.length} prefix={<ShoppingCartOutlined />} styles={{ content: { color: '#722ed1' } }} /></Card>
         </Col>
       </Row>
 

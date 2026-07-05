@@ -128,13 +128,13 @@ export default function RelatoriosPage() {
 
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Total de Relatórios" value={totalReports} prefix={<BarChartOutlined />} valueStyle={{ color: '#1677ff' }} /></Card>
+          <Card><Statistic title="Total de Relatórios" value={totalReports} prefix={<BarChartOutlined />} styles={{ content: { color: '#1677ff' } }} /></Card>
         </Col>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Favoritos" value={totalFavorites} prefix={<StarFilled />} valueStyle={{ color: '#faad14' }} /></Card>
+          <Card><Statistic title="Favoritos" value={totalFavorites} prefix={<StarFilled />} styles={{ content: { color: '#faad14' } }} /></Card>
         </Col>
         <Col xs={24} sm={8}>
-          <Card><Statistic title="Já Gerados" value={totalGenerated} prefix={<BarChartOutlined />} valueStyle={{ color: '#52c41a' }} /></Card>
+          <Card><Statistic title="Já Gerados" value={totalGenerated} prefix={<BarChartOutlined />} styles={{ content: { color: '#52c41a' } }} /></Card>
         </Col>
       </Row>
 

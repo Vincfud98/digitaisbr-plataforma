@@ -74,13 +74,13 @@ export default function RedesSociaisPage() {
 
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={12} sm={6}>
-          <Card><Statistic title="Contas Conectadas" value={connectedAccounts.length} suffix={`/ ${accounts.length}`} prefix={<LinkOutlined />} valueStyle={{ color: '#1677ff' }} /></Card>
+          <Card><Statistic title="Contas Conectadas" value={connectedAccounts.length} suffix={`/ ${accounts.length}`} prefix={<LinkOutlined />} styles={{ content: { color: '#1677ff' } }} /></Card>
         </Col>
         <Col xs={12} sm={6}>
           <Card><Statistic title="Total Seguidores" value={totalFollowers} prefix={<UserOutlined />} formatter={(v) => formatFollowers(v as number)} /></Card>
         </Col>
         <Col xs={12} sm={6}>
-          <Card><Statistic title="Engajamento Médio" value={avgEngagement} precision={1} suffix="%" prefix={<HeartOutlined />} valueStyle={{ color: '#eb2f96' }} /></Card>
+          <Card><Statistic title="Engajamento Médio" value={avgEngagement} precision={1} suffix="%" prefix={<HeartOutlined />} styles={{ content: { color: '#eb2f96' } }} /></Card>
         </Col>
         <Col xs={12} sm={6}>
           <Card><Statistic title="Total Posts" value={totalPosts} prefix={<EyeOutlined />} /></Card>
@@ -115,13 +115,13 @@ export default function RedesSociaisPage() {
                       <Text type="secondary">{account.username}</Text>
                       <Row gutter={16} style={{ marginTop: 8 }}>
                         <Col span={8}>
-                          <Statistic title="Seguidores" value={account.followers} formatter={(v) => formatFollowers(v as number)} valueStyle={{ fontSize: 16 }} />
+                          <Statistic title="Seguidores" value={account.followers} formatter={(v) => formatFollowers(v as number)} styles={{ content: { fontSize: 16 } }} />
                         </Col>
                         <Col span={8}>
-                          <Statistic title="Engajamento" value={account.engagement} precision={1} suffix="%" valueStyle={{ fontSize: 16, color: '#eb2f96' }} />
+                          <Statistic title="Engajamento" value={account.engagement} precision={1} suffix="%" styles={{ content: { fontSize: 16, color: '#eb2f96' } }} />
                         </Col>
                         <Col span={8}>
-                          <Statistic title="Posts" value={account.posts} valueStyle={{ fontSize: 16 }} />
+                          <Statistic title="Posts" value={account.posts} styles={{ content: { fontSize: 16 } }} />
                         </Col>
                       </Row>
                     </div>

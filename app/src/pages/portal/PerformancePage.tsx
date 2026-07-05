@@ -103,13 +103,13 @@ export default function PerformancePage() {
           <Card><Statistic title="Conversões" value={totalConversions} prefix={<ShoppingCartOutlined />} /></Card>
         </Col>
         <Col xs={12} sm={4}>
-          <Card><Statistic title="Taxa Conversão" value={conversionRate} precision={1} suffix="%" prefix={<RiseOutlined />} valueStyle={{ color: conversionRate > 3 ? '#52c41a' : '#faad14' }} /></Card>
+          <Card><Statistic title="Taxa Conversão" value={conversionRate} precision={1} suffix="%" prefix={<RiseOutlined />} styles={{ content: { color: conversionRate > 3 ? '#52c41a' : '#faad14' } }} /></Card>
         </Col>
         <Col xs={12} sm={4}>
           <Card><Statistic title="Receita" value={totalRevenue} precision={2} prefix="R$" /></Card>
         </Col>
         <Col xs={12} sm={4}>
-          <Card><Statistic title="Comissão" value={totalCommission} precision={2} prefix="R$" valueStyle={{ color: '#52c41a' }} /></Card>
+          <Card><Statistic title="Comissão" value={totalCommission} precision={2} prefix="R$" styles={{ content: { color: '#52c41a' } }} /></Card>
         </Col>
         <Col xs={12} sm={4}>
           <Card>
@@ -119,7 +119,7 @@ export default function PerformancePage() {
               precision={1}
               suffix="%"
               prefix={growthRate >= 0 ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
-              valueStyle={{ color: growthRate >= 0 ? '#52c41a' : '#f5222d' }}
+              styles={{ content: { color: growthRate >= 0 ? '#52c41a' : '#f5222d' } }}
             />
           </Card>
         </Col>
