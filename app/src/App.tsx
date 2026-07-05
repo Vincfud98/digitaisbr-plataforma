@@ -29,6 +29,7 @@ const FinanceiroPage = lazy(() => import('./pages/financeiro/FinanceiroPage'));
 const BeneficiosPage = lazy(() => import('./pages/beneficios/BeneficiosPage'));
 const ParceirosPage = lazy(() => import('./pages/parceiros/ParceirosPage'));
 const ConteudosPage = lazy(() => import('./pages/conteudos/ConteudosPage'));
+const ConteudoDetailPage = lazy(() => import('./pages/conteudos/ConteudoDetailPage'));
 const ComunidadePage = lazy(() => import('./pages/comunidade/ComunidadePage'));
 const NotificacoesPage = lazy(() => import('./pages/notificacoes/NotificacoesPage'));
 const ServicosPage = lazy(() => import('./pages/servicos/ServicosPage'));
@@ -104,6 +105,7 @@ export default function App() {
               <Route path="beneficios" element={<BeneficiosPage />} />
               <Route path="parceiros" element={<ParceirosPage />} />
               <Route path="conteudos" element={<ConteudosPage />} />
+              <Route path="conteudos/:id" element={<ConteudoDetailPage />} />
               <Route path="comunidade" element={<ComunidadePage />} />
               <Route path="notificacoes" element={<NotificacoesPage />} />
               <Route path="servicos" element={<ServicosPage />} />
@@ -126,6 +128,7 @@ export default function App() {
               <Route path="beneficios" element={<MeusBeneficiosPage />} />
               <Route path="plano" element={<MeuPlanoPage />} />
               <Route path="conteudos" element={<PortalConteudosPage />} />
+              <Route path="conteudos/:id" element={<ConteudoDetailPage />} />
               <Route path="comunidade" element={<PortalComunidadePage />} />
               <Route path="notificacoes" element={<PortalNotificacoesPage />} />
               <Route path="suporte" element={<PortalSuportePage />} />
