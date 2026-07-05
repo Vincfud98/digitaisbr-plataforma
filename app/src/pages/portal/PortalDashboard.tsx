@@ -147,7 +147,7 @@ export default function PortalDashboard() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="mes" fontSize={12} />
                 <YAxis fontSize={12} />
-                <Tooltip formatter={(value, name) => [name === 'receita' ? `R$ ${Number(value).toFixed(2)}` : value, name === 'receita' ? 'Receita' : 'Vendas']} />
+                <Tooltip formatter={(value: any, name: any) => [name === 'receita' ? `R$ ${Number(value).toFixed(2)}` : value, name === 'receita' ? 'Receita' : 'Vendas']} />
                 <Area type="monotone" dataKey="vendas" stroke="#52c41a" fill="#52c41a" fillOpacity={0.2} name="Vendas" />
                 <Area type="monotone" dataKey="receita" stroke="#1677ff" fill="#1677ff" fillOpacity={0.1} name="Receita" />
               </AreaChart>
@@ -163,7 +163,7 @@ export default function PortalDashboard() {
             ) : (
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
-                  <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}>
+                  <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }: any) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}>
                     {statusData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
                   </Pie>
                   <Tooltip />
@@ -182,7 +182,7 @@ export default function PortalDashboard() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="mes" fontSize={12} />
                 <YAxis fontSize={12} />
-                <Tooltip formatter={(value) => [`R$ ${Number(value).toFixed(2)}`, 'Comissão']} />
+                <Tooltip formatter={(value: any) => [`R$ ${Number(value).toFixed(2)}`, 'Comissão']} />
                 <Bar dataKey="valor" fill="#722ed1" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>

@@ -155,7 +155,7 @@ export default function DashboardPage() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="mes" fontSize={12} />
                 <YAxis fontSize={12} />
-                <Tooltip formatter={(value, name) => [`R$ ${Number(value).toFixed(2)}`, name === 'receita' ? 'Receita' : 'Comissões']} />
+                <Tooltip formatter={(value: any, name: any) => [`R$ ${Number(value).toFixed(2)}`, name === 'receita' ? 'Receita' : 'Comissões']} />
                 <Area type="monotone" dataKey="receita" stroke="#52c41a" fill="#52c41a" fillOpacity={0.2} name="Receita" />
                 <Area type="monotone" dataKey="comissoes" stroke="#722ed1" fill="#722ed1" fillOpacity={0.15} name="Comissões" />
               </AreaChart>
@@ -166,7 +166,7 @@ export default function DashboardPage() {
           <Card title="Associados por Plano" size="small">
             <ResponsiveContainer width="100%" height={280}>
               <PieChart>
-                <Pie data={planChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}>
+                <Pie data={planChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label={({ name, percent }: any) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}>
                   {planChartData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
                 </Pie>
                 <Legend />
