@@ -159,6 +159,7 @@ export interface Content {
   views: number;
   likes: number;
   imageUrl: string;
+  videoUrl?: string;
   publishedAt: string | null;
   createdAt: string;
 }

@@ -32,7 +32,29 @@ function seededRandom(seed: number) {
 }
 
 function VideoPlayer({ content }: { content: Content }) {
-  const tc = typeConfig[content.type];
+  if (content.videoUrl) {
+    return (
+      <div style={{
+        position: 'relative',
+        width: '100%',
+        paddingTop: '56.25%',
+        background: '#000',
+        borderRadius: 12,
+        overflow: 'hidden',
+        marginBottom: 24,
+        boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+      }}>
+        <iframe
+          src={content.videoUrl}
+          title={content.title}
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        />
+      </div>
+    );
+  }
+
   return (
     <div style={{
       position: 'relative',
@@ -55,9 +77,6 @@ function VideoPlayer({ content }: { content: Content }) {
       }}>
         <PlayCircleFilled style={{ fontSize: 72, color: '#fff', cursor: 'pointer', filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.5))' }} />
         <Text style={{ color: '#fff', marginTop: 12, fontSize: 16, fontWeight: 500 }}>Assistir {content.type === 'curso' ? 'Aulas' : 'Vídeo'}</Text>
-      </div>
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 4, background: 'rgba(255,255,255,0.2)' }}>
-        <div style={{ width: '0%', height: '100%', background: tc.hex, borderRadius: 2 }} />
       </div>
     </div>
   );
