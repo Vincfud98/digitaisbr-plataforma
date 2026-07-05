@@ -7,14 +7,23 @@ interface CartState {
   storeSlug: string | null;
 }
 
-const initialState: CartState = {
-  items: [],
-  storeSlug: null,
-};
+function loadCart(): CartState {
+  try {
+    const raw = localStorage.getItem('digitaisbr_cart');
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return { items: [], storeSlug: null };
+}
+
+function saveCart(state: CartState) {
+  try {
+    localStorage.setItem('digitaisbr_cart', JSON.stringify(state));
+  } catch {}
+}
 
 const cartSlice = createSlice({
   name: 'cart',
-  initialState,
+  initialState: loadCart(),
   reducers: {
     addToCart(state, action: PayloadAction<{ item: CartItem; storeSlug: string }>) {
       if (state.storeSlug && state.storeSlug !== action.payload.storeSlug) {
@@ -27,6 +36,7 @@ const cartSlice = createSlice({
       } else {
         state.items.push(action.payload.item);
       }
+      saveCart(state);
     },
     updateQuantity(state, action: PayloadAction<{ productId: string; quantity: number }>) {
       const item = state.items.find((i) => i.productId === action.payload.productId);
@@ -38,14 +48,17 @@ const cartSlice = createSlice({
         }
       }
       if (state.items.length === 0) state.storeSlug = null;
+      saveCart(state);
     },
     removeFromCart(state, action: PayloadAction<string>) {
       state.items = state.items.filter((i) => i.productId !== action.payload);
       if (state.items.length === 0) state.storeSlug = null;
+      saveCart(state);
     },
     clearCart(state) {
       state.items = [];
       state.storeSlug = null;
+      saveCart(state);
     },
   },
 });

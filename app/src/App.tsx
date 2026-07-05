@@ -1,57 +1,68 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
-import { ConfigProvider } from 'antd';
+import { ConfigProvider, Spin } from 'antd';
 import ptBR from 'antd/locale/pt_BR';
 import ErrorBoundary from './components/ErrorBoundary';
-import AppLayout from './components/layout/AppLayout';
-import LoginPage from './pages/auth/LoginPage';
-import RegisterPage from './pages/auth/RegisterPage';
-import DashboardPage from './pages/dashboard/DashboardPage';
-import AssociadosListPage from './pages/associados/AssociadosListPage';
-import AssociadoFormPage from './pages/associados/AssociadoFormPage';
-import AssociadoDetailPage from './pages/associados/AssociadoDetailPage';
-import PlanosPage from './pages/planos/PlanosPage';
-import CatalogoListPage from './pages/catalogo/CatalogoListPage';
-import ProdutoFormPage from './pages/catalogo/ProdutoFormPage';
-import ProdutoDetailPage from './pages/catalogo/ProdutoDetailPage';
-import LojasListPage from './pages/lojas/LojasListPage';
-import LojaConfigPage from './pages/lojas/LojaConfigPage';
-import LojaPreviewPage from './pages/lojas/LojaPreviewPage';
-import VendasPage from './pages/vendas/VendasPage';
-import ComissoesPage from './pages/comissoes/ComissoesPage';
-import FinanceiroPage from './pages/financeiro/FinanceiroPage';
-import BeneficiosPage from './pages/beneficios/BeneficiosPage';
-import ParceirosPage from './pages/parceiros/ParceirosPage';
-import ConteudosPage from './pages/conteudos/ConteudosPage';
-import ComunidadePage from './pages/comunidade/ComunidadePage';
-import NotificacoesPage from './pages/notificacoes/NotificacoesPage';
-import ServicosPage from './pages/servicos/ServicosPage';
-import DestaquesPage from './pages/destaques/DestaquesPage';
-import SuportePage from './pages/suporte/SuportePage';
-import RelatoriosPage from './pages/relatorios/RelatoriosPage';
-import PortalLayout from './components/layout/PortalLayout';
-import PortalDashboard from './pages/portal/PortalDashboard';
-import MinhaLojaPage from './pages/portal/MinhaLojaPage';
-import MinhasVendasPage from './pages/portal/MinhasVendasPage';
-import MeusBeneficiosPage from './pages/portal/MeusBeneficiosPage';
-import MeuPlanoPage from './pages/portal/MeuPlanoPage';
-import PortalConteudosPage from './pages/portal/PortalConteudosPage';
-import PortalComunidadePage from './pages/portal/PortalComunidadePage';
-import PortalNotificacoesPage from './pages/portal/PortalNotificacoesPage';
-import PortalSuportePage from './pages/portal/PortalSuportePage';
-import LinksAfiliadoPage from './pages/portal/LinksAfiliadoPage';
-import MateriaisPage from './pages/portal/MateriaisPage';
-import FinanceiroPortalPage from './pages/portal/FinanceiroPortalPage';
-import MeuPerfilPage from './pages/portal/MeuPerfilPage';
-import CuponsPage from './pages/portal/CuponsPage';
-import PerformancePage from './pages/portal/PerformancePage';
-import RedesSociaisPage from './pages/portal/RedesSociaisPage';
-import RankingPage from './pages/portal/RankingPage';
-import ComunicacoesPage from './pages/comunicacoes/ComunicacoesPage';
-import LojaPublicaPage from './pages/public/LojaPublicaPage';
-import CheckoutPage from './pages/public/CheckoutPage';
 import PrivateRoute from './routes/PrivateRoute';
 import DataLoader from './components/DataLoader';
+
+const AppLayout = lazy(() => import('./components/layout/AppLayout'));
+const PortalLayout = lazy(() => import('./components/layout/PortalLayout'));
+const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/auth/RegisterPage'));
+
+const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage'));
+const AssociadosListPage = lazy(() => import('./pages/associados/AssociadosListPage'));
+const AssociadoFormPage = lazy(() => import('./pages/associados/AssociadoFormPage'));
+const AssociadoDetailPage = lazy(() => import('./pages/associados/AssociadoDetailPage'));
+const PlanosPage = lazy(() => import('./pages/planos/PlanosPage'));
+const CatalogoListPage = lazy(() => import('./pages/catalogo/CatalogoListPage'));
+const ProdutoFormPage = lazy(() => import('./pages/catalogo/ProdutoFormPage'));
+const ProdutoDetailPage = lazy(() => import('./pages/catalogo/ProdutoDetailPage'));
+const LojasListPage = lazy(() => import('./pages/lojas/LojasListPage'));
+const LojaConfigPage = lazy(() => import('./pages/lojas/LojaConfigPage'));
+const LojaPreviewPage = lazy(() => import('./pages/lojas/LojaPreviewPage'));
+const VendasPage = lazy(() => import('./pages/vendas/VendasPage'));
+const ComissoesPage = lazy(() => import('./pages/comissoes/ComissoesPage'));
+const FinanceiroPage = lazy(() => import('./pages/financeiro/FinanceiroPage'));
+const BeneficiosPage = lazy(() => import('./pages/beneficios/BeneficiosPage'));
+const ParceirosPage = lazy(() => import('./pages/parceiros/ParceirosPage'));
+const ConteudosPage = lazy(() => import('./pages/conteudos/ConteudosPage'));
+const ComunidadePage = lazy(() => import('./pages/comunidade/ComunidadePage'));
+const NotificacoesPage = lazy(() => import('./pages/notificacoes/NotificacoesPage'));
+const ServicosPage = lazy(() => import('./pages/servicos/ServicosPage'));
+const DestaquesPage = lazy(() => import('./pages/destaques/DestaquesPage'));
+const SuportePage = lazy(() => import('./pages/suporte/SuportePage'));
+const RelatoriosPage = lazy(() => import('./pages/relatorios/RelatoriosPage'));
+const ComunicacoesPage = lazy(() => import('./pages/comunicacoes/ComunicacoesPage'));
+
+const PortalDashboard = lazy(() => import('./pages/portal/PortalDashboard'));
+const MinhaLojaPage = lazy(() => import('./pages/portal/MinhaLojaPage'));
+const MinhasVendasPage = lazy(() => import('./pages/portal/MinhasVendasPage'));
+const MeusBeneficiosPage = lazy(() => import('./pages/portal/MeusBeneficiosPage'));
+const MeuPlanoPage = lazy(() => import('./pages/portal/MeuPlanoPage'));
+const PortalConteudosPage = lazy(() => import('./pages/portal/PortalConteudosPage'));
+const PortalComunidadePage = lazy(() => import('./pages/portal/PortalComunidadePage'));
+const PortalNotificacoesPage = lazy(() => import('./pages/portal/PortalNotificacoesPage'));
+const PortalSuportePage = lazy(() => import('./pages/portal/PortalSuportePage'));
+const LinksAfiliadoPage = lazy(() => import('./pages/portal/LinksAfiliadoPage'));
+const MateriaisPage = lazy(() => import('./pages/portal/MateriaisPage'));
+const FinanceiroPortalPage = lazy(() => import('./pages/portal/FinanceiroPortalPage'));
+const MeuPerfilPage = lazy(() => import('./pages/portal/MeuPerfilPage'));
+const CuponsPage = lazy(() => import('./pages/portal/CuponsPage'));
+const PerformancePage = lazy(() => import('./pages/portal/PerformancePage'));
+const RedesSociaisPage = lazy(() => import('./pages/portal/RedesSociaisPage'));
+const RankingPage = lazy(() => import('./pages/portal/RankingPage'));
+
+const LojaPublicaPage = lazy(() => import('./pages/public/LojaPublicaPage'));
+const CheckoutPage = lazy(() => import('./pages/public/CheckoutPage'));
+
+const PageFallback = (
+  <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <Spin size="large" />
+  </div>
+);
 
 export default function App() {
   return (
@@ -60,6 +71,7 @@ export default function App() {
       <ConfigProvider locale={ptBR} theme={{ token: { colorPrimary: '#1677ff', borderRadius: 8 } }}>
         <BrowserRouter>
           <DataLoader>
+          <Suspense fallback={PageFallback}>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/registro" element={<RegisterPage />} />
@@ -128,6 +140,7 @@ export default function App() {
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          </Suspense>
           </DataLoader>
         </BrowserRouter>
       </ConfigProvider>

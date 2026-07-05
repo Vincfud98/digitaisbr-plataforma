@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { Card, Typography, Tag, Row, Col, Button, Input, Avatar, Space, Divider, Switch, message, Tooltip } from 'antd';
+import { Card, Typography, Tag, Row, Col, Button, Input, Avatar, Space, Divider, Switch, message, Tooltip, Upload } from 'antd';
 import {
   UserOutlined, LinkOutlined, InstagramOutlined, YoutubeOutlined,
   GlobalOutlined, CopyOutlined, EditOutlined, EyeOutlined,
-  ShopOutlined, MailOutlined, PhoneOutlined, SaveOutlined,
+  ShopOutlined, MailOutlined, PhoneOutlined, SaveOutlined, UploadOutlined,
 } from '@ant-design/icons';
-import { useAppSelector } from '../../store';
+import { useAppSelector, useAppDispatch } from '../../store';
+import { updateAssociado } from '../../store/slices/associadosSlice';
+import { uploadAvatar } from '../../lib/storageService';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -13,18 +15,22 @@ export default function MeuPerfilPage() {
   const { user } = useAppSelector((s) => s.auth);
   const associados = useAppSelector((s) => s.associados.list);
   const lojas = useAppSelector((s) => s.lojas.list);
+  const dispatch = useAppDispatch();
 
   const associado = associados.find((a) => a.id === (user?.id || 'assoc-1')) || associados[0];
   const loja = lojas.find((l) => l.associadoId === associado?.id);
 
   const [editing, setEditing] = useState(false);
-  const [bio, setBio] = useState('Apaixonada por produtos de qualidade e estilo de vida saudável. Compartilho as melhores ofertas e dicas com vocês!');
-  const [instagram, setInstagram] = useState('@maria.influencer');
-  const [youtube, setYoutube] = useState('MariaInfluencer');
-  const [tiktok, setTiktok] = useState('@maria.tk');
-  const [website, setWebsite] = useState('');
-  const [showEmail, setShowEmail] = useState(true);
-  const [showPhone, setShowPhone] = useState(false);
+  const [bio, setBio] = useState(associado?.bio || '');
+  const [instagram, setInstagram] = useState(associado?.instagram || '');
+  const [youtube, setYoutube] = useState(associado?.youtube || '');
+  const [tiktok, setTiktok] = useState(associado?.tiktok || '');
+  const [website, setWebsite] = useState(associado?.website || '');
+  const [showEmail, setShowEmail] = useState(associado?.showEmail ?? true);
+  const [showPhone, setShowPhone] = useState(associado?.showPhone ?? false);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const profileUrl = `https://digitaisbr-plataforma.web.app/loja/${loja?.slug || 'minha-loja'}`;
 
@@ -32,10 +38,44 @@ export default function MeuPerfilPage() {
     navigator.clipboard.writeText(profileUrl).then(() => message.success('Link copiado!')).catch(() => message.info(profileUrl));
   };
 
-  const handleSave = () => {
-    message.success('Perfil atualizado com sucesso!');
-    setEditing(false);
+  const handleAvatarSelect = (file: File) => {
+    setAvatarFile(file);
+    const reader = new FileReader();
+    reader.onload = (e) => setAvatarPreview(e.target?.result as string);
+    reader.readAsDataURL(file);
+    return false;
   };
+
+  const handleSave = async () => {
+    if (!associado) return;
+    setSaving(true);
+    try {
+      let avatar = associado.avatar || '';
+      if (avatarFile) {
+        avatar = await uploadAvatar(avatarFile, associado.id);
+      }
+      dispatch(updateAssociado({
+        ...associado,
+        bio,
+        instagram,
+        youtube,
+        tiktok,
+        website,
+        showEmail,
+        showPhone,
+        avatar,
+      }));
+      message.success('Perfil atualizado com sucesso!');
+      setEditing(false);
+      setAvatarFile(null);
+    } catch {
+      message.error('Erro ao salvar perfil.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const currentAvatar = avatarPreview || associado?.avatar;
 
   return (
     <div>
@@ -46,7 +86,7 @@ export default function MeuPerfilPage() {
         </Title>
         <Space>
           <Button icon={<EyeOutlined />} onClick={() => window.open(profileUrl, '_blank')}>Ver Perfil</Button>
-          <Button type="primary" icon={editing ? <SaveOutlined /> : <EditOutlined />} onClick={editing ? handleSave : () => setEditing(true)}>
+          <Button type="primary" icon={editing ? <SaveOutlined /> : <EditOutlined />} onClick={editing ? handleSave : () => setEditing(true)} loading={saving}>
             {editing ? 'Salvar' : 'Editar'}
           </Button>
         </Space>
@@ -56,7 +96,18 @@ export default function MeuPerfilPage() {
         <Col xs={24} lg={10}>
           <Card>
             <div style={{ textAlign: 'center', marginBottom: 16 }}>
-              <Avatar size={100} icon={<UserOutlined />} style={{ background: '#1677ff', marginBottom: 12 }} />
+              {currentAvatar ? (
+                <Avatar size={100} src={currentAvatar} style={{ marginBottom: 12 }} />
+              ) : (
+                <Avatar size={100} icon={<UserOutlined />} style={{ background: '#1677ff', marginBottom: 12 }} />
+              )}
+              {editing && (
+                <div style={{ marginBottom: 8 }}>
+                  <Upload accept="image/*" maxCount={1} showUploadList={false} beforeUpload={handleAvatarSelect}>
+                    <Button size="small" icon={<UploadOutlined />}>Trocar Foto</Button>
+                  </Upload>
+                </div>
+              )}
               <Title level={4} style={{ margin: '0 0 4px' }}>{associado?.name || 'Associado'}</Title>
               <Tag color="purple">Influencer DigitaisBR</Tag>
             </div>
@@ -68,7 +119,7 @@ export default function MeuPerfilPage() {
               {editing ? (
                 <Input.TextArea value={bio} onChange={(e) => setBio(e.target.value)} rows={3} showCount maxLength={200} />
               ) : (
-                <Paragraph style={{ margin: 0 }}>{bio}</Paragraph>
+                <Paragraph style={{ margin: 0 }}>{bio || <Text type="secondary">Sem bio</Text>}</Paragraph>
               )}
             </div>
 
@@ -123,9 +174,13 @@ export default function MeuPerfilPage() {
               textAlign: 'center',
               color: '#fff',
             }}>
-              <Avatar size={80} icon={<UserOutlined />} style={{ background: 'rgba(255,255,255,0.2)', border: '3px solid rgba(255,255,255,0.4)', marginBottom: 12 }} />
+              {currentAvatar ? (
+                <Avatar size={80} src={currentAvatar} style={{ border: '3px solid rgba(255,255,255,0.4)', marginBottom: 12 }} />
+              ) : (
+                <Avatar size={80} icon={<UserOutlined />} style={{ background: 'rgba(255,255,255,0.2)', border: '3px solid rgba(255,255,255,0.4)', marginBottom: 12 }} />
+              )}
               <Title level={3} style={{ color: '#fff', margin: '0 0 4px' }}>{associado?.name}</Title>
-              <Paragraph style={{ color: 'rgba(255,255,255,0.85)', maxWidth: 400, margin: '0 auto 16px' }}>{bio}</Paragraph>
+              <Paragraph style={{ color: 'rgba(255,255,255,0.85)', maxWidth: 400, margin: '0 auto 16px' }}>{bio || 'Sem bio'}</Paragraph>
 
               <Space wrap style={{ justifyContent: 'center', marginBottom: 16 }}>
                 {instagram && <Tag style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: 'none' }}><InstagramOutlined /> {instagram}</Tag>}

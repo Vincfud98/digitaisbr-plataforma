@@ -19,6 +19,7 @@ const COLLECTION_MAP: Record<string, string> = {
   'destaques': 'highlights',
   'suporte': 'tickets',
   'planos': 'plans',
+  'relatorios': 'reports',
 };
 
 const firestoreMiddleware: Middleware = (_store) => (next) => (action: unknown) => {
@@ -54,6 +55,16 @@ const firestoreMiddleware: Middleware = (_store) => (next) => (action: unknown) 
         break;
       }
 
+      case 'addPlan':
+      case 'addNotification':
+      case 'addContent': {
+        const { id, ...data } = payload as { id: string; [key: string]: unknown };
+        if (id) {
+          createDocument(collection, data, id).catch(console.error);
+        }
+        break;
+      }
+
       case 'updateAssociado':
       case 'updateProduct':
       case 'updateStore':
@@ -73,6 +84,7 @@ const firestoreMiddleware: Middleware = (_store) => (next) => (action: unknown) 
       case 'removeBenefit':
       case 'removePartner':
       case 'removeContent':
+      case 'removeTopic':
       case 'removeHighlight':
       case 'removeNotification': {
         const id = typeof payload === 'string' ? payload : (payload as { id: string }).id;
@@ -188,6 +200,50 @@ const firestoreMiddleware: Middleware = (_store) => (next) => (action: unknown) 
         if (id) {
           updateDocument(collection, id, { status }).catch(console.error);
         }
+        break;
+      }
+
+      case 'rateService': {
+        const { id, rating } = payload as { id: string; rating: number };
+        if (id) {
+          updateDocument(collection, id, { rating }).catch(console.error);
+        }
+        break;
+      }
+
+      case 'updatePosition': {
+        const { id, position } = payload as { id: string; position: number };
+        if (id) {
+          updateDocument(collection, id, { position }).catch(console.error);
+        }
+        break;
+      }
+
+      case 'toggleFavorite': {
+        const id = typeof payload === 'string' ? payload : (payload as { id: string }).id;
+        if (id) {
+          const state = _store.getState() as { relatorios: { list: Array<{ id: string; favorite: boolean }> } };
+          const report = state.relatorios.list.find((r) => r.id === id);
+          if (report) {
+            updateDocument(collection, id, { favorite: report.favorite }).catch(console.error);
+          }
+        }
+        break;
+      }
+
+      case 'markGenerated': {
+        const id = typeof payload === 'string' ? payload : (payload as { id: string }).id;
+        if (id) {
+          updateDocument(collection, id, { lastGenerated: new Date().toISOString() }).catch(console.error);
+        }
+        break;
+      }
+
+      case 'markAllAsRead': {
+        const state = _store.getState() as { notificacoes: { list: Array<{ id: string; read: boolean }> } };
+        state.notificacoes.list.filter((n) => !n.read).forEach((n) => {
+          updateDocument(collection, n.id, { read: true }).catch(console.error);
+        });
         break;
       }
     }

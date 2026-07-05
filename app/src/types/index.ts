@@ -323,4 +323,11 @@ export interface Associado {
   totalSales: number;
   totalCommission: number;
   avatar?: string;
+  bio?: string;
+  instagram?: string;
+  youtube?: string;
+  tiktok?: string;
+  website?: string;
+  showEmail?: boolean;
+  showPhone?: boolean;
 }
