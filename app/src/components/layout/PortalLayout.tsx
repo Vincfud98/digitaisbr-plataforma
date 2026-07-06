@@ -23,6 +23,7 @@ import {
   BarChartOutlined,
   ApiOutlined,
   TrophyOutlined,
+  AuditOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../store';
@@ -47,6 +48,7 @@ const menuItems = [
   { key: '/portal/performance', icon: <BarChartOutlined />, label: 'Performance' },
   { key: '/portal/redes-sociais', icon: <ApiOutlined />, label: 'Redes Sociais' },
   { key: '/portal/ranking', icon: <TrophyOutlined />, label: 'Ranking' },
+  { key: '/portal/servicos', icon: <AuditOutlined />, label: 'Assessoria' },
   { key: '/portal/conteudos', icon: <ReadOutlined />, label: 'Conteúdos' },
   { key: '/portal/comunidade', icon: <CommentOutlined />, label: 'Comunidade' },
   { key: '/portal/notificacoes', icon: <BellOutlined />, label: 'Notificações' },

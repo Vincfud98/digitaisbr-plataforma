@@ -54,6 +54,7 @@ const CuponsPage = lazy(() => import('./pages/portal/CuponsPage'));
 const PerformancePage = lazy(() => import('./pages/portal/PerformancePage'));
 const RedesSociaisPage = lazy(() => import('./pages/portal/RedesSociaisPage'));
 const RankingPage = lazy(() => import('./pages/portal/RankingPage'));
+const PortalServicosPage = lazy(() => import('./pages/portal/PortalServicosPage'));
 
 const LojaPublicaPage = lazy(() => import('./pages/public/LojaPublicaPage'));
 const CheckoutPage = lazy(() => import('./pages/public/CheckoutPage'));
@@ -139,6 +140,7 @@ export default function App() {
               <Route path="performance" element={<PerformancePage />} />
               <Route path="redes-sociais" element={<RedesSociaisPage />} />
               <Route path="ranking" element={<RankingPage />} />
+              <Route path="servicos" element={<PortalServicosPage />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
