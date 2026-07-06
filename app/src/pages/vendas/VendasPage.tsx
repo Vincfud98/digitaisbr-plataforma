@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Table, Tag, Typography, Card, Row, Col, Statistic, Input, Select, Space, Button, message, Popconfirm, Descriptions, DatePicker, Segmented, Badge, Tooltip } from 'antd';
 import {
   DollarOutlined, SearchOutlined, CheckCircleOutlined, CloseCircleOutlined,
-  ClockCircleOutlined, DownloadOutlined,
+  DownloadOutlined,
 } from '@ant-design/icons';
 import { useAppSelector, useAppDispatch } from '../../store';
 import { updateSaleStatus } from '../../store/slices/vendasSlice';
@@ -258,12 +258,12 @@ export default function VendasPage() {
         </Col>
         <Col xs={12} sm={8} lg={4}>
           <Card size="small" style={{ borderLeft: '3px solid #52c41a' }}>
-            <Statistic title="Aprovadas" value={totalApproved} prefix={<CheckCircleOutlined />} styles={{ content: { color: '#52c41a', fontSize: 20 } }} />
+            <Statistic title="Aprovadas" value={totalApproved} styles={{ content: { color: '#52c41a', fontSize: 20 } }} />
           </Card>
         </Col>
         <Col xs={12} sm={8} lg={4}>
           <Card size="small" style={{ borderLeft: '3px solid #faad14' }}>
-            <Statistic title="Pendentes" value={totalPending} prefix={<ClockCircleOutlined />} styles={{ content: { color: '#faad14', fontSize: 20 } }} />
+            <Statistic title="Pendentes" value={totalPending} styles={{ content: { color: '#faad14', fontSize: 20 } }} />
           </Card>
         </Col>
         <Col xs={12} sm={8} lg={4}>
