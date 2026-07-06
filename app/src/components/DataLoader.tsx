@@ -98,12 +98,10 @@ export default function DataLoader({ children }: Props) {
     let cancelled = false;
 
     async function loadAll() {
+      const timeout = new Promise<'timeout'>((resolve) => setTimeout(() => resolve('timeout'), 3000));
+
       try {
-        const [
-          associados, planos, produtos, lojas, vendas, comissoes,
-          financeiro, beneficios, parceiros, conteudos, comunidade,
-          notificacoes, servicos, tickets, relatorios, messages,
-        ] = await Promise.all([
+        const firestoreLoad = Promise.all([
           getCollection<Associado>('associados'),
           getCollection<Plan>('plans'),
           getCollection<Product>('products'),
@@ -122,26 +120,45 @@ export default function DataLoader({ children }: Props) {
           getCollection<TicketMessage>('ticketMessages'),
         ]);
 
+        const result = await Promise.race([firestoreLoad, timeout]);
+
         if (cancelled) return;
 
-        dispatch(setAssociados(associados));
-        dispatch(setPlanos(planos));
-        dispatch(setCatalogo(produtos));
-        dispatch(setLojas(lojas));
-        dispatch(setVendas(vendas));
-        dispatch(setComissoes(comissoes));
-        dispatch(setFinanceiro(financeiro));
-        dispatch(setBeneficios(beneficios));
-        dispatch(setParceiros(parceiros));
-        dispatch(setConteudos(conteudos));
-        dispatch(setComunidade(comunidade));
-        dispatch(setNotificacoes(notificacoes));
-        dispatch(setServicos(servicos));
-        dispatch(setSuporteTickets(tickets));
-        dispatch(setRelatorios(relatorios));
-        dispatch(setSuporteMsgs(messages));
+        if (result === 'timeout') {
+          console.warn('Firestore timeout, using local data');
+          await loadFallbackData();
+        } else {
+          const [
+            associados, planos, produtos, lojas, vendas, comissoes,
+            financeiro, beneficios, parceiros, conteudos, comunidade,
+            notificacoes, servicos, tickets, relatorios, messages,
+          ] = result;
+
+          const hasData = associados.length > 0 || produtos.length > 0;
+          if (!hasData) {
+            await loadFallbackData();
+          } else {
+            dispatch(setAssociados(associados));
+            dispatch(setPlanos(planos));
+            dispatch(setCatalogo(produtos));
+            dispatch(setLojas(lojas));
+            dispatch(setVendas(vendas));
+            dispatch(setComissoes(comissoes));
+            dispatch(setFinanceiro(financeiro));
+            dispatch(setBeneficios(beneficios));
+            dispatch(setParceiros(parceiros));
+            dispatch(setConteudos(conteudos));
+            dispatch(setComunidade(comunidade));
+            dispatch(setNotificacoes(notificacoes));
+            dispatch(setServicos(servicos));
+            dispatch(setSuporteTickets(tickets));
+            dispatch(setRelatorios(relatorios));
+            dispatch(setSuporteMsgs(messages));
+          }
+        }
       } catch (err) {
-        console.error('Failed to load Firestore data:', err);
+        console.error('Failed to load Firestore data, using fallback:', err);
+        await loadFallbackData();
       } finally {
         if (!cancelled) setLoading(false);
       }
