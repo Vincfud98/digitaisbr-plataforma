@@ -1,129 +1,242 @@
-import { useState } from 'react';
-import { Card, Typography, Tag, List, Avatar, Input, Button, Space, Form, Modal, message } from 'antd';
-import { CommentOutlined, UserOutlined, SearchOutlined, PlusOutlined, LikeOutlined, MessageOutlined } from '@ant-design/icons';
+import { useState, useMemo } from 'react';
+import { Tag, Button, Input, Select, Typography, Card, Row, Col, Space, message, Modal, Form, Segmented, Badge, Avatar } from 'antd';
+import {
+  CommentOutlined, SearchOutlined, PlusOutlined, LikeOutlined, MessageOutlined,
+  PushpinOutlined, FireOutlined, ShareAltOutlined, LikeFilled, HeartOutlined,
+  HeartFilled, SendOutlined, TrophyOutlined, TeamOutlined,
+} from '@ant-design/icons';
 import { useAppSelector, useAppDispatch } from '../../store';
 import { addTopic } from '../../store/slices/comunidadeSlice';
 import type { ForumTopic } from '../../types';
 
 const { Title, Text } = Typography;
 
-const categoryColors: Record<string, string> = {
-  'Dúvidas': 'blue',
-  'Dicas': 'green',
-  'Networking': 'purple',
-  'Sugestões': 'orange',
-  'Off-Topic': 'default',
+const categoryConfig: Record<string, { color: string; emoji: string }> = {
+  'Dicas de Vendas': { color: 'green', emoji: '💡' },
+  'Marketing Digital': { color: 'blue', emoji: '📱' },
+  'Gestão Financeira': { color: 'gold', emoji: '💰' },
+  'Experiências': { color: 'purple', emoji: '🎯' },
+  'Conquistas': { color: 'orange', emoji: '🏆' },
+  'Eventos': { color: 'cyan', emoji: '📅' },
+  'Sugestões': { color: 'magenta', emoji: '💬' },
+  'Dúvidas': { color: 'red', emoji: '❓' },
+  'Novidades': { color: 'lime', emoji: '🆕' },
 };
+
+const planColors: Record<string, string> = { basico: '#1677ff', intermediario: '#722ed1', avancado: '#faad14' };
+const planLabels: Record<string, string> = { basico: 'Básico', intermediario: 'Intermediário', avancado: 'Avançado' };
+const authorPlans: Record<string, string> = {
+  'Maria Silva': 'avancado', 'João Santos': 'intermediario', 'Ana Oliveira': 'avancado',
+  'Carlos Mendes': 'basico', 'Juliana Costa': 'avancado', 'Pedro Lima': 'intermediario',
+  'Fernanda Souza': 'avancado', 'Ricardo Alves': 'intermediario', 'Camila Ferreira': 'basico',
+  'Bruno Rocha': 'avancado',
+};
+
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins}min`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d`;
+  const weeks = Math.floor(days / 7);
+  if (weeks < 4) return `${weeks}sem`;
+  return new Date(dateStr).toLocaleDateString('pt-BR');
+}
 
 export default function PortalComunidadePage() {
   const dispatch = useAppDispatch();
   const topics = useAppSelector((s) => s.comunidade.list);
   const { user } = useAppSelector((s) => s.auth);
   const [search, setSearch] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [view, setView] = useState<string>('feed');
   const [formOpen, setFormOpen] = useState(false);
   const [form] = Form.useForm();
+  const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
+  const [savedPosts, setSavedPosts] = useState<Set<string>>(new Set());
+  const [expandedPosts, setExpandedPosts] = useState<Set<string>>(new Set());
 
-  const filtered = topics.filter((t) =>
-    !search || t.title.toLowerCase().includes(search.toLowerCase()) || t.authorName.toLowerCase().includes(search.toLowerCase())
-  );
+  const categories = useMemo(() => {
+    const map = new Map<string, number>();
+    topics.forEach((t) => map.set(t.category, (map.get(t.category) || 0) + 1));
+    return Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
+  }, [topics]);
 
-  const sorted = [...filtered].sort((a, b) => new Date(b.lastReplyAt || b.createdAt).getTime() - new Date(a.lastReplyAt || a.createdAt).getTime());
+  const filtered = useMemo(() => {
+    return topics.filter((t) => {
+      if (search && !t.title.toLowerCase().includes(search.toLowerCase()) && !t.body.toLowerCase().includes(search.toLowerCase()) && !t.authorName.toLowerCase().includes(search.toLowerCase())) return false;
+      if (categoryFilter !== 'all' && t.category !== categoryFilter) return false;
+      if (view === 'fixados' && t.status !== 'fixado') return false;
+      return true;
+    });
+  }, [topics, search, categoryFilter, view]);
+
+  const sorted = useMemo(() => {
+    const list = [...filtered];
+    if (view === 'populares') list.sort((a, b) => (b.likes + b.replies * 2) - (a.likes + a.replies * 2));
+    else list.sort((a, b) => {
+      if (a.status === 'fixado' && b.status !== 'fixado') return -1;
+      if (b.status === 'fixado' && a.status !== 'fixado') return 1;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+    return list;
+  }, [filtered, view]);
+
+  const fixados = topics.filter((t) => t.status === 'fixado').length;
+
+  const topContributors = useMemo(() => {
+    const map = new Map<string, { name: string; posts: number; likes: number }>();
+    topics.forEach((t) => {
+      const entry = map.get(t.authorId) || { name: t.authorName, posts: 0, likes: 0 };
+      entry.posts++;
+      entry.likes += t.likes;
+      map.set(t.authorId, entry);
+    });
+    return Array.from(map.values()).sort((a, b) => (b.likes + b.posts * 5) - (a.likes + a.posts * 5)).slice(0, 5);
+  }, [topics]);
+
+  const toggleLike = (id: string) => setLikedPosts((prev) => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+  const toggleSave = (id: string) => setSavedPosts((prev) => { const n = new Set(prev); if (n.has(id)) { n.delete(id); message.info('Removido dos salvos'); } else { n.add(id); message.success('Post salvo!'); } return n; });
+  const toggleExpand = (id: string) => setExpandedPosts((prev) => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+
+  const handleCreate = (values: { title: string; category: string; body: string }) => {
+    const topic: ForumTopic = {
+      id: `post-${Date.now()}`, title: values.title, body: values.body,
+      authorId: user?.id || '1', authorName: user?.name || 'Associado',
+      category: values.category, status: 'aberto', replies: 0, views: 0, likes: 0,
+      lastReplyAt: null, createdAt: new Date().toISOString(),
+    };
+    dispatch(addTopic(topic));
+    message.success('Post publicado!');
+    setFormOpen(false);
+    form.resetFields();
+  };
+
+  const PostCard = ({ post }: { post: ForumTopic }) => {
+    const isFixado = post.status === 'fixado';
+    const isLiked = likedPosts.has(post.id);
+    const isSaved = savedPosts.has(post.id);
+    const isExpanded = expandedPosts.has(post.id);
+    const plan = authorPlans[post.authorName] || 'basico';
+    const catConf = categoryConfig[post.category] || { color: 'default', emoji: '📝' };
+    const shouldTruncate = post.body.length > 200;
+    const displayBody = shouldTruncate && !isExpanded ? post.body.substring(0, 200) + '...' : post.body;
+    const likesCount = post.likes + (isLiked ? 1 : 0);
+
+    return (
+      <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #f0f0f0', overflow: 'hidden', transition: 'box-shadow 0.2s', borderTop: isFixado ? '3px solid #faad14' : undefined }}
+        onMouseEnter={(e) => (e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.08)')} onMouseLeave={(e) => (e.currentTarget.style.boxShadow = 'none')}>
+        {isFixado && <div style={{ background: '#fffbe6', padding: '4px 16px', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#ad8b00' }}><PushpinOutlined /> Post fixado</div>}
+        <div style={{ padding: 16 }}>
+          <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+            <Avatar size={44} style={{ background: planColors[plan], fontSize: 18, fontWeight: 700, flexShrink: 0 }}>{post.authorName.charAt(0)}</Avatar>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <Text strong style={{ fontSize: 14 }}>{post.authorName}</Text>
+                <Tag color={planColors[plan]} style={{ fontSize: 10, margin: 0, lineHeight: '16px' }}>{planLabels[plan]}</Tag>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#888' }}>
+                <span>{timeAgo(post.createdAt)}</span><span>·</span>
+                <Tag color={catConf.color} style={{ fontSize: 10, margin: 0 }}>{catConf.emoji} {post.category}</Tag>
+              </div>
+            </div>
+          </div>
+          <Text strong style={{ fontSize: 15, display: 'block', marginBottom: 6 }}>{post.title}</Text>
+          <div style={{ fontSize: 13, color: '#333', lineHeight: 1.6, whiteSpace: 'pre-line', marginBottom: shouldTruncate ? 4 : 12 }}>{displayBody}</div>
+          {shouldTruncate && <Button type="link" size="small" style={{ padding: 0, marginBottom: 8, fontSize: 12 }} onClick={() => toggleExpand(post.id)}>{isExpanded ? 'ver menos' : '...ver mais'}</Button>}
+          <div style={{ borderTop: '1px solid #f5f5f5', paddingTop: 8, display: 'flex', gap: 4, fontSize: 12, color: '#888' }}>
+            {likesCount > 0 && <span>{likesCount} curtida{likesCount !== 1 ? 's' : ''}</span>}
+            {post.replies > 0 && <span>· {post.replies} comentário{post.replies !== 1 ? 's' : ''}</span>}
+          </div>
+          <div style={{ borderTop: '1px solid #f5f5f5', marginTop: 4, paddingTop: 4, display: 'flex', justifyContent: 'space-around' }}>
+            <Button type="text" size="small" icon={isLiked ? <LikeFilled style={{ color: '#1677ff' }} /> : <LikeOutlined />} onClick={() => toggleLike(post.id)} style={{ flex: 1, color: isLiked ? '#1677ff' : '#666' }}>Curtir</Button>
+            <Button type="text" size="small" icon={<MessageOutlined />} style={{ flex: 1, color: '#666' }} onClick={() => message.info('Comentários serão implementados com Firestore.')}>Comentar</Button>
+            <Button type="text" size="small" icon={<ShareAltOutlined />} style={{ flex: 1, color: '#666' }} onClick={() => { navigator.clipboard?.writeText(`${window.location.origin}/comunidade/${post.id}`); message.success('Link copiado!'); }}>Compartilhar</Button>
+            <Button type="text" size="small" icon={isSaved ? <HeartFilled style={{ color: '#ff4d4f' }} /> : <HeartOutlined />} onClick={() => toggleSave(post.id)} style={{ flex: 1, color: isSaved ? '#ff4d4f' : '#666' }}>Salvar</Button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <Title level={4} style={{ margin: 0 }}>
-          <CommentOutlined style={{ marginRight: 8 }} />
-          Comunidade
-        </Title>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => setFormOpen(true)}>Novo Tópico</Button>
+        <Title level={4} style={{ margin: 0 }}><TeamOutlined style={{ marginRight: 8 }} />Comunidade</Title>
+        <Button type="primary" icon={<PlusOutlined />} onClick={() => setFormOpen(true)}>Criar Post</Button>
       </div>
 
-      <Input placeholder="Buscar tópicos..." prefix={<SearchOutlined />} value={search} onChange={(e) => setSearch(e.target.value)} style={{ width: 300, marginBottom: 16 }} allowClear />
+      <Row gutter={16}>
+        <Col xs={24} lg={16}>
+          <div style={{ background: '#fff', borderRadius: 10, border: '1px solid #f0f0f0', padding: 16, display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', marginBottom: 12 }} onClick={() => setFormOpen(true)}>
+            <Avatar size={40} style={{ background: '#1677ff', flexShrink: 0 }} icon={<SendOutlined />} />
+            <div style={{ flex: 1, background: '#f5f5f5', borderRadius: 20, padding: '10px 16px', color: '#888', fontSize: 14 }}>Compartilhe uma dica, experiência ou conquista...</div>
+          </div>
 
-      <Card>
-        <List
-          dataSource={sorted}
-          renderItem={(t) => (
-            <List.Item>
-              <List.Item.Meta
-                avatar={<Avatar icon={<UserOutlined />} style={{ background: '#1677ff' }} />}
-                title={
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Text strong style={{ fontSize: 14 }}>{t.title}</Text>
-                    <Tag color={categoryColors[t.category] || 'default'}>{t.category}</Tag>
-                    {t.status === 'fixado' && <Tag color="red">Fixo</Tag>}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
+            <Segmented value={view} onChange={(v) => setView(v as string)} options={[
+              { label: 'Feed', value: 'feed' },
+              { label: <span><FireOutlined /> Populares</span>, value: 'populares' },
+              { label: <Badge count={fixados} size="small" offset={[8, -2]}><span><PushpinOutlined /> Fixados</span></Badge>, value: 'fixados' },
+            ]} />
+            <Space size={8} wrap>
+              <Input placeholder="Buscar..." prefix={<SearchOutlined />} value={search} onChange={(e) => setSearch(e.target.value)} style={{ width: 180 }} allowClear size="small" />
+              <Select value={categoryFilter} onChange={setCategoryFilter} style={{ width: 150 }} size="small">
+                <Select.Option value="all">Todas categorias</Select.Option>
+                {categories.map(([cat]) => <Select.Option key={cat} value={cat}>{(categoryConfig[cat]?.emoji || '📝')} {cat}</Select.Option>)}
+              </Select>
+            </Space>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {sorted.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: 60, color: '#888', background: '#fff', borderRadius: 10, border: '1px solid #f0f0f0' }}>
+                <CommentOutlined style={{ fontSize: 48, marginBottom: 12 }} /><div>Nenhum post encontrado</div>
+                <Button type="primary" style={{ marginTop: 12 }} onClick={() => setFormOpen(true)}>Criar o primeiro post</Button>
+              </div>
+            ) : sorted.map((post) => <PostCard key={post.id} post={post} />)}
+          </div>
+        </Col>
+
+        <Col xs={24} lg={8}>
+          <Card size="small" style={{ marginBottom: 12, borderRadius: 10 }} title={<><TrophyOutlined style={{ color: '#faad14', marginRight: 6 }} />Top Contribuidores</>}>
+            {topContributors.map((c, i) => {
+              const plan = authorPlans[c.name] || 'basico';
+              return (
+                <div key={c.name} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: i < topContributors.length - 1 ? 10 : 0 }}>
+                  <div style={{ width: 22, height: 22, borderRadius: '50%', background: i === 0 ? '#faad14' : i === 1 ? '#bfbfbf' : i === 2 ? '#d48806' : '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: i < 3 ? '#fff' : '#888', fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{i + 1}</div>
+                  <Avatar size={32} style={{ background: planColors[plan], flexShrink: 0 }}>{c.name.charAt(0)}</Avatar>
+                  <div style={{ flex: 1 }}>
+                    <Text strong style={{ fontSize: 13 }}>{c.name}</Text>
+                    <div style={{ fontSize: 11, color: '#888' }}>{c.posts} posts · {c.likes} curtidas</div>
                   </div>
-                }
-                description={
-                  <Space>
-                    <Text type="secondary" style={{ fontSize: 12 }}>por {t.authorName}</Text>
-                    <Text type="secondary" style={{ fontSize: 12 }}>·</Text>
-                    <Text type="secondary" style={{ fontSize: 12 }}>{new Date(t.lastReplyAt || t.createdAt).toLocaleDateString('pt-BR')}</Text>
-                  </Space>
-                }
-              />
-              <Space size="large">
-                <Space size={4}>
-                  <MessageOutlined style={{ color: '#8c8c8c' }} />
-                  <Text type="secondary" style={{ fontSize: 12 }}>{t.replies}</Text>
-                </Space>
-                <Space size={4}>
-                  <LikeOutlined style={{ color: '#8c8c8c' }} />
-                  <Text type="secondary" style={{ fontSize: 12 }}>{t.likes}</Text>
-                </Space>
-                <Space size={4}>
-                  <UserOutlined style={{ color: '#8c8c8c' }} />
-                  <Text type="secondary" style={{ fontSize: 12 }}>{t.views}</Text>
-                </Space>
-              </Space>
-            </List.Item>
-          )}
-          pagination={{ pageSize: 10, showTotal: (t) => `${t} tópicos` }}
-        />
-      </Card>
+                </div>
+              );
+            })}
+          </Card>
+          <Card size="small" style={{ borderRadius: 10 }} title={<><FireOutlined style={{ color: '#ff4d4f', marginRight: 6 }} />Categorias</>}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {categories.map(([cat, count]) => {
+                const conf = categoryConfig[cat] || { color: 'default', emoji: '📝' };
+                const isActive = categoryFilter === cat;
+                return <Tag key={cat} color={isActive ? conf.color : undefined} style={{ cursor: 'pointer', borderRadius: 16, padding: '2px 10px', fontSize: 12, background: isActive ? undefined : '#fafafa' }} onClick={() => setCategoryFilter(isActive ? 'all' : cat)}>{conf.emoji} {cat} ({count})</Tag>;
+              })}
+            </div>
+          </Card>
+        </Col>
+      </Row>
 
-      <Modal
-        title="Novo Tópico"
-        open={formOpen}
-        onCancel={() => { setFormOpen(false); form.resetFields(); }}
-        onOk={() => form.submit()}
-        okText="Publicar"
-        cancelText="Cancelar"
-      >
-        <Form form={form} layout="vertical" onFinish={(values) => {
-          const topic: ForumTopic = {
-            id: `topic-${Date.now()}`,
-            title: values.title,
-            body: values.message || '',
-            authorId: user?.id || '1',
-            authorName: user?.name || 'Associado',
-            category: values.category,
-            status: 'aberto',
-            replies: 0,
-            views: 0,
-            likes: 0,
-            lastReplyAt: null,
-            createdAt: new Date().toISOString(),
-          };
-          dispatch(addTopic(topic));
-          message.success('Tópico criado!');
-          setFormOpen(false);
-          form.resetFields();
-        }}>
-          <Form.Item name="title" label="Título" rules={[{ required: true }]}><Input /></Form.Item>
-          <Form.Item name="category" label="Categoria" rules={[{ required: true }]} initialValue="Dúvidas">
-            <Input.Group>
-              <Space wrap>
-                {Object.keys(categoryColors).map((c) => (
-                  <Tag.CheckableTag key={c} checked={form.getFieldValue('category') === c} onChange={() => form.setFieldsValue({ category: c })}>
-                    {c}
-                  </Tag.CheckableTag>
-                ))}
-              </Space>
-            </Input.Group>
+      <Modal title="Criar Post" open={formOpen} onCancel={() => { setFormOpen(false); form.resetFields(); }} onOk={() => form.submit()} okText="Publicar" cancelText="Cancelar" width={600}>
+        <Form form={form} layout="vertical" onFinish={handleCreate}>
+          <Form.Item name="title" label="Título do post" rules={[{ required: true, message: 'Dê um título ao seu post' }]}><Input placeholder="Ex: Como aumentei minhas vendas em 300%..." /></Form.Item>
+          <Form.Item name="category" label="Categoria" rules={[{ required: true }]}>
+            <Select placeholder="Selecione a categoria">
+              {Object.entries(categoryConfig).map(([cat, conf]) => <Select.Option key={cat} value={cat}>{conf.emoji} {cat}</Select.Option>)}
+            </Select>
           </Form.Item>
-          <Form.Item name="message" label="Mensagem" rules={[{ required: true }]}><Input.TextArea rows={4} /></Form.Item>
+          <Form.Item name="body" label="Conteúdo" rules={[{ required: true, message: 'Escreva o conteúdo do post' }]}><Input.TextArea rows={6} placeholder="Compartilhe sua experiência, dica ou conquista..." /></Form.Item>
         </Form>
       </Modal>
     </div>
