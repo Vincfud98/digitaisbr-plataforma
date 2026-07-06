@@ -2,11 +2,6 @@ import type { FinancialTransaction } from '../types';
 import { mockSales } from './sales';
 import { mockCommissions } from './commissions';
 
-function seededRandom(seed: number) {
-  const x = Math.sin(seed) * 10000;
-  return x - Math.floor(x);
-}
-
 const approvedSales = mockSales.filter((s) => s.status === 'aprovada');
 const paidCommissions = mockCommissions.filter((c) => c.status === 'paga');
 
@@ -32,19 +27,25 @@ const commissionTransactions: FinancialTransaction[] = paidCommissions.map((c, i
   createdAt: c.paidAt!,
 }));
 
-const operationalCosts: FinancialTransaction[] = Array.from({ length: 12 }, (_, i) => {
-  const categories = ['Infraestrutura', 'Marketing', 'Suporte', 'Jurídico'];
-  const cat = categories[i % categories.length];
-  const amount = Math.round((seededRandom(i + 1500) * 3000 + 500) * 100) / 100;
+const totalEntradas = saleTransactions.reduce((s, t) => s + t.amount, 0);
+const totalComissoes = commissionTransactions.reduce((s, t) => s + t.amount, 0);
+const margemDisponivel = totalEntradas - totalComissoes;
+
+const operationalCosts: FinancialTransaction[] = [
+  { cat: 'Infraestrutura', pct: 0.06 },
+  { cat: 'Marketing', pct: 0.05 },
+  { cat: 'Suporte', pct: 0.03 },
+  { cat: 'Jurídico', pct: 0.02 },
+].map((item, i) => {
   const date = new Date(2025, 5, 20);
   date.setDate(date.getDate() - i * 7);
 
   return {
     id: `fin-op-${i + 1}`,
     type: 'saida' as const,
-    category: cat,
-    description: `${cat} — semana ${i + 1}`,
-    amount,
+    category: item.cat,
+    description: `${item.cat} — mensal`,
+    amount: Math.round(margemDisponivel * item.pct * 100) / 100,
     associadoId: null,
     referenceId: null,
     createdAt: date.toISOString().split('T')[0],
