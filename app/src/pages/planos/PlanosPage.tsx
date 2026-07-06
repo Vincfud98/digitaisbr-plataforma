@@ -100,7 +100,6 @@ export default function PlanosPage() {
                   {plan.legalSupport && <Tag color="green">Jurídico</Tag>}
                   {plan.accountingSupport && <Tag color="green">Contábil</Tag>}
                   {plan.exclusiveProducts && <Tag color="gold">Exclusivos</Tag>}
-                  {plan.highlight && <Tag color="gold">Destaque</Tag>}
                   {plan.priority && <Tag color="red">Prioritário</Tag>}
                 </div>
               </Card>
@@ -162,11 +161,6 @@ export default function PlanosPage() {
             </Col>
             <Col span={8}>
               <Form.Item name="accountingSupport" label="Contábil" valuePropName="checked">
-                <Switch />
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item name="highlight" label="Destaque" valuePropName="checked">
                 <Switch />
               </Form.Item>
             </Col>

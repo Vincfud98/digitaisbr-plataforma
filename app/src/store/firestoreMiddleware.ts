@@ -16,7 +16,6 @@ const COLLECTION_MAP: Record<string, string> = {
   'comunidade': 'forumTopics',
   'notificacoes': 'notifications',
   'servicos': 'services',
-  'destaques': 'highlights',
   'suporte': 'tickets',
   'planos': 'plans',
   'relatorios': 'reports',
@@ -45,7 +44,6 @@ const firestoreMiddleware: Middleware = (_store) => (next) => (action: unknown) 
       case 'addPartner':
       case 'addContent':
       case 'addTopic':
-      case 'addHighlight':
       case 'addTicket':
       case 'addServiceRequest': {
         const { id, ...data } = payload as { id: string; [key: string]: unknown };
@@ -85,7 +83,6 @@ const firestoreMiddleware: Middleware = (_store) => (next) => (action: unknown) 
       case 'removePartner':
       case 'removeContent':
       case 'removeTopic':
-      case 'removeHighlight':
       case 'removeNotification': {
         const id = typeof payload === 'string' ? payload : (payload as { id: string }).id;
         if (id) {
@@ -127,18 +124,6 @@ const firestoreMiddleware: Middleware = (_store) => (next) => (action: unknown) 
           const store = state.lojas.list.find((s) => s.id === id);
           if (store) {
             updateDocument(collection, id, { active: !store.active }).catch(console.error);
-          }
-        }
-        break;
-      }
-
-      case 'toggleHighlightActive': {
-        const id = typeof payload === 'string' ? payload : (payload as { id: string }).id;
-        if (id) {
-          const state = _store.getState() as { destaques: { list: Array<{ id: string; active: boolean }> } };
-          const item = state.destaques.list.find((h) => h.id === id);
-          if (item) {
-            updateDocument(collection, id, { active: item.active }).catch(console.error);
           }
         }
         break;

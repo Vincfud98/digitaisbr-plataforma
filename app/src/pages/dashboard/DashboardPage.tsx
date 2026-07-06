@@ -3,7 +3,7 @@ import { Card, Col, Row, Statistic, Typography, Tag, List, Space, Progress } fro
 import {
   ShopOutlined, TeamOutlined, ShoppingCartOutlined,
   RiseOutlined, GiftOutlined, BellOutlined, CustomerServiceOutlined,
-  StarOutlined, CommentOutlined, ReadOutlined,
+  CommentOutlined, ReadOutlined,
   CheckCircleOutlined, ClockCircleOutlined, ExclamationCircleOutlined,
 } from '@ant-design/icons';
 import {
@@ -32,7 +32,6 @@ export default function DashboardPage() {
   const comunidade = useAppSelector((s) => s.comunidade.list);
   const notificacoes = useAppSelector((s) => s.notificacoes.list);
   const tickets = useAppSelector((s) => s.suporte.list);
-  const destaques = useAppSelector((s) => s.destaques.list);
   const financeiro = useAppSelector((s) => s.financeiro.list);
 
   const plan = user?.plan || 'basico';
@@ -52,7 +51,6 @@ export default function DashboardPage() {
   const topicosAtivos = comunidade.filter((t) => t.status === 'aberto' || t.status === 'fixado').length;
   const notifNaoLidas = notificacoes.filter((n) => !n.read).length;
   const ticketsAbertos = tickets.filter((t) => t.status === 'aberto' || t.status === 'em-andamento').length;
-  const destaquesAtivos = destaques.filter((d) => d.active).length;
 
   const entradas = financeiro.filter((t) => t.type === 'entrada').reduce((s, t) => s + t.amount, 0);
   const saidas = financeiro.filter((t) => t.type === 'saida').reduce((s, t) => s + t.amount, 0);
@@ -347,15 +345,6 @@ export default function DashboardPage() {
                 <Tag color="blue">{tickets.filter((t) => t.priority === 'media').length} Média</Tag>
                 <Tag color="orange">{tickets.filter((t) => t.priority === 'alta').length} Alta</Tag>
                 <Tag color="red">{tickets.filter((t) => t.priority === 'urgente').length} Urgente</Tag>
-              </div>
-            </div>
-            <div style={{ marginTop: 16 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text type="secondary" style={{ fontSize: 12 }}>Destaques ativos:</Text>
-                <Space>
-                  <StarOutlined style={{ color: '#faad14' }} />
-                  <Text strong>{destaquesAtivos}</Text>
-                </Space>
               </div>
             </div>
           </Card>

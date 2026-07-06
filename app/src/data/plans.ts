@@ -20,7 +20,6 @@ export const plans: Plan[] = [
     priority: false,
     legalSupport: false,
     accountingSupport: false,
-    highlight: false,
   },
   {
     id: 'plan-intermediario',
@@ -42,18 +41,17 @@ export const plans: Plan[] = [
     priority: false,
     legalSupport: true,
     accountingSupport: true,
-    highlight: false,
   },
   {
     id: 'plan-avancado',
     name: 'Avançado',
     type: 'avancado',
     price: 199.90,
-    description: 'Máximo potencial. Produtos exclusivos, destaque na plataforma e suporte prioritário.',
+    description: 'Máximo potencial. Produtos exclusivos, assessoria completa e suporte prioritário.',
     features: [
       'Tudo do plano Intermediário',
       'Produtos exclusivos',
-      'Destaque na plataforma',
+      'Assessoria completa',
       'Suporte prioritário',
       'Produtos ilimitados na loja',
       'Consultoria mensal',
@@ -64,6 +62,5 @@ export const plans: Plan[] = [
     priority: true,
     legalSupport: true,
     accountingSupport: true,
-    highlight: true,
   },
 ];

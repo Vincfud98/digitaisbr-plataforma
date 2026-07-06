@@ -32,7 +32,6 @@ const ConteudoDetailPage = lazy(() => import('./pages/conteudos/ConteudoDetailPa
 const ComunidadePage = lazy(() => import('./pages/comunidade/ComunidadePage'));
 const NotificacoesPage = lazy(() => import('./pages/notificacoes/NotificacoesPage'));
 const ServicosPage = lazy(() => import('./pages/servicos/ServicosPage'));
-const DestaquesPage = lazy(() => import('./pages/destaques/DestaquesPage'));
 const SuportePage = lazy(() => import('./pages/suporte/SuportePage'));
 const RelatoriosPage = lazy(() => import('./pages/relatorios/RelatoriosPage'));
 const ComunicacoesPage = lazy(() => import('./pages/comunicacoes/ComunicacoesPage'));
@@ -109,7 +108,6 @@ export default function App() {
               <Route path="comunidade" element={<ComunidadePage />} />
               <Route path="notificacoes" element={<NotificacoesPage />} />
               <Route path="servicos" element={<ServicosPage />} />
-              <Route path="destaques" element={<DestaquesPage />} />
               <Route path="suporte" element={<SuportePage />} />
               <Route path="comunicacoes" element={<ComunicacoesPage />} />
               <Route path="relatorios" element={<RelatoriosPage />} />

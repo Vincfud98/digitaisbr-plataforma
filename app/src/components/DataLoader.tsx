@@ -18,13 +18,12 @@ import { setAll as setConteudos } from '../store/slices/conteudosSlice';
 import { setAll as setComunidade } from '../store/slices/comunidadeSlice';
 import { setAll as setNotificacoes } from '../store/slices/notificacoesSlice';
 import { setAll as setServicos } from '../store/slices/servicosSlice';
-import { setAll as setDestaques } from '../store/slices/destaquesSlice';
 import { setAll as setSuporteTickets, setMessages as setSuporteMsgs } from '../store/slices/suporteSlice';
 import { setAll as setRelatorios } from '../store/slices/relatoriosSlice';
 import type {
   Associado, Plan, Product, Store, Sale, Commission,
   FinancialTransaction, Benefit, Partner, Content, ForumTopic,
-  Notification, ServiceRequest, HighlightItem, SupportTicket,
+  Notification, ServiceRequest, SupportTicket,
   ReportConfig, TicketMessage,
 } from '../types';
 
@@ -42,7 +41,7 @@ export default function DataLoader({ children }: Props) {
       { mockAssociados }, { mockStores }, { mockProducts }, { mockSales },
       { plans }, { mockCommissions }, { mockTransactions }, { mockBenefits },
       { mockPartners }, { mockContents }, { forumTopics }, { notifications },
-      { serviceRequests }, { highlights }, { supportTickets }, { reportConfigs },
+      { serviceRequests }, { supportTickets }, { reportConfigs },
       { ticketMessages },
     ] = await Promise.all([
       import('../data/associados'),
@@ -58,7 +57,6 @@ export default function DataLoader({ children }: Props) {
       import('../data/forum'),
       import('../data/notifications'),
       import('../data/services'),
-      import('../data/highlights'),
       import('../data/tickets'),
       import('../data/reports'),
       import('../data/ticketMessages'),
@@ -76,7 +74,6 @@ export default function DataLoader({ children }: Props) {
     dispatch(setComunidade(forumTopics));
     dispatch(setNotificacoes(notifications));
     dispatch(setServicos(serviceRequests));
-    dispatch(setDestaques(highlights));
     dispatch(setSuporteTickets(supportTickets));
     dispatch(setRelatorios(reportConfigs));
     dispatch(setSuporteMsgs(ticketMessages));
@@ -105,7 +102,7 @@ export default function DataLoader({ children }: Props) {
         const [
           associados, planos, produtos, lojas, vendas, comissoes,
           financeiro, beneficios, parceiros, conteudos, comunidade,
-          notificacoes, servicos, destaques, tickets, relatorios, messages,
+          notificacoes, servicos, tickets, relatorios, messages,
         ] = await Promise.all([
           getCollection<Associado>('associados'),
           getCollection<Plan>('plans'),
@@ -120,7 +117,6 @@ export default function DataLoader({ children }: Props) {
           getCollection<ForumTopic>('forumTopics'),
           getCollection<Notification>('notifications'),
           getCollection<ServiceRequest>('services'),
-          getCollection<HighlightItem>('highlights'),
           getCollection<SupportTicket>('tickets'),
           getCollection<ReportConfig>('reports'),
           getCollection<TicketMessage>('ticketMessages'),
@@ -141,7 +137,6 @@ export default function DataLoader({ children }: Props) {
         dispatch(setComunidade(comunidade));
         dispatch(setNotificacoes(notificacoes));
         dispatch(setServicos(servicos));
-        dispatch(setDestaques(destaques));
         dispatch(setSuporteTickets(tickets));
         dispatch(setRelatorios(relatorios));
         dispatch(setSuporteMsgs(messages));

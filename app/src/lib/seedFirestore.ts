@@ -12,7 +12,6 @@ import { mockPartners } from '../data/partners';
 import { mockContents } from '../data/contents';
 import { notifications } from '../data/notifications';
 import { serviceRequests } from '../data/services';
-import { highlights } from '../data/highlights';
 import { supportTickets } from '../data/tickets';
 import { reportConfigs } from '../data/reports';
 import { forumTopics } from '../data/forum';
@@ -51,7 +50,6 @@ export async function seedIfNeeded(): Promise<boolean> {
     addBatch('contents', mockContents as unknown as Record<string, unknown>[]);
     addBatch('notifications', notifications as unknown as Record<string, unknown>[]);
     addBatch('services', serviceRequests as unknown as Record<string, unknown>[]);
-    addBatch('highlights', highlights as unknown as Record<string, unknown>[]);
     addBatch('tickets', supportTickets as unknown as Record<string, unknown>[]);
     addBatch('reports', reportConfigs as unknown as Record<string, unknown>[]);
     addBatch('forumTopics', forumTopics as unknown as Record<string, unknown>[]);

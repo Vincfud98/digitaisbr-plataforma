@@ -3,7 +3,7 @@ import { createCommissionForSale } from './commissionService';
 import { notifySale } from './notificationService';
 import type {
   Associado, Product, Store, Sale, Benefit, Partner, Content,
-  ForumTopic, ServiceRequest, HighlightItem, SupportTicket, TicketMessage,
+  ForumTopic, ServiceRequest, SupportTicket, TicketMessage,
   Commission, FinancialTransaction, CartItem, OrderCustomer, PaymentMethod,
 } from '../types';
 
@@ -20,7 +20,6 @@ const COLLECTIONS = {
   forumTopics: 'forumTopics',
   notifications: 'notifications',
   services: 'services',
-  highlights: 'highlights',
   tickets: 'tickets',
   ticketMessages: 'ticketMessages',
 } as const;
@@ -188,17 +187,6 @@ export async function saveServiceRequest(data: Omit<ServiceRequest, 'id'> & { id
   const { id, ...rest } = data;
   if (id) { await updateDocument(COLLECTIONS.services, id, rest); return id; }
   return createDocument(COLLECTIONS.services, rest);
-}
-
-// --- Highlights ---
-export async function saveHighlight(data: Omit<HighlightItem, 'id'> & { id?: string }): Promise<string> {
-  const { id, ...rest } = data;
-  if (id) { await updateDocument(COLLECTIONS.highlights, id, rest); return id; }
-  return createDocument(COLLECTIONS.highlights, rest);
-}
-
-export async function removeHighlight(id: string): Promise<void> {
-  await deleteDocument(COLLECTIONS.highlights, id);
 }
 
 // --- Support ---

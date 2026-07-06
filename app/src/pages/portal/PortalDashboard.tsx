@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Card, Col, Row, Statistic, Typography, Tag, List, Space, Progress, Button, message } from 'antd';
 import {
   ShopOutlined, ShoppingCartOutlined, GiftOutlined,
-  EyeOutlined, CrownOutlined, RiseOutlined, StarOutlined,
+  EyeOutlined, CrownOutlined, RiseOutlined, ReadOutlined,
   TeamOutlined, ThunderboltOutlined, FireOutlined,
   LinkOutlined,
 } from '@ant-design/icons';
@@ -30,7 +30,6 @@ export default function PortalDashboard() {
   const lojas = useAppSelector((s) => s.lojas.list);
   const beneficios = useAppSelector((s) => s.beneficios.list);
   const conteudos = useAppSelector((s) => s.conteudos.list);
-  const destaques = useAppSelector((s) => s.destaques.list);
 
   const associado = associados.find((a) => a.id === user?.id) || associados.find((a) => a.id === 'assoc-1') || associados[0];
   const plan = (associado?.planType || user?.plan || 'basico') as PlanType;
@@ -56,7 +55,6 @@ export default function PortalDashboard() {
     return planOrder.indexOf(c.minPlan) <= planOrder.indexOf(plan);
   });
 
-  const meusDestaques = destaques.filter((d) => d.active && d.type === 'loja' && minhaLoja && d.referenceId === minhaLoja.id);
 
   const vendasRecentes = [...minhasVendas]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -273,10 +271,10 @@ export default function PortalDashboard() {
           </Card>
         </Col>
         <Col xs={12} sm={6}>
-          <Card size="small" style={{ textAlign: 'center' }}>
-            <StarOutlined style={{ fontSize: 20, color: '#faad14' }} />
-            <div style={{ fontSize: 18, fontWeight: 600 }}>{meusDestaques.length}</div>
-            <Text type="secondary" style={{ fontSize: 12 }}>Destaques Ativos</Text>
+          <Card size="small" hoverable onClick={() => navigate('/portal/conteudos')} style={{ textAlign: 'center' }}>
+            <ReadOutlined style={{ fontSize: 20, color: '#faad14' }} />
+            <div style={{ fontSize: 18, fontWeight: 600 }}>{conteudosDisponiveis.length}</div>
+            <Text type="secondary" style={{ fontSize: 12 }}>Conteúdos</Text>
           </Card>
         </Col>
       </Row>

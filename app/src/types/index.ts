@@ -15,7 +15,6 @@ export interface Plan {
   priority: boolean;
   legalSupport: boolean;
   accountingSupport: boolean;
-  highlight: boolean;
 }
 
 export type ProductStatus = 'ativo' | 'inativo' | 'esgotado';
@@ -214,22 +213,6 @@ export interface ServiceRequest {
   scheduledAt: string | null;
   documents: string[];
   rating: number | null;
-  createdAt: string;
-}
-
-export interface HighlightItem {
-  id: string;
-  type: 'loja' | 'produto';
-  referenceId: string;
-  title: string;
-  subtitle: string;
-  image: string;
-  position: number;
-  active: boolean;
-  clicks: number;
-  impressions: number;
-  startDate: string;
-  endDate: string | null;
   createdAt: string;
 }
 

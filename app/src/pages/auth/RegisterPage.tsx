@@ -34,7 +34,7 @@ const plans = [
     name: 'Avançado',
     price: 'R$ 199,90/mês',
     color: '#faad14',
-    features: ['Tudo do Intermediário', 'Produtos exclusivos', 'Suporte prioritário', 'Destaque na plataforma', 'Condições diferenciadas'],
+    features: ['Tudo do Intermediário', 'Produtos exclusivos', 'Suporte prioritário', 'Assessoria completa', 'Condições diferenciadas'],
   },
 ];
 

@@ -15,7 +15,6 @@ import conteudosReducer from './slices/conteudosSlice';
 import comunidadeReducer from './slices/comunidadeSlice';
 import notificacoesReducer from './slices/notificacoesSlice';
 import servicosReducer from './slices/servicosSlice';
-import destaquesReducer from './slices/destaquesSlice';
 import suporteReducer from './slices/suporteSlice';
 import relatoriosReducer from './slices/relatoriosSlice';
 import cartReducer from './slices/cartSlice';
@@ -39,7 +38,6 @@ export const store = configureStore({
     comunidade: comunidadeReducer,
     notificacoes: notificacoesReducer,
     servicos: servicosReducer,
-    destaques: destaquesReducer,
     suporte: suporteReducer,
     relatorios: relatoriosReducer,
     cart: cartReducer,

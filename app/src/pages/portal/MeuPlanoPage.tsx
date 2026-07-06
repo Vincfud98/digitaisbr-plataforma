@@ -25,7 +25,7 @@ const features: PlanFeature[] = [
   { label: 'Produtos na Loja', basico: 'Até 20', intermediario: 'Até 50', avancado: 'Ilimitado' },
   { label: 'Benefícios', basico: 'Básicos', intermediario: 'Intermediários', avancado: 'Todos' },
   { label: 'Conteúdos Exclusivos', basico: false, intermediario: true, avancado: true },
-  { label: 'Destaques na Vitrine', basico: false, intermediario: '1 por mês', avancado: '3 por mês' },
+  { label: 'Assessoria Profissional', basico: false, intermediario: 'Básica', avancado: 'Completa' },
   { label: 'Relatórios de Vendas', basico: 'Simples', intermediario: 'Completos', avancado: 'Avançados + API' },
   { label: 'Suporte', basico: 'Email', intermediario: 'Email + Chat', avancado: 'Prioritário 24h' },
   { label: 'Comissão Extra', basico: false, intermediario: '+2%', avancado: '+5%' },
