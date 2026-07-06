@@ -4,8 +4,8 @@ import {
   ArrowLeftOutlined, SaveOutlined, ShopOutlined, EyeOutlined, UploadOutlined,
   DollarOutlined, FileTextOutlined, KeyOutlined, SafetyCertificateOutlined,
   SettingOutlined, CopyOutlined, CheckCircleOutlined, CloseCircleOutlined,
-  ExclamationCircleOutlined, UserOutlined, CalendarOutlined,
-  ShoppingCartOutlined, StopOutlined, ReloadOutlined,
+  ExclamationCircleOutlined, UserOutlined, CalendarOutlined, ClockCircleOutlined,
+  ShoppingCartOutlined, StopOutlined, ReloadOutlined, MailOutlined,
   LockOutlined, ApiOutlined, LinkOutlined, BankOutlined, AuditOutlined,
   FilePdfOutlined, CameraOutlined, IdcardOutlined, PhoneOutlined,
 } from '@ant-design/icons';
@@ -99,121 +99,173 @@ function OverviewTab({ store, associado, plan }: { store: Store; associado: any;
   );
 }
 
+type DocStatus = 'aprovado' | 'pendente' | 'enviado' | 'rejeitado' | 'nao_enviado';
+
 function DocumentsTab({ associado }: { associado: any }) {
   const seed = associado?.id?.charCodeAt(associado.id.length - 1) || 1;
-  const hasCnpj = seededRandom(seed) > 0.3;
-  const hasDoc = seededRandom(seed + 1) > 0.4;
-  const hasSelfie = seededRandom(seed + 2) > 0.5;
-  const cnpj = hasCnpj ? `${String(Math.floor(seededRandom(seed + 3) * 90 + 10))}.${String(Math.floor(seededRandom(seed + 4) * 900 + 100))}.${String(Math.floor(seededRandom(seed + 5) * 900 + 100))}/0001-${String(Math.floor(seededRandom(seed + 6) * 90 + 10))}` : null;
+  const initialCnpj: DocStatus = seededRandom(seed) > 0.5 ? 'aprovado' : seededRandom(seed) > 0.2 ? 'enviado' : 'nao_enviado';
+  const initialDoc: DocStatus = seededRandom(seed + 1) > 0.5 ? 'aprovado' : seededRandom(seed + 1) > 0.2 ? 'enviado' : 'nao_enviado';
+  const initialSelfie: DocStatus = seededRandom(seed + 2) > 0.6 ? 'aprovado' : seededRandom(seed + 2) > 0.3 ? 'enviado' : 'nao_enviado';
+  const initialComprovante: DocStatus = seededRandom(seed + 7) > 0.7 ? 'aprovado' : seededRandom(seed + 7) > 0.5 ? 'enviado' : 'nao_enviado';
 
-  const verificationScore = [hasCnpj, hasDoc, hasSelfie].filter(Boolean).length;
-  const verificationPercent = Math.round((verificationScore / 3) * 100);
-  const verificationStatus = verificationScore === 3 ? 'success' : verificationScore >= 2 ? 'normal' : 'exception';
+  const [cnpjStatus, setCnpjStatus] = useState<DocStatus>(initialCnpj);
+  const [docStatus, setDocStatus] = useState<DocStatus>(initialDoc);
+  const [selfieStatus, setSelfieStatus] = useState<DocStatus>(initialSelfie);
+  const [comprovanteStatus, setComprovanteStatus] = useState<DocStatus>(initialComprovante);
+  const [rejectReason, setRejectReason] = useState<string | null>(null);
+  const [rejectingDoc, setRejectingDoc] = useState<string | null>(null);
+
+  const cnpj = cnpjStatus !== 'nao_enviado' ? `${String(Math.floor(seededRandom(seed + 3) * 90 + 10))}.${String(Math.floor(seededRandom(seed + 4) * 900 + 100))}.${String(Math.floor(seededRandom(seed + 5) * 900 + 100))}/0001-${String(Math.floor(seededRandom(seed + 6) * 90 + 10))}` : null;
+
+  const handleApprove = (docName: string, setter: (s: DocStatus) => void) => {
+    setter('aprovado');
+    message.success(`${docName} aprovado com sucesso!`);
+  };
+
+  const handleReject = (docName: string, setter: (s: DocStatus) => void) => {
+    setRejectingDoc(docName);
+    setRejectReason(null);
+    setter('rejeitado');
+  };
+
+  const confirmReject = () => {
+    message.warning(`${rejectingDoc} rejeitado. O influencer será notificado.`);
+    setRejectingDoc(null);
+    setRejectReason(null);
+  };
+
+  const statusConfig: Record<DocStatus, { color: string; bg: string; border: string; label: string; icon: React.ReactNode }> = {
+    aprovado: { color: '#52c41a', bg: '#f6ffed', border: '#b7eb8f', label: 'Aprovado', icon: <CheckCircleOutlined /> },
+    enviado: { color: '#1677ff', bg: '#e6f4ff', border: '#91caff', label: 'Aguardando Análise', icon: <ClockCircleOutlined /> },
+    pendente: { color: '#faad14', bg: '#fffbe6', border: '#ffe58f', label: 'Pendente', icon: <ExclamationCircleOutlined /> },
+    rejeitado: { color: '#ff4d4f', bg: '#fff2f0', border: '#ffccc7', label: 'Rejeitado', icon: <CloseCircleOutlined /> },
+    nao_enviado: { color: '#999', bg: '#fafafa', border: '#d9d9d9', label: 'Não Enviado', icon: <CloseCircleOutlined /> },
+  };
+
+  const docs = [
+    { key: 'cnpj', label: 'CNPJ / MEI', icon: <BankOutlined />, status: cnpjStatus, setter: setCnpjStatus, detail: cnpj, subtext: cnpjStatus === 'aprovado' ? `Razão Social: ${associado?.name} Produções Digitais LTDA` : cnpjStatus === 'enviado' ? 'Documento enviado, aguardando verificação manual' : cnpjStatus === 'rejeitado' ? 'Documento rejeitado — solicitado reenvio' : 'Usuário não enviou o CNPJ/MEI', uploadDate: cnpjStatus !== 'nao_enviado' ? '28/06/2025 às 14:32' : null },
+    { key: 'identidade', label: 'Documento de Identidade (RG/CPF)', icon: <FileTextOutlined />, status: docStatus, setter: setDocStatus, detail: associado?.cpfCnpj || null, subtext: docStatus === 'aprovado' ? 'Documento verificado e aprovado' : docStatus === 'enviado' ? 'Documento enviado, aguardando verificação manual' : docStatus === 'rejeitado' ? 'Documento ilegível — solicitado reenvio' : 'Aguardando envio do documento', uploadDate: docStatus !== 'nao_enviado' ? '28/06/2025 às 14:33' : null },
+    { key: 'selfie', label: 'Selfie com Documento', icon: <CameraOutlined />, status: selfieStatus, setter: setSelfieStatus, detail: null, subtext: selfieStatus === 'aprovado' ? 'Validação facial concluída' : selfieStatus === 'enviado' ? 'Selfie enviada, aguardando verificação manual' : selfieStatus === 'rejeitado' ? 'Rosto não visível — solicitado reenvio' : 'Aguardando envio da selfie', uploadDate: selfieStatus !== 'nao_enviado' ? '28/06/2025 às 14:35' : null },
+    { key: 'comprovante', label: 'Comprovante de Endereço', icon: <FilePdfOutlined />, status: comprovanteStatus, setter: setComprovanteStatus, detail: null, subtext: comprovanteStatus === 'aprovado' ? 'Comprovante verificado' : comprovanteStatus === 'enviado' ? 'Comprovante enviado, aguardando verificação' : comprovanteStatus === 'rejeitado' ? 'Documento com mais de 90 dias — solicitado reenvio' : 'Opcional — necessário para saques acima de R$ 5.000', uploadDate: comprovanteStatus !== 'nao_enviado' ? '28/06/2025 às 14:36' : null },
+  ];
+
+  const approvedCount = [cnpjStatus, docStatus, selfieStatus].filter((s) => s === 'aprovado').length;
+  const verificationPercent = Math.round((approvedCount / 3) * 100);
+  const verificationStatus = approvedCount === 3 ? 'success' : approvedCount >= 2 ? 'normal' : 'exception';
+  const pendingReview = docs.filter((d) => d.status === 'enviado').length;
 
   return (
     <div>
+      {pendingReview > 0 && (
+        <Alert
+          title={`${pendingReview} documento(s) aguardando sua verificação manual.`}
+          description="Analise os documentos enviados e aprove ou rejeite cada um."
+          type="info"
+          showIcon
+          style={{ marginBottom: 16 }}
+        />
+      )}
+
+      {rejectingDoc && (
+        <Alert
+          title={`Motivo da rejeição: ${rejectingDoc}`}
+          description={
+            <div style={{ marginTop: 8 }}>
+              <Input.TextArea
+                rows={2}
+                placeholder="Informe o motivo da rejeição (ex: documento ilegível, foto cortada, dados divergentes...)"
+                value={rejectReason || ''}
+                onChange={(e) => setRejectReason(e.target.value)}
+                style={{ marginBottom: 8 }}
+              />
+              <Space>
+                <Button type="primary" size="small" danger onClick={confirmReject} disabled={!rejectReason}>Confirmar Rejeição</Button>
+                <Button size="small" onClick={() => setRejectingDoc(null)}>Cancelar</Button>
+              </Space>
+            </div>
+          }
+          type="error"
+          showIcon
+          closable
+          onClose={() => setRejectingDoc(null)}
+          style={{ marginBottom: 16 }}
+        />
+      )}
+
       <Row gutter={[16, 16]}>
         <Col xs={24} lg={16}>
           <Card title={<><IdcardOutlined style={{ marginRight: 8 }} />Documentos do Influencer</>}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {/* CNPJ */}
-              <div style={{ padding: 16, background: hasCnpj ? '#f6ffed' : '#fff2f0', borderRadius: 8, border: `1px solid ${hasCnpj ? '#b7eb8f' : '#ffccc7'}` }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Space>
-                    <BankOutlined style={{ fontSize: 20, color: hasCnpj ? '#52c41a' : '#ff4d4f' }} />
-                    <div>
-                      <Text strong>CNPJ / MEI</Text>
-                      <br />
-                      {hasCnpj ? (
-                        <Text copyable style={{ fontSize: 16, fontFamily: 'monospace' }}>{cnpj}</Text>
-                      ) : (
-                        <Text type="danger">Não enviado</Text>
-                      )}
+              {docs.map((doc) => {
+                const sc = statusConfig[doc.status];
+                return (
+                  <div key={doc.key} style={{ padding: 16, background: sc.bg, borderRadius: 8, border: `1px solid ${sc.border}` }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
+                      <Space>
+                        <div style={{ fontSize: 20, color: sc.color }}>{doc.icon}</div>
+                        <div>
+                          <Text strong>{doc.label}</Text>
+                          {doc.detail && <Text copyable style={{ fontSize: 14, fontFamily: 'monospace', marginLeft: 8 }}>{doc.detail}</Text>}
+                          <br />
+                          <Text type="secondary" style={{ fontSize: 12 }}>{doc.subtext}</Text>
+                          {doc.uploadDate && <Text type="secondary" style={{ fontSize: 11, display: 'block' }}>Enviado em: {doc.uploadDate}</Text>}
+                        </div>
+                      </Space>
+                      <Space>
+                        {doc.status === 'enviado' && (
+                          <>
+                            <Button size="small" icon={<EyeOutlined />}>Visualizar</Button>
+                            <Popconfirm title="Aprovar este documento?" description="O documento será marcado como verificado." okText="Aprovar" cancelText="Cancelar" onConfirm={() => handleApprove(doc.label, doc.setter)}>
+                              <Button size="small" type="primary" icon={<CheckCircleOutlined />}>Aprovar</Button>
+                            </Popconfirm>
+                            <Button size="small" danger icon={<CloseCircleOutlined />} onClick={() => handleReject(doc.label, doc.setter)}>Rejeitar</Button>
+                          </>
+                        )}
+                        {doc.status === 'aprovado' && (
+                          <>
+                            <Button size="small" icon={<EyeOutlined />}>Visualizar</Button>
+                            <Tag color="green" icon={<CheckCircleOutlined />}>Aprovado</Tag>
+                          </>
+                        )}
+                        {doc.status === 'rejeitado' && (
+                          <>
+                            <Tag color="red" icon={<CloseCircleOutlined />}>Rejeitado</Tag>
+                            <Button size="small" icon={<ReloadOutlined />} onClick={() => doc.setter('enviado')}>Re-analisar</Button>
+                          </>
+                        )}
+                        {doc.status === 'nao_enviado' && (
+                          <Tag color="default" icon={<CloseCircleOutlined />}>Não Enviado</Tag>
+                        )}
+                      </Space>
                     </div>
-                  </Space>
-                  {hasCnpj ? (
-                    <Tag color="green" icon={<CheckCircleOutlined />}>Verificado</Tag>
-                  ) : (
-                    <Tag color="red" icon={<CloseCircleOutlined />}>Pendente</Tag>
-                  )}
-                </div>
-                {hasCnpj && (
-                  <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid #d9f7be' }}>
-                    <Text type="secondary" style={{ fontSize: 12 }}>Razão Social: </Text>
-                    <Text style={{ fontSize: 12 }}>{associado?.name} Produções Digitais LTDA</Text>
-                    <br />
-                    <Text type="secondary" style={{ fontSize: 12 }}>Situação Cadastral: </Text>
-                    <Tag color="green" style={{ fontSize: 10 }}>ATIVA</Tag>
-                    <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>Natureza Jurídica: </Text>
-                    <Text style={{ fontSize: 12 }}>MEI</Text>
+                    {doc.key === 'cnpj' && doc.status === 'aprovado' && (
+                      <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid #d9f7be' }}>
+                        <Text type="secondary" style={{ fontSize: 12 }}>Razão Social: </Text>
+                        <Text style={{ fontSize: 12 }}>{associado?.name} Produções Digitais LTDA</Text>
+                        <br />
+                        <Text type="secondary" style={{ fontSize: 12 }}>Situação Cadastral: </Text>
+                        <Tag color="green" style={{ fontSize: 10 }}>ATIVA</Tag>
+                        <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>Natureza Jurídica: </Text>
+                        <Text style={{ fontSize: 12 }}>MEI</Text>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-
-              {/* RG / CPF */}
-              <div style={{ padding: 16, background: hasDoc ? '#f6ffed' : '#fff2f0', borderRadius: 8, border: `1px solid ${hasDoc ? '#b7eb8f' : '#ffccc7'}` }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Space>
-                    <FileTextOutlined style={{ fontSize: 20, color: hasDoc ? '#52c41a' : '#ff4d4f' }} />
-                    <div>
-                      <Text strong>Documento de Identidade (RG/CPF)</Text>
-                      <br />
-                      <Text type="secondary" style={{ fontSize: 12 }}>{hasDoc ? 'Documento enviado e verificado' : 'Aguardando envio do documento'}</Text>
-                    </div>
-                  </Space>
-                  {hasDoc ? (
-                    <Space>
-                      <Button size="small" icon={<EyeOutlined />}>Visualizar</Button>
-                      <Tag color="green" icon={<CheckCircleOutlined />}>Verificado</Tag>
-                    </Space>
-                  ) : (
-                    <Tag color="red" icon={<CloseCircleOutlined />}>Pendente</Tag>
-                  )}
-                </div>
-              </div>
-
-              {/* Selfie com documento */}
-              <div style={{ padding: 16, background: hasSelfie ? '#f6ffed' : '#fff2f0', borderRadius: 8, border: `1px solid ${hasSelfie ? '#b7eb8f' : '#ffccc7'}` }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Space>
-                    <CameraOutlined style={{ fontSize: 20, color: hasSelfie ? '#52c41a' : '#ff4d4f' }} />
-                    <div>
-                      <Text strong>Selfie com Documento</Text>
-                      <br />
-                      <Text type="secondary" style={{ fontSize: 12 }}>{hasSelfie ? 'Validação facial concluída' : 'Aguardando envio da selfie'}</Text>
-                    </div>
-                  </Space>
-                  {hasSelfie ? (
-                    <Space>
-                      <Button size="small" icon={<EyeOutlined />}>Visualizar</Button>
-                      <Tag color="green" icon={<CheckCircleOutlined />}>Verificado</Tag>
-                    </Space>
-                  ) : (
-                    <Tag color="red" icon={<CloseCircleOutlined />}>Pendente</Tag>
-                  )}
-                </div>
-              </div>
-
-              {/* Comprovante de endereço */}
-              <div style={{ padding: 16, background: '#f5f5f5', borderRadius: 8, border: '1px solid #d9d9d9' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Space>
-                    <FilePdfOutlined style={{ fontSize: 20, color: '#888' }} />
-                    <div>
-                      <Text strong>Comprovante de Endereço</Text>
-                      <br />
-                      <Text type="secondary" style={{ fontSize: 12 }}>Opcional — necessário para saques acima de R$ 5.000</Text>
-                    </div>
-                  </Space>
-                  <Tag color="default">Opcional</Tag>
-                </div>
-              </div>
+                );
+              })}
             </div>
 
-            {verificationScore < 3 && (
+            {approvedCount < 3 && (
               <Alert
                 title="Documentação incompleta — este influencer não pode receber saques até completar a verificação."
                 type="warning"
+                showIcon
+                style={{ marginTop: 16 }}
+              />
+            )}
+            {approvedCount === 3 && (
+              <Alert
+                title="Todos os documentos obrigatórios foram verificados e aprovados."
+                type="success"
                 showIcon
                 style={{ marginTop: 16 }}
               />
@@ -227,24 +279,18 @@ function DocumentsTab({ associado }: { associado: any }) {
               <Progress type="circle" percent={verificationPercent} status={verificationStatus} size={120} />
               <div style={{ marginTop: 12 }}>
                 <Text strong style={{ fontSize: 16 }}>
-                  {verificationScore === 3 ? 'Totalmente Verificado' : verificationScore === 2 ? 'Parcialmente Verificado' : verificationScore === 1 ? 'Verificação Inicial' : 'Não Verificado'}
+                  {approvedCount === 3 ? 'Totalmente Verificado' : approvedCount === 2 ? 'Parcialmente Verificado' : approvedCount === 1 ? 'Verificação Inicial' : 'Não Verificado'}
                 </Text>
               </div>
             </div>
             <Divider style={{ margin: '12px 0' }} />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Text>CNPJ/MEI</Text>
-                {hasCnpj ? <CheckCircleOutlined style={{ color: '#52c41a' }} /> : <CloseCircleOutlined style={{ color: '#ff4d4f' }} />}
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Text>Identidade</Text>
-                {hasDoc ? <CheckCircleOutlined style={{ color: '#52c41a' }} /> : <CloseCircleOutlined style={{ color: '#ff4d4f' }} />}
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Text>Selfie</Text>
-                {hasSelfie ? <CheckCircleOutlined style={{ color: '#52c41a' }} /> : <CloseCircleOutlined style={{ color: '#ff4d4f' }} />}
-              </div>
+              {docs.slice(0, 3).map((doc) => (
+                <div key={doc.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Text>{doc.label.split('(')[0].trim()}</Text>
+                  <Tag color={statusConfig[doc.status].color} style={{ fontSize: 10, margin: 0 }} icon={statusConfig[doc.status].icon}>{statusConfig[doc.status].label}</Tag>
+                </div>
+              ))}
             </div>
           </Card>
 
@@ -254,6 +300,21 @@ function DocumentsTab({ associado }: { associado: any }) {
               <div><Text type="secondary"><PhoneOutlined /> Tel:</Text> <Text>{associado?.phone || '(11) 99999-0000'}</Text></div>
               <div><Text type="secondary">Email:</Text> <Text>{associado?.email}</Text></div>
               {associado?.instagram && <div><Text type="secondary">Instagram:</Text> <Text>@{associado.instagram}</Text></div>}
+            </div>
+          </Card>
+
+          <Card title="Ações em Lote" size="small" style={{ marginTop: 16 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <Popconfirm title="Aprovar todos os documentos enviados?" okText="Aprovar Todos" cancelText="Cancelar" onConfirm={() => {
+                if (cnpjStatus === 'enviado') { setCnpjStatus('aprovado'); }
+                if (docStatus === 'enviado') { setDocStatus('aprovado'); }
+                if (selfieStatus === 'enviado') { setSelfieStatus('aprovado'); }
+                if (comprovanteStatus === 'enviado') { setComprovanteStatus('aprovado'); }
+                message.success('Todos os documentos enviados foram aprovados!');
+              }}>
+                <Button block type="primary" icon={<CheckCircleOutlined />} disabled={!docs.some((d) => d.status === 'enviado')}>Aprovar Todos Enviados</Button>
+              </Popconfirm>
+              <Button block icon={<MailOutlined />} onClick={() => message.info('Notificação enviada ao influencer solicitando documentos pendentes.')}>Solicitar Documentos Pendentes</Button>
             </div>
           </Card>
         </Col>
