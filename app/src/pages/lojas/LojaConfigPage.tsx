@@ -1,18 +1,16 @@
 import { useState, useMemo } from 'react';
-import { Card, Typography, Button, Row, Col, Input, Switch, ColorPicker, Form, message, Space, Tag, Checkbox, Empty, Divider, Upload, Tabs, Statistic, Table, Badge, Alert, Timeline, Descriptions, Progress, Tooltip, Popconfirm } from 'antd';
+import { Card, Typography, Button, Row, Col, Input, message, Space, Tag, Checkbox, Empty, Divider, Tabs, Statistic, Table, Badge, Alert, Timeline, Descriptions, Progress, Tooltip, Popconfirm } from 'antd';
 import {
-  ArrowLeftOutlined, SaveOutlined, ShopOutlined, EyeOutlined, UploadOutlined,
+  ArrowLeftOutlined, ShopOutlined, EyeOutlined,
   DollarOutlined, FileTextOutlined, KeyOutlined, SafetyCertificateOutlined,
-  SettingOutlined, CopyOutlined, CheckCircleOutlined, CloseCircleOutlined,
+  CopyOutlined, CheckCircleOutlined, CloseCircleOutlined,
   ExclamationCircleOutlined, UserOutlined, CalendarOutlined, ClockCircleOutlined,
   ShoppingCartOutlined, StopOutlined, ReloadOutlined, MailOutlined,
   LockOutlined, ApiOutlined, LinkOutlined, BankOutlined, AuditOutlined,
   FilePdfOutlined, CameraOutlined, IdcardOutlined, PhoneOutlined,
 } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useAppSelector, useAppDispatch } from '../../store';
-import { updateStore } from '../../store/slices/lojasSlice';
-import { uploadStoreLogo, uploadStoreBanner } from '../../lib/storageService';
+import { useAppSelector } from '../../store';
 import { categories } from '../../data/categories';
 import type { Store, Product, ProductExclusivity, PlanType, Sale } from '../../types';
 
@@ -730,21 +728,15 @@ function ComplianceTab({ store }: { store: Store }) {
 export default function LojaConfigPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
   const store = useAppSelector((s) => s.lojas.list.find((st) => st.id === id));
   const associado = useAppSelector((s) => s.associados.list.find((a) => a.id === store?.associadoId));
   const plan = useAppSelector((s) => s.planos.list.find((p) => p.id === associado?.planId));
   const allProducts = useAppSelector((s) => s.catalogo.list);
 
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>(store?.productIds || []);
-  const [config, setConfig] = useState(store?.config || { primaryColor: '#1677ff', bannerUrl: '', logoUrl: '', description: '', showWhatsapp: false, whatsappNumber: '' });
-  const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [bannerFile, setBannerFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
 
   const maxProducts = plan?.maxProducts ?? 20;
   const canAddMore = maxProducts === -1 || selectedProductIds.length < maxProducts;
-  const canCustomize = plan?.customization ?? false;
 
   if (!store || !associado) return <Empty description="Loja não encontrada" />;
 
@@ -758,69 +750,11 @@ export default function LojaConfigPage() {
     }
   };
 
-  const handleSave = async () => {
-    setUploading(true);
-    try {
-      const updatedConfig = { ...config };
-      if (logoFile) updatedConfig.logoUrl = await uploadStoreLogo(logoFile, store.id);
-      if (bannerFile) updatedConfig.bannerUrl = await uploadStoreBanner(bannerFile, store.id);
-      dispatch(updateStore({ ...store, productIds: selectedProductIds, config: updatedConfig }));
-      message.success('Loja atualizada com sucesso!');
-    } catch {
-      message.error('Erro ao fazer upload das imagens.');
-    } finally {
-      setUploading(false);
-    }
-  };
-
   const tabItems = [
     {
       key: 'overview',
       label: <><EyeOutlined /> Visão Geral</>,
       children: <OverviewTab store={store} associado={associado} plan={plan} />,
-    },
-    {
-      key: 'config',
-      label: <><SettingOutlined /> Configurações</>,
-      children: (
-        <Row gutter={[16, 16]}>
-          <Col xs={24} lg={12}>
-            <Card title="Informações da Loja" style={{ marginBottom: 16 }}>
-              <Form layout="vertical">
-                <Form.Item label="Nome da Loja"><Input value={store.name} disabled /></Form.Item>
-                <Form.Item label="Slug (URL)"><Input addonBefore="digitaisbr.com/loja/" value={store.slug} disabled /></Form.Item>
-                <Form.Item label="Descrição"><Input.TextArea rows={3} value={config.description} onChange={(e) => setConfig({ ...config, description: e.target.value })} /></Form.Item>
-                <Form.Item label="WhatsApp"><Switch checked={config.showWhatsapp} onChange={(v) => setConfig({ ...config, showWhatsapp: v })} /></Form.Item>
-                {config.showWhatsapp && <Form.Item label="Número WhatsApp"><Input value={config.whatsappNumber} onChange={(e) => setConfig({ ...config, whatsappNumber: e.target.value })} placeholder="5511999999999" /></Form.Item>}
-              </Form>
-            </Card>
-            <Card title="Status da Loja">
-              <Descriptions column={1} size="small">
-                <Descriptions.Item label="Status"><Tag color={store.active ? 'green' : 'red'}>{store.active ? 'Ativa' : 'Inativa'}</Tag></Descriptions.Item>
-                <Descriptions.Item label="Plano do Associado"><Tag color={plan?.id === 'plan-3' ? 'gold' : plan?.id === 'plan-2' ? 'purple' : 'blue'}>{plan?.name || 'Básico'}</Tag></Descriptions.Item>
-                <Descriptions.Item label="Produtos Selecionados">{selectedProductIds.length}{maxProducts === -1 ? '' : ` / ${maxProducts}`}</Descriptions.Item>
-                <Descriptions.Item label="Visualizações">{store.totalViews}</Descriptions.Item>
-                <Descriptions.Item label="Vendas">{store.totalSales}</Descriptions.Item>
-              </Descriptions>
-            </Card>
-          </Col>
-          <Col xs={24} lg={12}>
-            <Card title="Personalização Visual">
-              {!canCustomize && (
-                <Alert title="Personalização visual disponível a partir do plano Intermediário." type="warning" showIcon style={{ marginBottom: 16 }} />
-              )}
-              <Form layout="vertical">
-                <Form.Item label="Cor Principal"><ColorPicker value={config.primaryColor} disabled={!canCustomize} onChange={(_, hex) => setConfig({ ...config, primaryColor: hex })} /></Form.Item>
-                <Form.Item label="Logo"><Upload listType="picture-card" accept="image/*" maxCount={1} disabled={!canCustomize} beforeUpload={(file) => { setLogoFile(file); return false; }} onRemove={() => { setLogoFile(null); setConfig({ ...config, logoUrl: '' }); }} defaultFileList={config.logoUrl ? [{ uid: '-1', name: 'logo', status: 'done' as const, url: config.logoUrl }] : []}>{!logoFile && !config.logoUrl && <div><UploadOutlined /><div style={{ marginTop: 8 }}>Logo</div></div>}</Upload></Form.Item>
-                <Form.Item label="Banner"><Upload listType="picture-card" accept="image/*" maxCount={1} disabled={!canCustomize} beforeUpload={(file) => { setBannerFile(file); return false; }} onRemove={() => { setBannerFile(null); setConfig({ ...config, bannerUrl: '' }); }} defaultFileList={config.bannerUrl ? [{ uid: '-1', name: 'banner', status: 'done' as const, url: config.bannerUrl }] : []}>{!bannerFile && !config.bannerUrl && <div><UploadOutlined /><div style={{ marginTop: 8 }}>Banner</div></div>}</Upload></Form.Item>
-              </Form>
-            </Card>
-            <div style={{ marginTop: 16 }}>
-              <Button type="primary" icon={<SaveOutlined />} onClick={handleSave} loading={uploading} block size="large">Salvar Configurações</Button>
-            </div>
-          </Col>
-        </Row>
-      ),
     },
     {
       key: 'products',
