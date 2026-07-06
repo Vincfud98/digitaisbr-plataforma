@@ -7,6 +7,7 @@ import {
   HeartOutlined, StarOutlined, FireOutlined,
   PercentageOutlined, RiseOutlined,
 } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../../store';
 import { updateStore } from '../../store/slices/lojasSlice';
 import { addProduct, updateProduct } from '../../store/slices/catalogoSlice';
@@ -164,6 +165,7 @@ function ProductCard({ product, onAdd, onRemove, onEdit, isInStore, isOwn, index
 
 export default function MinhaLojaPage() {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const associados = useAppSelector((s) => s.associados.list);
   const lojas = useAppSelector((s) => s.lojas.list);
   const catalogo = useAppSelector((s) => s.catalogo.list);
@@ -280,11 +282,16 @@ export default function MinhaLojaPage() {
           </Title>
           <Tag color={loja.active ? 'green' : 'orange'}>{loja.active ? 'Ativa' : 'Inativa'}</Tag>
         </div>
-        {tab === 'proprio' && (
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditProduct(null); form.resetFields(); setFormOpen(true); }}>
-            Novo Produto
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Button type="primary" icon={<EyeOutlined />} onClick={() => navigate(`/loja/${loja.slug}`)}>
+            Ver como Cliente
           </Button>
-        )}
+          {tab === 'proprio' && (
+            <Button icon={<PlusOutlined />} onClick={() => { setEditProduct(null); form.resetFields(); setFormOpen(true); }}>
+              Novo Produto
+            </Button>
+          )}
+        </div>
       </div>
 
       <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
