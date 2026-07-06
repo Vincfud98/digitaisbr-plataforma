@@ -99,6 +99,76 @@ function OverviewTab({ store, associado, plan }: { store: Store; associado: any;
   );
 }
 
+function ProductsTab({ store, allProducts }: { store: Store; allProducts: Product[] }) {
+  const storeProducts = allProducts.filter((p) => store.productIds.includes(p.id));
+  const totalValue = storeProducts.reduce((s, p) => s + p.price, 0);
+  const avgCommission = storeProducts.length > 0 ? storeProducts.reduce((s, p) => s + p.commissionPercent, 0) / storeProducts.length : 0;
+
+  const statusColors: Record<string, string> = { ativo: 'green', inativo: 'default', esgotado: 'red' };
+
+  const columns = [
+    {
+      title: 'Produto', dataIndex: 'name', key: 'name',
+      render: (name: string, record: Product) => (
+        <Space>
+          <img src={record.image} alt={name} style={{ width: 40, height: 40, borderRadius: 6, objectFit: 'cover' }} />
+          <div>
+            <Text strong style={{ fontSize: 13 }}>{name}</Text>
+            <br />
+            <Text type="secondary" style={{ fontSize: 11 }}>SKU: {record.sku}</Text>
+          </div>
+        </Space>
+      ),
+    },
+    {
+      title: 'Categoria', dataIndex: 'categoryId', key: 'category', width: 130,
+      render: (catId: string) => {
+        const cat = categories.find((c) => c.id === catId);
+        return cat ? <Tag color={cat.color}>{cat.name}</Tag> : catId;
+      },
+    },
+    { title: 'Preço', dataIndex: 'price', key: 'price', width: 110, render: (v: number) => <Text strong>R$ {v.toFixed(2)}</Text> },
+    { title: 'Comissão', dataIndex: 'commissionPercent', key: 'commission', width: 100, render: (v: number) => <Tag color="purple">{v}%</Tag> },
+    { title: 'Estoque', dataIndex: 'stock', key: 'stock', width: 80, render: (v: number) => <Text type={v <= 5 ? 'danger' : undefined}>{v}</Text> },
+    { title: 'Exclusividade', dataIndex: 'exclusivity', key: 'exclusivity', width: 120, render: (v: string) => v === 'todos' ? <Tag>Todos</Tag> : v === 'intermediario' ? <Tag color="purple">Inter+</Tag> : <Tag color="gold">Avançado</Tag> },
+    { title: 'Status', dataIndex: 'status', key: 'status', width: 90, render: (v: string) => <Tag color={statusColors[v] || 'default'}>{v.charAt(0).toUpperCase() + v.slice(1)}</Tag> },
+  ];
+
+  return (
+    <div>
+      <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+        <Col xs={12} sm={6}>
+          <Card><Statistic title="Produtos na Loja" value={storeProducts.length} prefix={<ShoppingCartOutlined />} /></Card>
+        </Col>
+        <Col xs={12} sm={6}>
+          <Card><Statistic title="Ativos" value={storeProducts.filter((p) => p.status === 'ativo').length} prefix={<CheckCircleOutlined />} styles={{ content: { color: '#52c41a' } }} /></Card>
+        </Col>
+        <Col xs={12} sm={6}>
+          <Card><Statistic title="Valor Total Catálogo" value={totalValue} precision={2} prefix="R$" styles={{ content: { color: '#1677ff' } }} /></Card>
+        </Col>
+        <Col xs={12} sm={6}>
+          <Card><Statistic title="Comissão Média" value={avgCommission} precision={1} suffix="%" styles={{ content: { color: '#722ed1' } }} /></Card>
+        </Col>
+      </Row>
+
+      <Card title={<><ShoppingCartOutlined style={{ marginRight: 8 }} />Produtos Selecionados pelo Influencer</>}>
+        {storeProducts.length > 0 ? (
+          <Table dataSource={storeProducts} columns={columns} rowKey="id" size="small" pagination={{ pageSize: 10 }} />
+        ) : (
+          <Empty description="Este influencer ainda não selecionou nenhum produto para sua loja." />
+        )}
+      </Card>
+
+      {storeProducts.some((p) => p.status === 'esgotado') && (
+        <Alert title={`${storeProducts.filter((p) => p.status === 'esgotado').length} produto(s) esgotado(s) na loja deste influencer.`} type="warning" showIcon style={{ marginTop: 16 }} />
+      )}
+      {storeProducts.some((p) => p.stock <= 5 && p.stock > 0) && (
+        <Alert title={`${storeProducts.filter((p) => p.stock <= 5 && p.stock > 0).length} produto(s) com estoque baixo (≤ 5 unidades).`} type="info" showIcon style={{ marginTop: 16 }} />
+      )}
+    </div>
+  );
+}
+
 type DocStatus = 'aprovado' | 'pendente' | 'enviado' | 'rejeitado' | 'nao_enviado';
 
 function DocumentsTab({ associado }: { associado: any }) {
@@ -714,6 +784,11 @@ export default function LojaConfigPage() {
           </Col>
         </Row>
       ),
+    },
+    {
+      key: 'products',
+      label: <><ShoppingCartOutlined /> Produtos</>,
+      children: <ProductsTab store={store} allProducts={allProducts} />,
     },
     {
       key: 'documents',
