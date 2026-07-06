@@ -1,8 +1,7 @@
 import { useState, useMemo } from 'react';
-import { Table, Tag, Typography, Card, Row, Col, Statistic, Input, Select, Space, Button, message, Popconfirm, Segmented, Badge, Descriptions, DatePicker } from 'antd';
-import { BankOutlined, SearchOutlined, DollarOutlined, WalletOutlined, DownloadOutlined } from '@ant-design/icons';
-import { useAppSelector, useAppDispatch } from '../../store';
-import { updateCommissionStatus } from '../../store/slices/comissoesSlice';
+import { Table, Tag, Typography, Card, Row, Col, Statistic, Input, Select, Space, Button, message, Segmented, Badge, Descriptions, DatePicker } from 'antd';
+import { BankOutlined, SearchOutlined, DollarOutlined, DownloadOutlined } from '@ant-design/icons';
+import { useAppSelector } from '../../store';
 import { categories } from '../../data/categories';
 import type { Commission, CommissionStatus } from '../../types';
 
@@ -10,13 +9,12 @@ const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
 const statusConfig: Record<CommissionStatus, { color: string; label: string }> = {
-  pendente: { color: 'orange', label: 'Aguardando Venda' },
-  aprovada: { color: 'blue', label: 'A Pagar' },
+  pendente: { color: 'orange', label: 'Aguardando Pgto' },
+  aprovada: { color: 'blue', label: 'Processando' },
   paga: { color: 'green', label: 'Paga' },
 };
 
 export default function ComissoesPage() {
-  const dispatch = useAppDispatch();
   const commissions = useAppSelector((s) => s.comissoes.list);
   const products = useAppSelector((s) => s.catalogo.list);
   const associados = useAppSelector((s) => s.associados.list);
@@ -76,16 +74,6 @@ export default function ComissoesPage() {
     const ids = new Set(commissions.map((c) => c.associadoId));
     return associados.filter((a) => ids.has(a.id));
   }, [commissions, associados]);
-
-  const handlePay = (id: string) => {
-    dispatch(updateCommissionStatus({ id, status: 'paga' }));
-    message.success('Comissão marcada como paga!');
-  };
-
-  const handlePayAll = () => {
-    toPayComms.forEach((c) => dispatch(updateCommissionStatus({ id: c.id, status: 'paga' })));
-    message.success(`${toPayComms.length} comissões marcadas como pagas!`);
-  };
 
   const columns = [
     {
@@ -166,20 +154,6 @@ export default function ComissoesPage() {
       width: 120,
       render: (v: CommissionStatus) => <Tag color={statusConfig[v].color}>{statusConfig[v].label}</Tag>,
     },
-    {
-      title: 'Ações',
-      key: 'actions',
-      width: 100,
-      render: (_: unknown, r: Commission) => (
-        <>
-          {r.status === 'aprovada' && (
-            <Popconfirm title="Marcar comissão como paga?" description={`R$ ${r.commissionValue.toFixed(2)} para ${assocMap[r.associadoId]?.name}`} okText="Confirmar Pgto" cancelText="Cancelar" onConfirm={() => handlePay(r.id)}>
-              <Button type="link" size="small" icon={<WalletOutlined />} style={{ color: '#52c41a' }}>Pagar</Button>
-            </Popconfirm>
-          )}
-        </>
-      ),
-    },
   ];
 
   const expandedRowRender = (record: Commission) => {
@@ -202,14 +176,7 @@ export default function ComissoesPage() {
           <BankOutlined style={{ marginRight: 8 }} />
           Gestão de Comissões
         </Title>
-        <Space>
-          {toPayComms.length > 0 && (
-            <Popconfirm title={`Pagar todas as ${toPayComms.length} comissões pendentes?`} description={`Total: R$ ${totalToPay.toFixed(2)}`} okText="Pagar Todas" cancelText="Cancelar" onConfirm={handlePayAll}>
-              <Button type="primary" icon={<WalletOutlined />}>Pagar Todas ({toPayComms.length})</Button>
-            </Popconfirm>
-          )}
-          <Button icon={<DownloadOutlined />} onClick={() => message.info('Exportação será implementada com Cloud Functions.')}>Exportar</Button>
-        </Space>
+        <Button icon={<DownloadOutlined />} onClick={() => message.info('Exportação será implementada com Cloud Functions.')}>Exportar</Button>
       </div>
 
       <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
@@ -220,7 +187,7 @@ export default function ComissoesPage() {
         </Col>
         <Col xs={12} sm={8} lg={5}>
           <Card size="small" style={{ borderLeft: '3px solid #1677ff' }}>
-            <Statistic title="A Pagar" value={totalToPay} precision={2} prefix="R$" styles={{ content: { color: '#1677ff', fontSize: 20 } }} />
+            <Statistic title="Processando" value={totalToPay} precision={2} prefix="R$" styles={{ content: { color: '#1677ff', fontSize: 20 } }} />
           </Card>
         </Col>
         <Col xs={12} sm={8} lg={5}>
@@ -258,7 +225,7 @@ export default function ComissoesPage() {
                   </div>
                   {a.toPay > 0 && (
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
-                      <Text type="secondary">A pagar:</Text>
+                      <Text type="secondary">Processando:</Text>
                       <Text style={{ color: '#1677ff' }}>R$ {a.toPay.toFixed(2)}</Text>
                     </div>
                   )}
@@ -280,7 +247,7 @@ export default function ComissoesPage() {
             onChange={(v) => { setView(v as string); setStatusFilter('all'); }}
             options={[
               { label: `Todas (${commissions.length})`, value: 'todas' },
-              { label: <Badge count={toPayComms.length} size="small" offset={[8, -2]}><span>A Pagar</span></Badge>, value: 'a_pagar' },
+              { label: <Badge count={toPayComms.length} size="small" offset={[8, -2]}><span>Processando</span></Badge>, value: 'a_pagar' },
               { label: `Pagas (${paidComms.length})`, value: 'pagas' },
             ]}
           />
@@ -290,8 +257,8 @@ export default function ComissoesPage() {
           <Input placeholder="Buscar por associado ou produto..." prefix={<SearchOutlined />} value={search} onChange={(e) => setSearch(e.target.value)} style={{ width: 280 }} allowClear />
           <Select value={statusFilter} onChange={setStatusFilter} style={{ width: 160 }} disabled={view !== 'todas'}>
             <Select.Option value="all">Todos status</Select.Option>
-            <Select.Option value="pendente">Aguardando Venda</Select.Option>
-            <Select.Option value="aprovada">A Pagar</Select.Option>
+            <Select.Option value="pendente">Aguardando Pgto</Select.Option>
+            <Select.Option value="aprovada">Processando</Select.Option>
             <Select.Option value="paga">Paga</Select.Option>
           </Select>
           <Select value={associadoFilter} onChange={setAssociadoFilter} style={{ width: 200 }} showSearch optionFilterProp="children">
