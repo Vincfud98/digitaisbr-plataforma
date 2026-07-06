@@ -179,6 +179,7 @@ export interface ForumTopic {
   body: string;
   authorId: string;
   authorName: string;
+  authorRole?: string;
   category: string;
   status: ForumTopicStatus;
   replies: number;
@@ -186,6 +187,7 @@ export interface ForumTopic {
   likes: number;
   lastReplyAt: string | null;
   createdAt: string;
+  media?: { type: 'image' | 'video'; url: string; caption?: string }[];
 }
 
 export interface Notification {
