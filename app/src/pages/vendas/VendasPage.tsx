@@ -1,8 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Table, Tag, Typography, Card, Row, Col, Statistic, Input, Select, Space, Button, message, Popconfirm, Descriptions, DatePicker, Segmented, Badge, Tooltip } from 'antd';
 import {
-  DollarOutlined, SearchOutlined, CheckCircleOutlined, CloseCircleOutlined,
-  DownloadOutlined,
+  DollarOutlined, SearchOutlined, DownloadOutlined,
 } from '@ant-design/icons';
 import { useAppSelector, useAppDispatch } from '../../store';
 import { updateSaleStatus } from '../../store/slices/vendasSlice';
@@ -13,8 +12,8 @@ const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
 const statusConfig: Record<SaleStatus, { color: string; label: string }> = {
-  pendente: { color: 'orange', label: 'Pendente' },
-  aprovada: { color: 'green', label: 'Aprovada' },
+  pendente: { color: 'orange', label: 'Aguardando Pgto' },
+  aprovada: { color: 'green', label: 'Paga' },
   cancelada: { color: 'red', label: 'Cancelada' },
   reembolsada: { color: 'default', label: 'Reembolsada' },
 };
@@ -75,11 +74,6 @@ export default function VendasPage() {
     const ids = new Set(sales.map((s) => s.associadoId));
     return associados.filter((a) => ids.has(a.id));
   }, [sales, associados]);
-
-  const handleApprove = (id: string) => {
-    dispatch(updateSaleStatus({ id, status: 'aprovada' }));
-    message.success('Venda aprovada!');
-  };
 
   const handleCancel = (id: string) => {
     dispatch(updateSaleStatus({ id, status: 'cancelada' }));
@@ -191,14 +185,9 @@ export default function VendasPage() {
       render: (_: unknown, r: Sale) => (
         <Space size={4}>
           {r.status === 'pendente' && (
-            <>
-              <Popconfirm title="Aprovar esta venda?" okText="Aprovar" cancelText="Cancelar" onConfirm={() => handleApprove(r.id)}>
-                <Button type="link" size="small" icon={<CheckCircleOutlined />} style={{ color: '#52c41a' }} />
-              </Popconfirm>
-              <Popconfirm title="Cancelar esta venda?" okText="Sim, cancelar" cancelText="Não" onConfirm={() => handleCancel(r.id)}>
-                <Button type="link" size="small" icon={<CloseCircleOutlined />} danger />
-              </Popconfirm>
-            </>
+            <Popconfirm title="Cancelar esta venda?" description="O checkout será invalidado." okText="Sim, cancelar" cancelText="Não" onConfirm={() => handleCancel(r.id)}>
+              <Button type="link" size="small" danger style={{ fontSize: 12 }}>Cancelar</Button>
+            </Popconfirm>
           )}
           {r.status === 'aprovada' && (
             <Popconfirm title="Reembolsar esta venda?" description={`R$ ${r.totalPrice.toFixed(2)} será devolvido ao cliente.`} okText="Reembolsar" cancelText="Não" onConfirm={() => handleRefund(r.id)}>
@@ -280,8 +269,8 @@ export default function VendasPage() {
             onChange={(v) => { setView(v as string); setStatusFilter('all'); }}
             options={[
               { label: `Todas (${sales.length})`, value: 'todas' },
-              { label: <Badge count={totalPending} size="small" offset={[8, -2]}><span>Pendentes</span></Badge>, value: 'pendentes' },
-              { label: `Aprovadas (${totalApproved})`, value: 'aprovadas' },
+              { label: <Badge count={totalPending} size="small" offset={[8, -2]}><span>Aguardando Pgto</span></Badge>, value: 'pendentes' },
+              { label: `Pagas (${totalApproved})`, value: 'aprovadas' },
             ]}
           />
         </div>
