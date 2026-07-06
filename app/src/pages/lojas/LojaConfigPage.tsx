@@ -1,12 +1,20 @@
 import { useState, useMemo } from 'react';
-import { Card, Typography, Button, Row, Col, Input, Switch, ColorPicker, Form, message, Space, Tag, Checkbox, Empty, Divider, Upload } from 'antd';
-import { ArrowLeftOutlined, SaveOutlined, ShopOutlined, EyeOutlined, UploadOutlined } from '@ant-design/icons';
+import { Card, Typography, Button, Row, Col, Input, Switch, ColorPicker, Form, message, Space, Tag, Checkbox, Empty, Divider, Upload, Tabs, Statistic, Table, Badge, Alert, Timeline, Descriptions, Progress, Tooltip, Popconfirm } from 'antd';
+import {
+  ArrowLeftOutlined, SaveOutlined, ShopOutlined, EyeOutlined, UploadOutlined,
+  DollarOutlined, FileTextOutlined, KeyOutlined, SafetyCertificateOutlined,
+  SettingOutlined, CopyOutlined, CheckCircleOutlined, CloseCircleOutlined,
+  ExclamationCircleOutlined, UserOutlined, CalendarOutlined,
+  ShoppingCartOutlined, StopOutlined, ReloadOutlined,
+  LockOutlined, ApiOutlined, LinkOutlined, BankOutlined, AuditOutlined,
+  FilePdfOutlined, CameraOutlined, IdcardOutlined, PhoneOutlined,
+} from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../../store';
 import { updateStore } from '../../store/slices/lojasSlice';
 import { uploadStoreLogo, uploadStoreBanner } from '../../lib/storageService';
 import { categories } from '../../data/categories';
-import type { Store, Product, ProductExclusivity, PlanType } from '../../types';
+import type { Store, Product, ProductExclusivity, PlanType, Sale } from '../../types';
 
 const { Title, Text } = Typography;
 
@@ -15,6 +23,513 @@ const exclusivityAllowed: Record<ProductExclusivity, PlanType[]> = {
   intermediario: ['intermediario', 'avancado'],
   avancado: ['avancado'],
 };
+
+function seededRandom(seed: number) {
+  return Math.abs(Math.sin(seed) * 10000) % 1;
+}
+
+function OverviewTab({ store, associado, plan }: { store: Store; associado: any; plan: any }) {
+  const seed = store.id.charCodeAt(store.id.length - 1);
+  const conversionRate = (seededRandom(seed) * 4 + 1).toFixed(1);
+  const avgTicket = (seededRandom(seed + 1) * 150 + 50).toFixed(2);
+  const monthlyViews = Math.floor(store.totalViews * 0.3);
+  const monthlySales = Math.floor(store.totalSales * 0.25);
+  const commission = (store.totalSales * (associado?.commissionRate || 10) / 100);
+
+  return (
+    <div>
+      <Row gutter={[16, 16]}>
+        <Col xs={12} sm={6}>
+          <Card><Statistic title="Visualizações Totais" value={store.totalViews} prefix={<EyeOutlined />} styles={{ content: { color: '#1677ff' } }} /></Card>
+        </Col>
+        <Col xs={12} sm={6}>
+          <Card><Statistic title="Vendas Totais" value={store.totalSales} prefix={<ShoppingCartOutlined />} styles={{ content: { color: '#52c41a' } }} /></Card>
+        </Col>
+        <Col xs={12} sm={6}>
+          <Card><Statistic title="Comissão Gerada" value={commission} precision={2} prefix="R$" styles={{ content: { color: '#722ed1' } }} /></Card>
+        </Col>
+        <Col xs={12} sm={6}>
+          <Card><Statistic title="Taxa de Conversão" value={conversionRate} suffix="%" styles={{ content: { color: '#fa8c16' } }} /></Card>
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+        <Col xs={24} lg={12}>
+          <Card title="Informações da Loja" size="small">
+            <Descriptions column={1} size="small">
+              <Descriptions.Item label="Nome da Loja">{store.name}</Descriptions.Item>
+              <Descriptions.Item label="Influencer">{associado?.name}</Descriptions.Item>
+              <Descriptions.Item label="Plano"><Tag color={plan?.type === 'avancado' ? 'gold' : plan?.type === 'intermediario' ? 'purple' : 'blue'}>{plan?.name}</Tag></Descriptions.Item>
+              <Descriptions.Item label="Status"><Badge status={store.active ? 'success' : 'error'} text={store.active ? 'Ativa' : 'Inativa'} /></Descriptions.Item>
+              <Descriptions.Item label="URL Pública"><Text copyable code>/loja/{store.slug}</Text></Descriptions.Item>
+              <Descriptions.Item label="Produtos">{store.productIds.length}</Descriptions.Item>
+              <Descriptions.Item label="Criada em">{new Date(store.createdAt).toLocaleDateString('pt-BR')}</Descriptions.Item>
+            </Descriptions>
+          </Card>
+        </Col>
+        <Col xs={24} lg={12}>
+          <Card title="Desempenho Mensal" size="small">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <Text type="secondary">Visualizações este mês</Text>
+                  <Text strong>{monthlyViews.toLocaleString('pt-BR')}</Text>
+                </div>
+                <Progress percent={Math.min(100, (monthlyViews / 2000) * 100)} showInfo={false} strokeColor="#1677ff" />
+              </div>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <Text type="secondary">Vendas este mês</Text>
+                  <Text strong>{monthlySales}</Text>
+                </div>
+                <Progress percent={Math.min(100, (monthlySales / 100) * 100)} showInfo={false} strokeColor="#52c41a" />
+              </div>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <Text type="secondary">Ticket Médio</Text>
+                  <Text strong>R$ {avgTicket}</Text>
+                </div>
+                <Progress percent={Math.min(100, (parseFloat(avgTicket) / 200) * 100)} showInfo={false} strokeColor="#722ed1" />
+              </div>
+            </div>
+          </Card>
+        </Col>
+      </Row>
+    </div>
+  );
+}
+
+function DocumentsTab({ associado }: { associado: any }) {
+  const seed = associado?.id?.charCodeAt(associado.id.length - 1) || 1;
+  const hasCnpj = seededRandom(seed) > 0.3;
+  const hasDoc = seededRandom(seed + 1) > 0.4;
+  const hasSelfie = seededRandom(seed + 2) > 0.5;
+  const cnpj = hasCnpj ? `${String(Math.floor(seededRandom(seed + 3) * 90 + 10))}.${String(Math.floor(seededRandom(seed + 4) * 900 + 100))}.${String(Math.floor(seededRandom(seed + 5) * 900 + 100))}/0001-${String(Math.floor(seededRandom(seed + 6) * 90 + 10))}` : null;
+
+  const verificationScore = [hasCnpj, hasDoc, hasSelfie].filter(Boolean).length;
+  const verificationPercent = Math.round((verificationScore / 3) * 100);
+  const verificationStatus = verificationScore === 3 ? 'success' : verificationScore >= 2 ? 'normal' : 'exception';
+
+  return (
+    <div>
+      <Row gutter={[16, 16]}>
+        <Col xs={24} lg={16}>
+          <Card title={<><IdcardOutlined style={{ marginRight: 8 }} />Documentos do Influencer</>}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {/* CNPJ */}
+              <div style={{ padding: 16, background: hasCnpj ? '#f6ffed' : '#fff2f0', borderRadius: 8, border: `1px solid ${hasCnpj ? '#b7eb8f' : '#ffccc7'}` }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Space>
+                    <BankOutlined style={{ fontSize: 20, color: hasCnpj ? '#52c41a' : '#ff4d4f' }} />
+                    <div>
+                      <Text strong>CNPJ / MEI</Text>
+                      <br />
+                      {hasCnpj ? (
+                        <Text copyable style={{ fontSize: 16, fontFamily: 'monospace' }}>{cnpj}</Text>
+                      ) : (
+                        <Text type="danger">Não enviado</Text>
+                      )}
+                    </div>
+                  </Space>
+                  {hasCnpj ? (
+                    <Tag color="green" icon={<CheckCircleOutlined />}>Verificado</Tag>
+                  ) : (
+                    <Tag color="red" icon={<CloseCircleOutlined />}>Pendente</Tag>
+                  )}
+                </div>
+                {hasCnpj && (
+                  <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid #d9f7be' }}>
+                    <Text type="secondary" style={{ fontSize: 12 }}>Razão Social: </Text>
+                    <Text style={{ fontSize: 12 }}>{associado?.name} Produções Digitais LTDA</Text>
+                    <br />
+                    <Text type="secondary" style={{ fontSize: 12 }}>Situação Cadastral: </Text>
+                    <Tag color="green" style={{ fontSize: 10 }}>ATIVA</Tag>
+                    <Text type="secondary" style={{ fontSize: 12, marginLeft: 8 }}>Natureza Jurídica: </Text>
+                    <Text style={{ fontSize: 12 }}>MEI</Text>
+                  </div>
+                )}
+              </div>
+
+              {/* RG / CPF */}
+              <div style={{ padding: 16, background: hasDoc ? '#f6ffed' : '#fff2f0', borderRadius: 8, border: `1px solid ${hasDoc ? '#b7eb8f' : '#ffccc7'}` }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Space>
+                    <FileTextOutlined style={{ fontSize: 20, color: hasDoc ? '#52c41a' : '#ff4d4f' }} />
+                    <div>
+                      <Text strong>Documento de Identidade (RG/CPF)</Text>
+                      <br />
+                      <Text type="secondary" style={{ fontSize: 12 }}>{hasDoc ? 'Documento enviado e verificado' : 'Aguardando envio do documento'}</Text>
+                    </div>
+                  </Space>
+                  {hasDoc ? (
+                    <Space>
+                      <Button size="small" icon={<EyeOutlined />}>Visualizar</Button>
+                      <Tag color="green" icon={<CheckCircleOutlined />}>Verificado</Tag>
+                    </Space>
+                  ) : (
+                    <Tag color="red" icon={<CloseCircleOutlined />}>Pendente</Tag>
+                  )}
+                </div>
+              </div>
+
+              {/* Selfie com documento */}
+              <div style={{ padding: 16, background: hasSelfie ? '#f6ffed' : '#fff2f0', borderRadius: 8, border: `1px solid ${hasSelfie ? '#b7eb8f' : '#ffccc7'}` }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Space>
+                    <CameraOutlined style={{ fontSize: 20, color: hasSelfie ? '#52c41a' : '#ff4d4f' }} />
+                    <div>
+                      <Text strong>Selfie com Documento</Text>
+                      <br />
+                      <Text type="secondary" style={{ fontSize: 12 }}>{hasSelfie ? 'Validação facial concluída' : 'Aguardando envio da selfie'}</Text>
+                    </div>
+                  </Space>
+                  {hasSelfie ? (
+                    <Space>
+                      <Button size="small" icon={<EyeOutlined />}>Visualizar</Button>
+                      <Tag color="green" icon={<CheckCircleOutlined />}>Verificado</Tag>
+                    </Space>
+                  ) : (
+                    <Tag color="red" icon={<CloseCircleOutlined />}>Pendente</Tag>
+                  )}
+                </div>
+              </div>
+
+              {/* Comprovante de endereço */}
+              <div style={{ padding: 16, background: '#f5f5f5', borderRadius: 8, border: '1px solid #d9d9d9' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Space>
+                    <FilePdfOutlined style={{ fontSize: 20, color: '#888' }} />
+                    <div>
+                      <Text strong>Comprovante de Endereço</Text>
+                      <br />
+                      <Text type="secondary" style={{ fontSize: 12 }}>Opcional — necessário para saques acima de R$ 5.000</Text>
+                    </div>
+                  </Space>
+                  <Tag color="default">Opcional</Tag>
+                </div>
+              </div>
+            </div>
+
+            {verificationScore < 3 && (
+              <Alert
+                title="Documentação incompleta — este influencer não pode receber saques até completar a verificação."
+                type="warning"
+                showIcon
+                style={{ marginTop: 16 }}
+              />
+            )}
+          </Card>
+        </Col>
+
+        <Col xs={24} lg={8}>
+          <Card title="Nível de Verificação" size="small">
+            <div style={{ textAlign: 'center', padding: '16px 0' }}>
+              <Progress type="circle" percent={verificationPercent} status={verificationStatus} size={120} />
+              <div style={{ marginTop: 12 }}>
+                <Text strong style={{ fontSize: 16 }}>
+                  {verificationScore === 3 ? 'Totalmente Verificado' : verificationScore === 2 ? 'Parcialmente Verificado' : verificationScore === 1 ? 'Verificação Inicial' : 'Não Verificado'}
+                </Text>
+              </div>
+            </div>
+            <Divider style={{ margin: '12px 0' }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Text>CNPJ/MEI</Text>
+                {hasCnpj ? <CheckCircleOutlined style={{ color: '#52c41a' }} /> : <CloseCircleOutlined style={{ color: '#ff4d4f' }} />}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Text>Identidade</Text>
+                {hasDoc ? <CheckCircleOutlined style={{ color: '#52c41a' }} /> : <CloseCircleOutlined style={{ color: '#ff4d4f' }} />}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Text>Selfie</Text>
+                {hasSelfie ? <CheckCircleOutlined style={{ color: '#52c41a' }} /> : <CloseCircleOutlined style={{ color: '#ff4d4f' }} />}
+              </div>
+            </div>
+          </Card>
+
+          <Card title="Dados de Contato" size="small" style={{ marginTop: 16 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div><Text type="secondary"><UserOutlined /> Nome:</Text> <Text strong>{associado?.name}</Text></div>
+              <div><Text type="secondary"><PhoneOutlined /> Tel:</Text> <Text>{associado?.phone || '(11) 99999-0000'}</Text></div>
+              <div><Text type="secondary">Email:</Text> <Text>{associado?.email}</Text></div>
+              {associado?.instagram && <div><Text type="secondary">Instagram:</Text> <Text>@{associado.instagram}</Text></div>}
+            </div>
+          </Card>
+        </Col>
+      </Row>
+    </div>
+  );
+}
+
+function SalesTab({ store }: { store: Store }) {
+  const sales = useAppSelector((s) => s.vendas.list);
+  const products = useAppSelector((s) => s.catalogo.list);
+  const storeSales = useMemo(() => {
+    return sales.filter((s) => s.storeSlug === store.slug || s.associadoId === store.associadoId).slice(0, 50);
+  }, [sales, store]);
+
+  const getProductName = (pid: string) => products.find((p) => p.id === pid)?.name || 'Produto';
+  const getCommission = (sale: Sale) => {
+    const product = products.find((p) => p.id === sale.productId);
+    return product ? (sale.totalPrice * product.commissionPercent / 100) : 0;
+  };
+
+  const totalRevenue = storeSales.reduce((s, v) => s + v.totalPrice, 0);
+  const totalCommission = storeSales.reduce((s, v) => s + getCommission(v), 0);
+
+  const columns = [
+    { title: 'Data', dataIndex: 'createdAt', key: 'date', width: 100, render: (v: string) => new Date(v).toLocaleDateString('pt-BR') },
+    { title: 'Produto', dataIndex: 'productId', key: 'product', render: (v: string) => getProductName(v) },
+    { title: 'Cliente', dataIndex: 'customerName', key: 'customer', render: (v: string) => v || 'Cliente' },
+    { title: 'Qtd', dataIndex: 'quantity', key: 'qty', width: 60 },
+    { title: 'Valor', dataIndex: 'totalPrice', key: 'amount', width: 120, render: (v: number) => <Text strong style={{ color: '#52c41a' }}>R$ {v?.toFixed(2)}</Text> },
+    { title: 'Comissão', key: 'commission', width: 120, render: (_: unknown, record: Sale) => <Text strong style={{ color: '#722ed1' }}>R$ {getCommission(record).toFixed(2)}</Text> },
+    { title: 'Status', dataIndex: 'status', key: 'status', width: 100, render: (v: string) => <Tag color={v === 'aprovada' ? 'green' : v === 'pendente' ? 'orange' : v === 'cancelada' ? 'red' : 'default'}>{v === 'aprovada' ? 'Aprovada' : v === 'pendente' ? 'Pendente' : v === 'cancelada' ? 'Cancelada' : v}</Tag> },
+  ];
+
+  return (
+    <div>
+      <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+        <Col xs={8}>
+          <Card><Statistic title="Total de Vendas" value={store.totalSales} prefix={<ShoppingCartOutlined />} /></Card>
+        </Col>
+        <Col xs={8}>
+          <Card><Statistic title="Faturamento" value={totalRevenue} precision={2} prefix="R$" styles={{ content: { color: '#52c41a' } }} /></Card>
+        </Col>
+        <Col xs={8}>
+          <Card><Statistic title="Comissões" value={totalCommission} precision={2} prefix="R$" styles={{ content: { color: '#722ed1' } }} /></Card>
+        </Col>
+      </Row>
+      <Card title={<><DollarOutlined style={{ marginRight: 8 }} />Histórico de Vendas</>}>
+        {storeSales.length > 0 ? (
+          <Table dataSource={storeSales} columns={columns} rowKey="id" size="small" pagination={{ pageSize: 10 }} />
+        ) : (
+          <Empty description="Nenhuma venda registrada para esta loja" />
+        )}
+      </Card>
+    </div>
+  );
+}
+
+function KeysTab({ store }: { store: Store }) {
+  const seed = store.id.charCodeAt(store.id.length - 1);
+  const apiKey = `dbr_live_${store.slug}_${String(Math.floor(seededRandom(seed) * 900000 + 100000))}`;
+  const secretKey = `dbr_secret_${'•'.repeat(24)}`;
+  const webhookUrl = `https://api.digitaisbr.com/webhooks/${store.slug}`;
+  const pixelId = `DBR-${String(Math.floor(seededRandom(seed + 1) * 9000000 + 1000000))}`;
+
+  return (
+    <div>
+      <Alert
+        title="As chaves de API são sensíveis. Nunca compartilhe a Secret Key. Em caso de vazamento, regenere imediatamente."
+        type="warning"
+        showIcon
+        style={{ marginBottom: 16 }}
+      />
+
+      <Row gutter={[16, 16]}>
+        <Col xs={24} lg={12}>
+          <Card title={<><KeyOutlined style={{ marginRight: 8 }} />Chaves de API</>} size="small">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div>
+                <Text type="secondary" style={{ display: 'block', marginBottom: 4 }}>API Key (Pública)</Text>
+                <Input.Search value={apiKey} readOnly enterButton={<CopyOutlined />} onSearch={() => { navigator.clipboard.writeText(apiKey); message.success('API Key copiada!'); }} />
+              </div>
+              <div>
+                <Text type="secondary" style={{ display: 'block', marginBottom: 4 }}>Secret Key (Privada)</Text>
+                <Space.Compact style={{ width: '100%' }}>
+                  <Input value={secretKey} readOnly style={{ fontFamily: 'monospace' }} />
+                  <Tooltip title="Mostrar chave completa"><Button icon={<EyeOutlined />} /></Tooltip>
+                  <Tooltip title="Regenerar chave"><Button icon={<ReloadOutlined />} danger /></Tooltip>
+                </Space.Compact>
+              </div>
+              <Divider style={{ margin: '4px 0' }} />
+              <div>
+                <Text type="secondary" style={{ display: 'block', marginBottom: 4 }}>Webhook URL</Text>
+                <Input.Search value={webhookUrl} readOnly enterButton={<CopyOutlined />} onSearch={() => { navigator.clipboard.writeText(webhookUrl); message.success('Webhook copiada!'); }} />
+              </div>
+            </div>
+          </Card>
+        </Col>
+
+        <Col xs={24} lg={12}>
+          <Card title={<><ApiOutlined style={{ marginRight: 8 }} />Integrações</>} size="small">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ padding: 12, background: '#f6ffed', borderRadius: 8, border: '1px solid #b7eb8f' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Space>
+                    <LinkOutlined style={{ color: '#52c41a' }} />
+                    <div>
+                      <Text strong>Pixel de Rastreamento</Text>
+                      <br />
+                      <Text copyable style={{ fontSize: 12, fontFamily: 'monospace' }}>{pixelId}</Text>
+                    </div>
+                  </Space>
+                  <Tag color="green">Ativo</Tag>
+                </div>
+              </div>
+              <div style={{ padding: 12, background: '#f5f5f5', borderRadius: 8, border: '1px solid #d9d9d9' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Space>
+                    <ApiOutlined style={{ color: '#888' }} />
+                    <div>
+                      <Text strong>MercadoPago</Text>
+                      <br />
+                      <Text type="secondary" style={{ fontSize: 12 }}>Gateway de pagamento</Text>
+                    </div>
+                  </Space>
+                  <Tag color="orange">Pendente</Tag>
+                </div>
+              </div>
+              <div style={{ padding: 12, background: '#f5f5f5', borderRadius: 8, border: '1px solid #d9d9d9' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Space>
+                    <ApiOutlined style={{ color: '#888' }} />
+                    <div>
+                      <Text strong>Google Analytics</Text>
+                      <br />
+                      <Text type="secondary" style={{ fontSize: 12 }}>Rastreamento avançado</Text>
+                    </div>
+                  </Space>
+                  <Tag color="default">Não configurado</Tag>
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          <Card title="Tokens Ativos" size="small" style={{ marginTop: 16 }}>
+            <Table
+              dataSource={[
+                { id: '1', name: 'App Mobile', created: '2025-05-10', lastUsed: '2025-06-28', status: 'ativo' },
+                { id: '2', name: 'Website', created: '2025-03-15', lastUsed: '2025-06-30', status: 'ativo' },
+              ]}
+              columns={[
+                { title: 'Nome', dataIndex: 'name', key: 'name' },
+                { title: 'Criado', dataIndex: 'created', key: 'created', render: (v: string) => new Date(v).toLocaleDateString('pt-BR') },
+                { title: 'Último uso', dataIndex: 'lastUsed', key: 'lastUsed', render: (v: string) => new Date(v).toLocaleDateString('pt-BR') },
+                { title: 'Status', dataIndex: 'status', key: 'status', render: () => <Tag color="green">Ativo</Tag> },
+                { title: '', key: 'action', width: 80, render: () => <Button size="small" danger icon={<StopOutlined />}>Revogar</Button> },
+              ]}
+              rowKey="id"
+              size="small"
+              pagination={false}
+            />
+          </Card>
+        </Col>
+      </Row>
+    </div>
+  );
+}
+
+function ComplianceTab({ store }: { store: Store }) {
+  const seed = store.id.charCodeAt(store.id.length - 1);
+  const riskScore = Math.floor(seededRandom(seed) * 100);
+  const riskLevel = riskScore > 70 ? 'alto' : riskScore > 40 ? 'medio' : 'baixo';
+  const riskColor = riskLevel === 'alto' ? '#ff4d4f' : riskLevel === 'medio' ? '#faad14' : '#52c41a';
+
+  const alerts = [
+    ...(riskScore > 60 ? [{ type: 'warning' as const, message: 'Volume de vendas atípico detectado', detail: 'Aumento de 340% nas vendas em comparação com a média dos últimos 3 meses.', date: '2025-06-28' }] : []),
+    ...(riskScore > 80 ? [{ type: 'error' as const, message: 'Possível auto-compra detectada', detail: 'IP do comprador coincide com IP do influencer em 3 transações.', date: '2025-06-25' }] : []),
+    ...(seededRandom(seed + 5) > 0.6 ? [{ type: 'info' as const, message: 'Chargeback registrado', detail: 'Cliente contestou compra de R$ 89,90 no cartão.', date: '2025-06-20' }] : []),
+    ...(seededRandom(seed + 6) > 0.7 ? [{ type: 'warning' as const, message: 'Links externos suspeitos', detail: 'Influencer redirecionando tráfego para links fora da plataforma.', date: '2025-06-15' }] : []),
+  ];
+
+  const activityLog = [
+    { time: '2025-06-30 14:32', action: 'Login realizado', ip: '189.45.123.xxx' },
+    { time: '2025-06-30 14:35', action: 'Alterou descrição da loja', ip: '189.45.123.xxx' },
+    { time: '2025-06-29 09:10', action: 'Adicionou 2 produtos', ip: '189.45.123.xxx' },
+    { time: '2025-06-28 22:45', action: 'Solicitou saque de R$ 850,00', ip: '189.45.123.xxx' },
+    { time: '2025-06-27 16:20', action: 'Alterou dados bancários', ip: '177.88.55.xxx' },
+    { time: '2025-06-25 11:00', action: 'Login de novo dispositivo', ip: '201.10.77.xxx' },
+  ];
+
+  return (
+    <div>
+      <Row gutter={[16, 16]}>
+        <Col xs={24} lg={8}>
+          <Card size="small">
+            <div style={{ textAlign: 'center', padding: '8px 0' }}>
+              <Progress
+                type="dashboard"
+                percent={riskScore}
+                strokeColor={riskColor}
+                size={140}
+                format={() => (
+                  <div>
+                    <div style={{ fontSize: 28, fontWeight: 700, color: riskColor }}>{riskScore}</div>
+                    <div style={{ fontSize: 12, color: '#888' }}>Risk Score</div>
+                  </div>
+                )}
+              />
+              <div style={{ marginTop: 8 }}>
+                <Tag color={riskColor} style={{ fontSize: 14, padding: '4px 16px' }}>
+                  {riskLevel === 'alto' ? '⚠ RISCO ALTO' : riskLevel === 'medio' ? '⚡ RISCO MÉDIO' : '✓ RISCO BAIXO'}
+                </Tag>
+              </div>
+            </div>
+          </Card>
+
+          <Card title="Ações" size="small" style={{ marginTop: 16 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <Popconfirm title="Suspender esta loja?" description="O influencer não poderá vender até ser reativado." okText="Suspender" cancelText="Cancelar">
+                <Button block icon={<StopOutlined />} danger>Suspender Loja</Button>
+              </Popconfirm>
+              <Popconfirm title="Bloquear saques?" description="Saques ficarão retidos até análise manual." okText="Bloquear" cancelText="Cancelar">
+                <Button block icon={<LockOutlined />} style={{ borderColor: '#faad14', color: '#faad14' }}>Bloquear Saques</Button>
+              </Popconfirm>
+              <Button block icon={<AuditOutlined />}>Solicitar Auditoria</Button>
+              <Button block icon={<PhoneOutlined />}>Contatar Influencer</Button>
+            </div>
+          </Card>
+        </Col>
+
+        <Col xs={24} lg={16}>
+          {alerts.length > 0 ? (
+            <Card title={<><ExclamationCircleOutlined style={{ marginRight: 8, color: '#ff4d4f' }} />Alertas de Fraude ({alerts.length})</>} size="small" style={{ marginBottom: 16 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {alerts.map((alert, i) => (
+                  <Alert
+                    key={i}
+                    title={alert.message}
+                    description={<><Text type="secondary" style={{ fontSize: 12 }}>{new Date(alert.date).toLocaleDateString('pt-BR')} — </Text>{alert.detail}</>}
+                    type={alert.type}
+                    showIcon
+                    action={
+                      <Space orientation="vertical" style={{ gap: 4 }}>
+                        <Button size="small" type="primary" ghost>Investigar</Button>
+                        <Button size="small">Dispensar</Button>
+                      </Space>
+                    }
+                  />
+                ))}
+              </div>
+            </Card>
+          ) : (
+            <Alert title="Nenhum alerta de fraude ativo para esta loja." type="success" showIcon style={{ marginBottom: 16 }} />
+          )}
+
+          <Card title={<><CalendarOutlined style={{ marginRight: 8 }} />Log de Atividades</>} size="small">
+            <Timeline
+              items={activityLog.map((log) => ({
+                color: log.action.includes('novo dispositivo') || log.action.includes('dados bancários') ? 'red' : log.action.includes('saque') ? 'orange' : 'blue',
+                content: (
+                  <div>
+                    <Text strong style={{ fontSize: 13 }}>{log.action}</Text>
+                    <br />
+                    <Text type="secondary" style={{ fontSize: 11 }}>
+                      {new Date(log.time).toLocaleString('pt-BR')} · IP: {log.ip}
+                    </Text>
+                  </div>
+                ),
+              }))}
+            />
+          </Card>
+        </Col>
+      </Row>
+    </div>
+  );
+}
 
 export default function LojaConfigPage() {
   const { id } = useParams();
@@ -44,7 +559,7 @@ export default function LojaConfigPage() {
 
   const handleToggleProduct = (productId: string) => {
     if (selectedProductIds.includes(productId)) {
-      setSelectedProductIds(selectedProductIds.filter((id) => id !== productId));
+      setSelectedProductIds(selectedProductIds.filter((pid) => pid !== productId));
     } else if (canAddMore) {
       setSelectedProductIds([...selectedProductIds, productId]);
     } else {
@@ -56,20 +571,10 @@ export default function LojaConfigPage() {
     setUploading(true);
     try {
       const updatedConfig = { ...config };
-      if (logoFile) {
-        updatedConfig.logoUrl = await uploadStoreLogo(logoFile, store.id);
-      }
-      if (bannerFile) {
-        updatedConfig.bannerUrl = await uploadStoreBanner(bannerFile, store.id);
-      }
-      const updated: Store = {
-        ...store,
-        productIds: selectedProductIds,
-        config: updatedConfig,
-      };
-      dispatch(updateStore(updated));
+      if (logoFile) updatedConfig.logoUrl = await uploadStoreLogo(logoFile, store.id);
+      if (bannerFile) updatedConfig.bannerUrl = await uploadStoreBanner(bannerFile, store.id);
+      dispatch(updateStore({ ...store, productIds: selectedProductIds, config: updatedConfig }));
       message.success('Loja atualizada com sucesso!');
-      navigate('/lojas');
     } catch {
       message.error('Erro ao fazer upload das imagens.');
     } finally {
@@ -82,6 +587,95 @@ export default function LojaConfigPage() {
     products: availableProducts.filter((p) => p.categoryId === cat.id),
   })).filter((g) => g.products.length > 0);
 
+  const tabItems = [
+    {
+      key: 'overview',
+      label: <><EyeOutlined /> Visão Geral</>,
+      children: <OverviewTab store={store} associado={associado} plan={plan} />,
+    },
+    {
+      key: 'config',
+      label: <><SettingOutlined /> Configurações</>,
+      children: (
+        <Row gutter={[16, 16]}>
+          <Col xs={24} lg={16}>
+            <Card title={`Produtos — ${selectedProductIds.length}${maxProducts === -1 ? '' : `/${maxProducts}`} selecionados`}>
+              {groupedProducts.map((group) => (
+                <div key={group.id} style={{ marginBottom: 20 }}>
+                  <Title level={5} style={{ margin: '0 0 8px' }}><Tag color={group.color}>{group.name}</Tag></Title>
+                  <Row gutter={[8, 8]}>
+                    {group.products.map((product: Product) => {
+                      const selected = selectedProductIds.includes(product.id);
+                      return (
+                        <Col xs={24} sm={12} key={product.id}>
+                          <Card size="small" hoverable style={{ borderColor: selected ? '#1677ff' : undefined, background: selected ? '#e6f4ff' : undefined }} onClick={() => handleToggleProduct(product.id)}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <div>
+                                <Checkbox checked={selected} style={{ marginRight: 8 }} />
+                                <Text strong>{product.name}</Text>
+                                <div style={{ fontSize: 12, color: '#888', marginLeft: 24 }}>R$ {product.price.toFixed(2)} — {product.commissionPercent}% comissão</div>
+                              </div>
+                              {product.exclusivity !== 'todos' && (
+                                <Tag color={product.exclusivity === 'avancado' ? 'gold' : 'purple'} style={{ fontSize: 10 }}>
+                                  {product.exclusivity === 'avancado' ? 'Exclusivo' : 'Inter+'}
+                                </Tag>
+                              )}
+                            </div>
+                          </Card>
+                        </Col>
+                      );
+                    })}
+                  </Row>
+                </div>
+              ))}
+            </Card>
+          </Col>
+          <Col xs={24} lg={8}>
+            <Card title="Personalização">
+              {!canCustomize && (
+                <div style={{ marginBottom: 16, padding: 12, background: '#fff7e6', borderRadius: 8, border: '1px solid #ffd591' }}>
+                  <Text type="warning">Personalização visual disponível a partir do plano Intermediário.</Text>
+                </div>
+              )}
+              <Form layout="vertical">
+                <Form.Item label="Descrição"><Input.TextArea rows={3} value={config.description} onChange={(e) => setConfig({ ...config, description: e.target.value })} /></Form.Item>
+                <Form.Item label="Cor Principal"><ColorPicker value={config.primaryColor} disabled={!canCustomize} onChange={(_, hex) => setConfig({ ...config, primaryColor: hex })} /></Form.Item>
+                <Form.Item label="Logo"><Upload listType="picture-card" accept="image/*" maxCount={1} disabled={!canCustomize} beforeUpload={(file) => { setLogoFile(file); return false; }} onRemove={() => { setLogoFile(null); setConfig({ ...config, logoUrl: '' }); }} defaultFileList={config.logoUrl ? [{ uid: '-1', name: 'logo', status: 'done' as const, url: config.logoUrl }] : []}>{!logoFile && !config.logoUrl && <div><UploadOutlined /><div style={{ marginTop: 8 }}>Logo</div></div>}</Upload></Form.Item>
+                <Form.Item label="Banner"><Upload listType="picture-card" accept="image/*" maxCount={1} disabled={!canCustomize} beforeUpload={(file) => { setBannerFile(file); return false; }} onRemove={() => { setBannerFile(null); setConfig({ ...config, bannerUrl: '' }); }} defaultFileList={config.bannerUrl ? [{ uid: '-1', name: 'banner', status: 'done' as const, url: config.bannerUrl }] : []}>{!bannerFile && !config.bannerUrl && <div><UploadOutlined /><div style={{ marginTop: 8 }}>Banner</div></div>}</Upload></Form.Item>
+                <Divider />
+                <Form.Item label="WhatsApp"><Switch checked={config.showWhatsapp} onChange={(v) => setConfig({ ...config, showWhatsapp: v })} /></Form.Item>
+                {config.showWhatsapp && <Form.Item label="Número"><Input value={config.whatsappNumber} onChange={(e) => setConfig({ ...config, whatsappNumber: e.target.value })} /></Form.Item>}
+              </Form>
+            </Card>
+            <div style={{ marginTop: 16 }}>
+              <Button type="primary" icon={<SaveOutlined />} onClick={handleSave} loading={uploading} block size="large">Salvar Configurações</Button>
+            </div>
+          </Col>
+        </Row>
+      ),
+    },
+    {
+      key: 'documents',
+      label: <><FileTextOutlined /> Documentos</>,
+      children: <DocumentsTab associado={associado} />,
+    },
+    {
+      key: 'sales',
+      label: <><DollarOutlined /> Vendas</>,
+      children: <SalesTab store={store} />,
+    },
+    {
+      key: 'keys',
+      label: <><KeyOutlined /> Chaves & API</>,
+      children: <KeysTab store={store} />,
+    },
+    {
+      key: 'compliance',
+      label: <><SafetyCertificateOutlined /> Compliance</>,
+      children: <ComplianceTab store={store} />,
+    },
+  ];
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
@@ -92,115 +686,10 @@ export default function LojaConfigPage() {
         </Space>
         <Space>
           <Button icon={<EyeOutlined />} onClick={() => navigate(`/lojas/${id}/preview`)}>Preview</Button>
-          <Button type="primary" icon={<SaveOutlined />} onClick={handleSave} loading={uploading}>Salvar</Button>
         </Space>
       </div>
 
-      <Row gutter={[16, 16]}>
-        <Col xs={24} lg={16}>
-          <Card title={`Produtos Disponíveis — ${selectedProductIds.length}${maxProducts === -1 ? '' : `/${maxProducts}`} selecionados`}>
-            {groupedProducts.map((group) => (
-              <div key={group.id} style={{ marginBottom: 20 }}>
-                <Title level={5} style={{ margin: '0 0 8px' }}>
-                  <Tag color={group.color}>{group.name}</Tag>
-                </Title>
-                <Row gutter={[8, 8]}>
-                  {group.products.map((product: Product) => {
-                    const selected = selectedProductIds.includes(product.id);
-                    return (
-                      <Col xs={24} sm={12} key={product.id}>
-                        <Card
-                          size="small"
-                          hoverable
-                          style={{ borderColor: selected ? '#1677ff' : undefined, background: selected ? '#e6f4ff' : undefined }}
-                          onClick={() => handleToggleProduct(product.id)}
-                        >
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div>
-                              <Checkbox checked={selected} style={{ marginRight: 8 }} />
-                              <Text strong>{product.name}</Text>
-                              <div style={{ fontSize: 12, color: '#888', marginLeft: 24 }}>
-                                R$ {product.price.toFixed(2)} — {product.commissionPercent}% comissão
-                              </div>
-                            </div>
-                            {product.exclusivity !== 'todos' && (
-                              <Tag color={product.exclusivity === 'avancado' ? 'gold' : 'purple'} style={{ fontSize: 10 }}>
-                                {product.exclusivity === 'avancado' ? 'Exclusivo' : 'Inter+'}
-                              </Tag>
-                            )}
-                          </div>
-                        </Card>
-                      </Col>
-                    );
-                  })}
-                </Row>
-              </div>
-            ))}
-          </Card>
-        </Col>
-
-        <Col xs={24} lg={8}>
-          <Card title="Personalização da Loja">
-            {!canCustomize && (
-              <div style={{ marginBottom: 16, padding: 12, background: '#fff7e6', borderRadius: 8, border: '1px solid #ffd591' }}>
-                <Text type="warning">Personalização visual disponível a partir do plano Intermediário.</Text>
-              </div>
-            )}
-            <Form layout="vertical">
-              <Form.Item label="Descrição da Loja">
-                <Input.TextArea rows={3} value={config.description} onChange={(e) => setConfig({ ...config, description: e.target.value })} />
-              </Form.Item>
-              <Form.Item label="Cor Principal">
-                <ColorPicker value={config.primaryColor} disabled={!canCustomize} onChange={(_, hex) => setConfig({ ...config, primaryColor: hex })} />
-              </Form.Item>
-              <Form.Item label="Logo da Loja">
-                <Upload
-                  listType="picture-card"
-                  accept="image/*"
-                  maxCount={1}
-                  disabled={!canCustomize}
-                  beforeUpload={(file) => { setLogoFile(file); return false; }}
-                  onRemove={() => { setLogoFile(null); setConfig({ ...config, logoUrl: '' }); }}
-                  defaultFileList={config.logoUrl ? [{ uid: '-1', name: 'logo', status: 'done', url: config.logoUrl }] : []}
-                >
-                  {!logoFile && !config.logoUrl && <div><UploadOutlined /><div style={{ marginTop: 8 }}>Logo</div></div>}
-                </Upload>
-              </Form.Item>
-              <Form.Item label="Banner da Loja">
-                <Upload
-                  listType="picture-card"
-                  accept="image/*"
-                  maxCount={1}
-                  disabled={!canCustomize}
-                  beforeUpload={(file) => { setBannerFile(file); return false; }}
-                  onRemove={() => { setBannerFile(null); setConfig({ ...config, bannerUrl: '' }); }}
-                  defaultFileList={config.bannerUrl ? [{ uid: '-1', name: 'banner', status: 'done', url: config.bannerUrl }] : []}
-                >
-                  {!bannerFile && !config.bannerUrl && <div><UploadOutlined /><div style={{ marginTop: 8 }}>Banner</div></div>}
-                </Upload>
-              </Form.Item>
-              <Divider />
-              <Form.Item label="Mostrar WhatsApp">
-                <Switch checked={config.showWhatsapp} onChange={(v) => setConfig({ ...config, showWhatsapp: v })} />
-              </Form.Item>
-              {config.showWhatsapp && (
-                <Form.Item label="Número WhatsApp">
-                  <Input value={config.whatsappNumber} onChange={(e) => setConfig({ ...config, whatsappNumber: e.target.value })} />
-                </Form.Item>
-              )}
-            </Form>
-          </Card>
-
-          <Card title="Informações" style={{ marginTop: 16 }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <div><Text type="secondary">Associado:</Text> <Text strong>{associado.name}</Text></div>
-              <div><Text type="secondary">Plano:</Text> <Tag>{plan?.name}</Tag></div>
-              <div><Text type="secondary">URL Pública:</Text> <Text copyable code>/loja/{store.slug}</Text></div>
-              <div><Text type="secondary">Desde:</Text> <Text>{new Date(store.createdAt).toLocaleDateString('pt-BR')}</Text></div>
-            </div>
-          </Card>
-        </Col>
-      </Row>
+      <Tabs items={tabItems} defaultActiveKey="overview" />
     </div>
   );
 }
