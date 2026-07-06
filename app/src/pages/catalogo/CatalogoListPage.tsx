@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Table, Tag, Button, Input, Select, Typography, Space, Popconfirm, message, Card, Row, Col, Statistic } from 'antd';
 import {
   PlusOutlined, SearchOutlined, EditOutlined, DeleteOutlined, EyeOutlined,
-  ShoppingCartOutlined, AppstoreOutlined, DollarOutlined, InboxOutlined,
+  AppstoreOutlined, DollarOutlined, InboxOutlined, GiftOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../../store';
@@ -123,8 +123,8 @@ export default function CatalogoListPage() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <Title level={4} style={{ margin: 0 }}>
-          <ShoppingCartOutlined style={{ marginRight: 8 }} />
-          Catálogo de Produtos
+          <GiftOutlined style={{ marginRight: 8 }} />
+          Benefícios & Produtos
         </Title>
         <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/catalogo/novo')}>
           Novo Produto

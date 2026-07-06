@@ -99,26 +99,41 @@ function OverviewTab({ store, associado, plan }: { store: Store; associado: any;
   );
 }
 
-function ProductsTab({ store, allProducts }: { store: Store; allProducts: Product[] }) {
-  const storeProducts = allProducts.filter((p) => store.productIds.includes(p.id));
+function ProductsTab({ allProducts, selectedProductIds, onToggleProduct, maxProducts, associado }: { allProducts: Product[]; selectedProductIds: string[]; onToggleProduct: (id: string) => void; maxProducts: number; associado: any }) {
+  const storeProducts = allProducts.filter((p) => selectedProductIds.includes(p.id));
   const totalValue = storeProducts.reduce((s, p) => s + p.price, 0);
   const avgCommission = storeProducts.length > 0 ? storeProducts.reduce((s, p) => s + p.commissionPercent, 0) / storeProducts.length : 0;
+
+  const availableProducts = allProducts.filter((p) => p.status === 'ativo' && exclusivityAllowed[p.exclusivity].includes(associado?.planType || 'basico'));
+  const groupedProducts = categories.map((cat) => ({
+    ...cat,
+    products: availableProducts.filter((p) => p.categoryId === cat.id),
+  })).filter((g) => g.products.length > 0);
 
   const statusColors: Record<string, string> = { ativo: 'green', inativo: 'default', esgotado: 'red' };
 
   const columns = [
     {
       title: 'Produto', dataIndex: 'name', key: 'name',
-      render: (name: string, record: Product) => (
+      render: (name: string, record: Product) => {
+        const cat = categories.find((c) => c.id === record.categoryId);
+        return (
         <Space>
-          <img src={record.image} alt={name} style={{ width: 40, height: 40, borderRadius: 6, objectFit: 'cover' }} />
+          {record.image ? (
+            <img src={record.image} alt={name} style={{ width: 40, height: 40, borderRadius: 6, objectFit: 'cover' }} />
+          ) : (
+            <div style={{ width: 40, height: 40, borderRadius: 6, background: cat?.color || '#1677ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 14 }}>
+              {name.charAt(0)}
+            </div>
+          )}
           <div>
             <Text strong style={{ fontSize: 13 }}>{name}</Text>
             <br />
             <Text type="secondary" style={{ fontSize: 11 }}>SKU: {record.sku}</Text>
           </div>
         </Space>
-      ),
+      );
+      },
     },
     {
       title: 'Categoria', dataIndex: 'categoryId', key: 'category', width: 130,
@@ -129,10 +144,12 @@ function ProductsTab({ store, allProducts }: { store: Store; allProducts: Produc
     },
     { title: 'Preço', dataIndex: 'price', key: 'price', width: 110, render: (v: number) => <Text strong>R$ {v.toFixed(2)}</Text> },
     { title: 'Comissão', dataIndex: 'commissionPercent', key: 'commission', width: 100, render: (v: number) => <Tag color="purple">{v}%</Tag> },
-    { title: 'Estoque', dataIndex: 'stock', key: 'stock', width: 80, render: (v: number) => <Text type={v <= 5 ? 'danger' : undefined}>{v}</Text> },
+    { title: 'Estoque', dataIndex: 'stock', key: 'stock', width: 80, render: (v: number) => v === -1 ? <Tag color="blue">Ilimitado</Tag> : <Text type={v <= 5 ? 'danger' : undefined}>{v}</Text> },
     { title: 'Exclusividade', dataIndex: 'exclusivity', key: 'exclusivity', width: 120, render: (v: string) => v === 'todos' ? <Tag>Todos</Tag> : v === 'intermediario' ? <Tag color="purple">Inter+</Tag> : <Tag color="gold">Avançado</Tag> },
     { title: 'Status', dataIndex: 'status', key: 'status', width: 90, render: (v: string) => <Tag color={statusColors[v] || 'default'}>{v.charAt(0).toUpperCase() + v.slice(1)}</Tag> },
   ];
+
+  const [view, setView] = useState<'selected' | 'add'>('selected');
 
   return (
     <div>
@@ -151,19 +168,57 @@ function ProductsTab({ store, allProducts }: { store: Store; allProducts: Produc
         </Col>
       </Row>
 
-      <Card title={<><ShoppingCartOutlined style={{ marginRight: 8 }} />Produtos Selecionados pelo Influencer</>}>
-        {storeProducts.length > 0 ? (
-          <Table dataSource={storeProducts} columns={columns} rowKey="id" size="small" pagination={{ pageSize: 10 }} />
-        ) : (
-          <Empty description="Este influencer ainda não selecionou nenhum produto para sua loja." />
-        )}
-      </Card>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+        <Button type={view === 'selected' ? 'primary' : 'default'} onClick={() => setView('selected')}>Selecionados ({selectedProductIds.length})</Button>
+        <Button type={view === 'add' ? 'primary' : 'default'} onClick={() => setView('add')}>Adicionar / Remover Produtos</Button>
+      </div>
+
+      {view === 'selected' ? (
+        <Card title={<><ShoppingCartOutlined style={{ marginRight: 8 }} />Produtos Selecionados pelo Influencer</>}>
+          {storeProducts.length > 0 ? (
+            <Table dataSource={storeProducts} columns={columns} rowKey="id" size="small" pagination={{ pageSize: 10 }} />
+          ) : (
+            <Empty description="Este influencer ainda não selecionou nenhum produto para sua loja." />
+          )}
+        </Card>
+      ) : (
+        <Card title={`Catálogo Disponível — ${selectedProductIds.length}${maxProducts === -1 ? '' : `/${maxProducts}`} selecionados`}>
+          {groupedProducts.map((group) => (
+            <div key={group.id} style={{ marginBottom: 20 }}>
+              <Title level={5} style={{ margin: '0 0 8px' }}><Tag color={group.color}>{group.name}</Tag></Title>
+              <Row gutter={[8, 8]}>
+                {group.products.map((product: Product) => {
+                  const selected = selectedProductIds.includes(product.id);
+                  return (
+                    <Col xs={24} sm={12} key={product.id}>
+                      <Card size="small" hoverable style={{ borderColor: selected ? '#1677ff' : undefined, background: selected ? '#e6f4ff' : undefined }} onClick={() => onToggleProduct(product.id)}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div>
+                            <Checkbox checked={selected} style={{ marginRight: 8 }} />
+                            <Text strong>{product.name}</Text>
+                            <div style={{ fontSize: 12, color: '#888', marginLeft: 24 }}>R$ {product.price.toFixed(2)} — {product.commissionPercent}% comissão</div>
+                          </div>
+                          {product.exclusivity !== 'todos' && (
+                            <Tag color={product.exclusivity === 'avancado' ? 'gold' : 'purple'} style={{ fontSize: 10 }}>
+                              {product.exclusivity === 'avancado' ? 'Exclusivo' : 'Inter+'}
+                            </Tag>
+                          )}
+                        </div>
+                      </Card>
+                    </Col>
+                  );
+                })}
+              </Row>
+            </div>
+          ))}
+        </Card>
+      )}
 
       {storeProducts.some((p) => p.status === 'esgotado') && (
         <Alert title={`${storeProducts.filter((p) => p.status === 'esgotado').length} produto(s) esgotado(s) na loja deste influencer.`} type="warning" showIcon style={{ marginTop: 16 }} />
       )}
-      {storeProducts.some((p) => p.stock <= 5 && p.stock > 0) && (
-        <Alert title={`${storeProducts.filter((p) => p.stock <= 5 && p.stock > 0).length} produto(s) com estoque baixo (≤ 5 unidades).`} type="info" showIcon style={{ marginTop: 16 }} />
+      {storeProducts.some((p) => p.stock > 0 && p.stock <= 5) && (
+        <Alert title={`${storeProducts.filter((p) => p.stock > 0 && p.stock <= 5).length} produto(s) com estoque baixo (≤ 5 unidades).`} type="info" showIcon style={{ marginTop: 16 }} />
       )}
     </div>
   );
@@ -559,12 +614,16 @@ function ComplianceTab({ store }: { store: Store }) {
   const riskLevel = riskScore > 70 ? 'alto' : riskScore > 40 ? 'medio' : 'baixo';
   const riskColor = riskLevel === 'alto' ? '#ff4d4f' : riskLevel === 'medio' ? '#faad14' : '#52c41a';
 
-  const alerts = [
-    ...(riskScore > 60 ? [{ type: 'warning' as const, message: 'Volume de vendas atípico detectado', detail: 'Aumento de 340% nas vendas em comparação com a média dos últimos 3 meses.', date: '2025-06-28' }] : []),
-    ...(riskScore > 80 ? [{ type: 'error' as const, message: 'Possível auto-compra detectada', detail: 'IP do comprador coincide com IP do influencer em 3 transações.', date: '2025-06-25' }] : []),
-    ...(seededRandom(seed + 5) > 0.6 ? [{ type: 'info' as const, message: 'Chargeback registrado', detail: 'Cliente contestou compra de R$ 89,90 no cartão.', date: '2025-06-20' }] : []),
-    ...(seededRandom(seed + 6) > 0.7 ? [{ type: 'warning' as const, message: 'Links externos suspeitos', detail: 'Influencer redirecionando tráfego para links fora da plataforma.', date: '2025-06-15' }] : []),
+  const allAlerts = [
+    ...(riskScore > 60 ? [{ id: 'a1', type: 'warning' as const, message: 'Volume de vendas atípico detectado', detail: 'Aumento de 340% nas vendas em comparação com a média dos últimos 3 meses.', date: '2025-06-28' }] : []),
+    ...(riskScore > 80 ? [{ id: 'a2', type: 'error' as const, message: 'Possível auto-compra detectada', detail: 'IP do comprador coincide com IP do influencer em 3 transações.', date: '2025-06-25' }] : []),
+    ...(seededRandom(seed + 5) > 0.6 ? [{ id: 'a3', type: 'info' as const, message: 'Chargeback registrado', detail: 'Cliente contestou compra de R$ 89,90 no cartão.', date: '2025-06-20' }] : []),
+    ...(seededRandom(seed + 6) > 0.7 ? [{ id: 'a4', type: 'warning' as const, message: 'Links externos suspeitos', detail: 'Influencer redirecionando tráfego para links fora da plataforma.', date: '2025-06-15' }] : []),
   ];
+
+  const [dismissed, setDismissed] = useState<string[]>([]);
+  const [investigating, setInvestigating] = useState<string[]>([]);
+  const alerts = allAlerts.filter((a) => !dismissed.includes(a.id));
 
   const activityLog = [
     { time: '2025-06-30 14:32', action: 'Login realizado', ip: '189.45.123.xxx' },
@@ -628,8 +687,14 @@ function ComplianceTab({ store }: { store: Store }) {
                     showIcon
                     action={
                       <Space orientation="vertical" style={{ gap: 4 }}>
-                        <Button size="small" type="primary" ghost>Investigar</Button>
-                        <Button size="small">Dispensar</Button>
+                        {investigating.includes(alert.id) ? (
+                          <Tag color="processing">Em investigação</Tag>
+                        ) : (
+                          <Button size="small" type="primary" ghost onClick={() => { setInvestigating((prev) => [...prev, alert.id]); message.info(`Investigação aberta para: ${alert.message}`); }}>Investigar</Button>
+                        )}
+                        <Popconfirm title="Dispensar este alerta?" okText="Sim" cancelText="Não" onConfirm={() => { setDismissed((prev) => [...prev, alert.id]); message.success('Alerta dispensado'); }}>
+                          <Button size="small">Dispensar</Button>
+                        </Popconfirm>
                       </Space>
                     }
                   />
@@ -677,11 +742,6 @@ export default function LojaConfigPage() {
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
 
-  const availableProducts = useMemo(() => {
-    if (!associado) return [];
-    return allProducts.filter((p) => p.status === 'ativo' && exclusivityAllowed[p.exclusivity].includes(associado.planType));
-  }, [allProducts, associado]);
-
   const maxProducts = plan?.maxProducts ?? 20;
   const canAddMore = maxProducts === -1 || selectedProductIds.length < maxProducts;
   const canCustomize = plan?.customization ?? false;
@@ -713,11 +773,6 @@ export default function LojaConfigPage() {
     }
   };
 
-  const groupedProducts = categories.map((cat) => ({
-    ...cat,
-    products: availableProducts.filter((p) => p.categoryId === cat.id),
-  })).filter((g) => g.products.length > 0);
-
   const tabItems = [
     {
       key: 'overview',
@@ -729,53 +784,35 @@ export default function LojaConfigPage() {
       label: <><SettingOutlined /> Configurações</>,
       children: (
         <Row gutter={[16, 16]}>
-          <Col xs={24} lg={16}>
-            <Card title={`Produtos — ${selectedProductIds.length}${maxProducts === -1 ? '' : `/${maxProducts}`} selecionados`}>
-              {groupedProducts.map((group) => (
-                <div key={group.id} style={{ marginBottom: 20 }}>
-                  <Title level={5} style={{ margin: '0 0 8px' }}><Tag color={group.color}>{group.name}</Tag></Title>
-                  <Row gutter={[8, 8]}>
-                    {group.products.map((product: Product) => {
-                      const selected = selectedProductIds.includes(product.id);
-                      return (
-                        <Col xs={24} sm={12} key={product.id}>
-                          <Card size="small" hoverable style={{ borderColor: selected ? '#1677ff' : undefined, background: selected ? '#e6f4ff' : undefined }} onClick={() => handleToggleProduct(product.id)}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <div>
-                                <Checkbox checked={selected} style={{ marginRight: 8 }} />
-                                <Text strong>{product.name}</Text>
-                                <div style={{ fontSize: 12, color: '#888', marginLeft: 24 }}>R$ {product.price.toFixed(2)} — {product.commissionPercent}% comissão</div>
-                              </div>
-                              {product.exclusivity !== 'todos' && (
-                                <Tag color={product.exclusivity === 'avancado' ? 'gold' : 'purple'} style={{ fontSize: 10 }}>
-                                  {product.exclusivity === 'avancado' ? 'Exclusivo' : 'Inter+'}
-                                </Tag>
-                              )}
-                            </div>
-                          </Card>
-                        </Col>
-                      );
-                    })}
-                  </Row>
-                </div>
-              ))}
+          <Col xs={24} lg={12}>
+            <Card title="Informações da Loja" style={{ marginBottom: 16 }}>
+              <Form layout="vertical">
+                <Form.Item label="Nome da Loja"><Input value={store.name} disabled /></Form.Item>
+                <Form.Item label="Slug (URL)"><Input addonBefore="digitaisbr.com/loja/" value={store.slug} disabled /></Form.Item>
+                <Form.Item label="Descrição"><Input.TextArea rows={3} value={config.description} onChange={(e) => setConfig({ ...config, description: e.target.value })} /></Form.Item>
+                <Form.Item label="WhatsApp"><Switch checked={config.showWhatsapp} onChange={(v) => setConfig({ ...config, showWhatsapp: v })} /></Form.Item>
+                {config.showWhatsapp && <Form.Item label="Número WhatsApp"><Input value={config.whatsappNumber} onChange={(e) => setConfig({ ...config, whatsappNumber: e.target.value })} placeholder="5511999999999" /></Form.Item>}
+              </Form>
+            </Card>
+            <Card title="Status da Loja">
+              <Descriptions column={1} size="small">
+                <Descriptions.Item label="Status"><Tag color={store.active ? 'green' : 'red'}>{store.active ? 'Ativa' : 'Inativa'}</Tag></Descriptions.Item>
+                <Descriptions.Item label="Plano do Associado"><Tag color={plan?.id === 'plan-3' ? 'gold' : plan?.id === 'plan-2' ? 'purple' : 'blue'}>{plan?.name || 'Básico'}</Tag></Descriptions.Item>
+                <Descriptions.Item label="Produtos Selecionados">{selectedProductIds.length}{maxProducts === -1 ? '' : ` / ${maxProducts}`}</Descriptions.Item>
+                <Descriptions.Item label="Visualizações">{store.totalViews}</Descriptions.Item>
+                <Descriptions.Item label="Vendas">{store.totalSales}</Descriptions.Item>
+              </Descriptions>
             </Card>
           </Col>
-          <Col xs={24} lg={8}>
-            <Card title="Personalização">
+          <Col xs={24} lg={12}>
+            <Card title="Personalização Visual">
               {!canCustomize && (
-                <div style={{ marginBottom: 16, padding: 12, background: '#fff7e6', borderRadius: 8, border: '1px solid #ffd591' }}>
-                  <Text type="warning">Personalização visual disponível a partir do plano Intermediário.</Text>
-                </div>
+                <Alert title="Personalização visual disponível a partir do plano Intermediário." type="warning" showIcon style={{ marginBottom: 16 }} />
               )}
               <Form layout="vertical">
-                <Form.Item label="Descrição"><Input.TextArea rows={3} value={config.description} onChange={(e) => setConfig({ ...config, description: e.target.value })} /></Form.Item>
                 <Form.Item label="Cor Principal"><ColorPicker value={config.primaryColor} disabled={!canCustomize} onChange={(_, hex) => setConfig({ ...config, primaryColor: hex })} /></Form.Item>
                 <Form.Item label="Logo"><Upload listType="picture-card" accept="image/*" maxCount={1} disabled={!canCustomize} beforeUpload={(file) => { setLogoFile(file); return false; }} onRemove={() => { setLogoFile(null); setConfig({ ...config, logoUrl: '' }); }} defaultFileList={config.logoUrl ? [{ uid: '-1', name: 'logo', status: 'done' as const, url: config.logoUrl }] : []}>{!logoFile && !config.logoUrl && <div><UploadOutlined /><div style={{ marginTop: 8 }}>Logo</div></div>}</Upload></Form.Item>
                 <Form.Item label="Banner"><Upload listType="picture-card" accept="image/*" maxCount={1} disabled={!canCustomize} beforeUpload={(file) => { setBannerFile(file); return false; }} onRemove={() => { setBannerFile(null); setConfig({ ...config, bannerUrl: '' }); }} defaultFileList={config.bannerUrl ? [{ uid: '-1', name: 'banner', status: 'done' as const, url: config.bannerUrl }] : []}>{!bannerFile && !config.bannerUrl && <div><UploadOutlined /><div style={{ marginTop: 8 }}>Banner</div></div>}</Upload></Form.Item>
-                <Divider />
-                <Form.Item label="WhatsApp"><Switch checked={config.showWhatsapp} onChange={(v) => setConfig({ ...config, showWhatsapp: v })} /></Form.Item>
-                {config.showWhatsapp && <Form.Item label="Número"><Input value={config.whatsappNumber} onChange={(e) => setConfig({ ...config, whatsappNumber: e.target.value })} /></Form.Item>}
               </Form>
             </Card>
             <div style={{ marginTop: 16 }}>
@@ -788,7 +825,7 @@ export default function LojaConfigPage() {
     {
       key: 'products',
       label: <><ShoppingCartOutlined /> Produtos</>,
-      children: <ProductsTab store={store} allProducts={allProducts} />,
+      children: <ProductsTab allProducts={allProducts} selectedProductIds={selectedProductIds} onToggleProduct={handleToggleProduct} maxProducts={maxProducts} associado={associado} />,
     },
     {
       key: 'documents',

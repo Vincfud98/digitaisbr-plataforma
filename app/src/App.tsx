@@ -26,7 +26,6 @@ const LojaPreviewPage = lazy(() => import('./pages/lojas/LojaPreviewPage'));
 const VendasPage = lazy(() => import('./pages/vendas/VendasPage'));
 const ComissoesPage = lazy(() => import('./pages/comissoes/ComissoesPage'));
 const FinanceiroPage = lazy(() => import('./pages/financeiro/FinanceiroPage'));
-const BeneficiosPage = lazy(() => import('./pages/beneficios/BeneficiosPage'));
 const ParceirosPage = lazy(() => import('./pages/parceiros/ParceirosPage'));
 const ConteudosPage = lazy(() => import('./pages/conteudos/ConteudosPage'));
 const ConteudoDetailPage = lazy(() => import('./pages/conteudos/ConteudoDetailPage'));
@@ -102,7 +101,7 @@ export default function App() {
               <Route path="vendas" element={<VendasPage />} />
               <Route path="comissoes" element={<ComissoesPage />} />
               <Route path="financeiro" element={<FinanceiroPage />} />
-              <Route path="beneficios" element={<BeneficiosPage />} />
+              <Route path="beneficios" element={<Navigate to="/catalogo" replace />} />
               <Route path="parceiros" element={<ParceirosPage />} />
               <Route path="conteudos" element={<ConteudosPage />} />
               <Route path="conteudos/:id" element={<ConteudoDetailPage />} />
