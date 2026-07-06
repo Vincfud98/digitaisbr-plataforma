@@ -58,6 +58,51 @@ const PortalServicosPage = lazy(() => import('./pages/portal/PortalServicosPage'
 const LojaPublicaPage = lazy(() => import('./pages/public/LojaPublicaPage'));
 const CheckoutPage = lazy(() => import('./pages/public/CheckoutPage'));
 
+function prefetchPortalPages() {
+  import('./pages/portal/PortalDashboard');
+  import('./pages/portal/MinhaLojaPage');
+  import('./pages/portal/MinhasVendasPage');
+  import('./pages/portal/MeuPlanoPage');
+  import('./pages/portal/MeusBeneficiosPage');
+  import('./pages/portal/PortalConteudosPage');
+  import('./pages/portal/LinksAfiliadoPage');
+  import('./pages/portal/FinanceiroPortalPage');
+  import('./pages/portal/MeuPerfilPage');
+  import('./pages/portal/PerformancePage');
+  import('./pages/portal/CuponsPage');
+  import('./pages/portal/RankingPage');
+  import('./pages/portal/PortalComunidadePage');
+  import('./pages/portal/PortalSuportePage');
+  import('./pages/portal/MateriaisPage');
+  import('./pages/portal/RedesSociaisPage');
+  import('./pages/portal/PortalServicosPage');
+  import('./pages/portal/PortalNotificacoesPage');
+}
+
+function prefetchAdminPages() {
+  import('./pages/dashboard/DashboardPage');
+  import('./pages/associados/AssociadosListPage');
+  import('./pages/catalogo/CatalogoListPage');
+  import('./pages/lojas/LojasListPage');
+  import('./pages/vendas/VendasPage');
+  import('./pages/comissoes/ComissoesPage');
+  import('./pages/financeiro/FinanceiroPage');
+  import('./pages/relatorios/RelatoriosPage');
+  import('./pages/conteudos/ConteudosPage');
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      if (window.location.pathname.startsWith('/portal')) {
+        prefetchPortalPages();
+      } else {
+        prefetchAdminPages();
+      }
+    }, 1000);
+  });
+}
+
 const PageFallback = (
   <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
     <Spin size="large" />
