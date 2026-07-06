@@ -1,12 +1,13 @@
 import { useState, useMemo } from 'react';
-import { Tag, Button, Input, Select, Typography, Card, Row, Col, Statistic, Badge, message, Segmented, DatePicker } from 'antd';
+import { Tag, Button, Input, Select, Typography, Card, Row, Col, Statistic, Badge, message, Segmented, DatePicker, Modal, Form, Space } from 'antd';
 import {
   BellOutlined, SearchOutlined, CheckOutlined, DollarOutlined, ShoppingCartOutlined,
   GiftOutlined, ReadOutlined, CustomerServiceOutlined, SettingOutlined, DeleteOutlined,
-  MailOutlined, MobileOutlined, NotificationOutlined, ClockCircleOutlined,
+  MailOutlined, MobileOutlined, NotificationOutlined, ClockCircleOutlined, SendOutlined,
+  TeamOutlined,
 } from '@ant-design/icons';
 import { useAppSelector, useAppDispatch } from '../../store';
-import { markAsRead, markAllAsRead, removeNotification } from '../../store/slices/notificacoesSlice';
+import { markAsRead, markAllAsRead, removeNotification, addNotification } from '../../store/slices/notificacoesSlice';
 import type { Notification, NotificationType, NotificationChannel } from '../../types';
 
 const { Title, Text } = Typography;
@@ -44,11 +45,35 @@ function timeAgo(dateStr: string): string {
 export default function NotificacoesPage() {
   const dispatch = useAppDispatch();
   const notifications = useAppSelector((s) => s.notificacoes.list);
+  const associados = useAppSelector((s) => s.associados.list);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [channelFilter, setChannelFilter] = useState<string>('all');
   const [dateRange, setDateRange] = useState<[any, any] | null>(null);
   const [view, setView] = useState<string>('todas');
+  const [sendOpen, setSendOpen] = useState(false);
+  const [sendForm] = Form.useForm();
+
+  const handleSend = (values: { userId: string; title: string; messageText: string; type: NotificationType; channel: NotificationChannel }) => {
+    const targetIds = values.userId === '__all__' ? associados.map((a) => a.id) : [values.userId];
+    targetIds.forEach((uid) => {
+      const notif: Notification = {
+        id: `notif-${Date.now()}-${uid}`,
+        type: values.type,
+        title: values.title,
+        message: values.messageText,
+        channel: values.channel,
+        userId: uid,
+        read: false,
+        actionUrl: null,
+        createdAt: new Date().toISOString(),
+      };
+      dispatch(addNotification(notif));
+    });
+    message.success(`Notificação enviada para ${targetIds.length === 1 ? '1 associado' : `${targetIds.length} associados`}!`);
+    setSendOpen(false);
+    sendForm.resetFields();
+  };
 
   const filtered = useMemo(() => {
     return notifications.filter((n) => {
@@ -141,11 +166,14 @@ export default function NotificacoesPage() {
           <BellOutlined style={{ marginRight: 8 }} />
           Central de Notificações
         </Title>
-        {unreadCount > 0 && (
-          <Button type="primary" icon={<CheckOutlined />} onClick={() => { dispatch(markAllAsRead()); message.success('Todas marcadas como lidas!'); }}>
-            Marcar todas como lidas ({unreadCount})
-          </Button>
-        )}
+        <Space>
+          <Button type="primary" icon={<SendOutlined />} onClick={() => setSendOpen(true)}>Enviar Notificação</Button>
+          {unreadCount > 0 && (
+            <Button icon={<CheckOutlined />} onClick={() => { dispatch(markAllAsRead()); message.success('Todas marcadas como lidas!'); }}>
+              Marcar todas como lidas ({unreadCount})
+            </Button>
+          )}
+        </Space>
       </div>
 
       <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
@@ -244,6 +272,49 @@ export default function NotificacoesPage() {
           </div>
         )}
       </Card>
+
+      <Modal
+        title={<><SendOutlined style={{ marginRight: 8 }} />Enviar Notificação</>}
+        open={sendOpen}
+        onCancel={() => { setSendOpen(false); sendForm.resetFields(); }}
+        onOk={() => sendForm.submit()}
+        okText="Enviar"
+        cancelText="Cancelar"
+        width={560}
+      >
+        <Form form={sendForm} layout="vertical" onFinish={handleSend}>
+          <Form.Item name="userId" label="Destinatário" rules={[{ required: true, message: 'Selecione o destinatário' }]}>
+            <Select placeholder="Selecione um associado" showSearch optionFilterProp="children">
+              <Select.Option value="__all__"><TeamOutlined style={{ marginRight: 6 }} />Todos os associados ({associados.length})</Select.Option>
+              {associados.map((a) => (
+                <Select.Option key={a.id} value={a.id}>{a.name} — {a.email}</Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <Form.Item name="title" label="Título" rules={[{ required: true, message: 'Informe o título' }]}>
+            <Input placeholder="Ex: Novo benefício disponível!" />
+          </Form.Item>
+          <Form.Item name="messageText" label="Mensagem" rules={[{ required: true, message: 'Escreva a mensagem' }]}>
+            <Input.TextArea rows={3} placeholder="Corpo da notificação..." />
+          </Form.Item>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <Form.Item name="type" label="Tipo" rules={[{ required: true }]} style={{ flex: 1 }}>
+              <Select placeholder="Tipo">
+                {Object.entries(typeConfig).map(([key, cfg]) => (
+                  <Select.Option key={key} value={key}><Tag color={cfg.color} style={{ margin: 0 }}>{cfg.label}</Tag></Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item name="channel" label="Canal" rules={[{ required: true }]} style={{ flex: 1 }}>
+              <Select placeholder="Canal">
+                <Select.Option value="in-app"><BellOutlined style={{ marginRight: 6 }} />In-App</Select.Option>
+                <Select.Option value="email"><MailOutlined style={{ marginRight: 6 }} />Email</Select.Option>
+                <Select.Option value="push"><MobileOutlined style={{ marginRight: 6 }} />Push</Select.Option>
+              </Select>
+            </Form.Item>
+          </div>
+        </Form>
+      </Modal>
     </div>
   );
 }
