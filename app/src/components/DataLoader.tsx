@@ -136,6 +136,13 @@ export default function DataLoader({ children }: Props) {
 
           const hasData = associados.length > 0 || produtos.length > 0;
           if (!hasData) {
+            const { seedIfNeeded } = await import('../lib/seedFirestore');
+            const seeded = await seedIfNeeded();
+            if (seeded) {
+              console.log('Firestore seeded, reloading data...');
+              window.location.reload();
+              return;
+            }
             await loadFallbackData();
           } else {
             dispatch(setAssociados(associados));

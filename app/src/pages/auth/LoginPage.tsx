@@ -36,34 +36,17 @@ export default function LoginPage() {
       message.success('Login realizado com sucesso!');
       navigate(profile.role === 'associado' ? '/portal' : '/');
     } catch (err: unknown) {
+      dispatch(loginFailure());
       const code = (err as { code?: string }).code;
       if (code === 'auth/too-many-requests') {
-        dispatch(loginFailure());
         message.error('Muitas tentativas. Tente novamente em alguns minutos.');
+      } else if (code === 'auth/user-not-found' || code === 'auth/invalid-credential') {
+        message.error('Email ou senha incorretos.');
+      } else if ((err as Error).message === 'timeout') {
+        message.error('Servidor demorou para responder. Tente novamente.');
       } else {
-        fallbackDemo(values.email, values.password);
+        message.error('Erro ao fazer login. Tente novamente.');
       }
-    }
-  };
-
-  const fallbackDemo = (email: string, password: string) => {
-    if (email && password) {
-      const isAssociado = email.includes('associado') || email.includes('@loja');
-      const role = isAssociado ? 'associado' as const : 'admin' as const;
-      dispatch(
-        loginSuccess({
-          id: isAssociado ? 'assoc-1' : '1',
-          name: isAssociado ? 'Maria Associada' : 'Admin Demo',
-          email,
-          role,
-          plan: isAssociado ? 'intermediario' : 'avancado',
-        })
-      );
-      message.success('Login demo realizado!');
-      navigate(role === 'associado' ? '/portal' : '/');
-    } else {
-      dispatch(loginFailure());
-      message.error('Credenciais inválidas');
     }
   };
 
@@ -148,11 +131,6 @@ export default function LoginPage() {
         <div style={{ textAlign: 'center' }}>
           <Text type="secondary">Ainda não tem conta? </Text>
           <Link to="/registro">Criar conta</Link>
-        </div>
-        <div style={{ textAlign: 'center', marginTop: 12, padding: '8px 12px', background: '#f6ffed', borderRadius: 6 }}>
-          <Text type="secondary" style={{ fontSize: 11 }}>
-            Demo: use qualquer email/senha. Email com "associado" → Portal do Associado
-          </Text>
         </div>
       </Card>
 

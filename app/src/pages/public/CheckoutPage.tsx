@@ -32,6 +32,7 @@ export default function CheckoutPage() {
   const [orderTotal, setOrderTotal] = useState(0);
   const [orderStoreName, setOrderStoreName] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [lastOrderTime, setLastOrderTime] = useState(0);
   const [form] = Form.useForm();
 
   const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
@@ -61,6 +62,16 @@ export default function CheckoutPage() {
 
   const handleFinishOrder = async () => {
     if (!customer || !store) return;
+    if (!customer.name || !customer.email || !customer.cpf || !customer.phone) {
+      message.error('Preencha todos os dados antes de finalizar.');
+      setStep(1);
+      return;
+    }
+    const now = Date.now();
+    if (now - lastOrderTime < 30000) {
+      message.warning('Aguarde 30 segundos antes de fazer outro pedido.');
+      return;
+    }
     setProcessing(true);
 
     try {
@@ -91,6 +102,7 @@ export default function CheckoutPage() {
       });
 
       dispatch(clearCart());
+      setLastOrderTime(Date.now());
       setStep(3);
       message.success('Pedido realizado com sucesso!');
     } catch (err) {
