@@ -1,12 +1,18 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+// @ts-expect-error custom plugin
+import obfuscatorPlugin from './vite-obfuscator-plugin.mjs'
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    obfuscatorPlugin(),
+  ],
   server: {
     port: parseInt(process.env.PORT || '5173'),
   },
   build: {
+    sourcemap: false,
     rolldownOptions: {
       output: {
         manualChunks(id) {

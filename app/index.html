@@ -37,6 +37,58 @@
         }
       });
     </script>
+    <script>
+      (function(){
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return;
+
+        // Bloquear atalhos de DevTools
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'F12') { e.preventDefault(); return false; }
+          if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) { e.preventDefault(); return false; }
+          if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) { e.preventDefault(); return false; }
+        }, true);
+
+        // Bloquear clique direito
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; }, true);
+
+        // Detectar DevTools aberto via threshold de tamanho
+        var _0x1 = 160;
+        function _0xCheck() {
+          var w = window.outerWidth - window.innerWidth > _0x1;
+          var h = window.outerHeight - window.innerHeight > _0x1;
+          if (w || h) {
+            document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#001529;color:#fff;font-family:sans-serif;font-size:24px;text-align:center;padding:40px"><div><h1 style="font-size:48px;margin-bottom:20px">&#x26D4;</h1><p>Acesso não autorizado detectado</p><p style="font-size:14px;margin-top:10px;opacity:0.6">Esta aplicação é protegida.</p></div></div>';
+          }
+        }
+        setInterval(_0xCheck, 1000);
+
+        // Anti-debug: detectar pausa do debugger
+        (function _0xAntiDebug() {
+          var start = performance.now();
+          debugger;
+          var end = performance.now();
+          if (end - start > 100) {
+            document.body.innerHTML = '';
+            window.location.href = 'about:blank';
+          }
+          setTimeout(_0xAntiDebug, 3000);
+        })();
+
+        // Sobrescrever console
+        var _noop = function(){};
+        ['log','warn','info','error','debug','table','trace','dir','group','groupEnd','clear','count','assert','profile','profileEnd'].forEach(function(m) {
+          try { console[m] = _noop; } catch(e){}
+        });
+
+        // Bloquear seleção de texto (dificulta cópia)
+        document.addEventListener('selectstart', function(e) { e.preventDefault(); }, true);
+        document.addEventListener('copy', function(e) { e.preventDefault(); }, true);
+        document.addEventListener('cut', function(e) { e.preventDefault(); }, true);
+
+        // Bloquear drag de elementos
+        document.addEventListener('dragstart', function(e) { e.preventDefault(); }, true);
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
