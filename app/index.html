@@ -62,18 +62,6 @@
         }
         setInterval(_0xCheck, 1000);
 
-        // Anti-debug: detectar pausa do debugger
-        (function _0xAntiDebug() {
-          var start = performance.now();
-          debugger;
-          var end = performance.now();
-          if (end - start > 100) {
-            document.body.innerHTML = '';
-            window.location.href = 'about:blank';
-          }
-          setTimeout(_0xAntiDebug, 3000);
-        })();
-
         // Sobrescrever console
         var _noop = function(){};
         ['log','warn','info','error','debug','table','trace','dir','group','groupEnd','clear','count','assert','profile','profileEnd'].forEach(function(m) {
