@@ -137,37 +137,38 @@ export default function PortalSuportePage() {
               </div>
 
               {/* Messages */}
-              <div style={{ flex: 1, overflowY: 'auto', padding: '16px', background: '#f5f7fa' }}>
+              <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', background: '#e8ecf1' }}>
                 {ticketMessages.map((msg) => {
                   if (msg.sender === 'system') {
                     return (
-                      <div key={msg.id} style={{ textAlign: 'center', margin: '12px 0' }}>
-                        <Tag style={{ background: '#e6f4ff', border: 'none', color: '#1677ff', fontSize: 11 }}>
+                      <div key={msg.id} style={{ textAlign: 'center', margin: '16px 0' }}>
+                        <Tag style={{ background: '#d6e4ff', border: '1px solid #adc6ff', color: '#1d39c4', fontSize: 11, padding: '2px 10px' }}>
                           <RobotOutlined /> {msg.content}
                         </Tag>
-                        <div><Text type="secondary" style={{ fontSize: 10 }}>{new Date(msg.createdAt).toLocaleString('pt-BR')}</Text></div>
+                        <div style={{ marginTop: 4 }}><Text type="secondary" style={{ fontSize: 10 }}>{new Date(msg.createdAt).toLocaleString('pt-BR')}</Text></div>
                       </div>
                     );
                   }
                   const isMe = msg.sender === 'user';
                   return (
-                    <div key={msg.id} style={{ display: 'flex', justifyContent: isMe ? 'flex-end' : 'flex-start', marginBottom: 12 }}>
-                      <div style={{ display: 'flex', gap: 8, maxWidth: '75%', flexDirection: isMe ? 'row-reverse' : 'row' }}>
-                        <Avatar size={32} style={{ background: isMe ? '#722ed1' : '#1677ff', flexShrink: 0 }} icon={isMe ? <UserOutlined /> : <TeamOutlined />} />
+                    <div key={msg.id} style={{ display: 'flex', justifyContent: isMe ? 'flex-end' : 'flex-start', marginBottom: 16 }}>
+                      <div style={{ display: 'flex', gap: 10, maxWidth: '75%', flexDirection: isMe ? 'row-reverse' : 'row' }}>
+                        <Avatar size={34} style={{ background: isMe ? '#722ed1' : '#1677ff', flexShrink: 0, boxShadow: '0 2px 4px rgba(0,0,0,0.12)' }} icon={isMe ? <UserOutlined /> : <TeamOutlined />} />
                         <div>
-                          <div style={{ textAlign: isMe ? 'right' : 'left', marginBottom: 2 }}>
-                            <Text strong style={{ fontSize: 12 }}>{msg.senderName}</Text>
+                          <div style={{ textAlign: isMe ? 'right' : 'left', marginBottom: 4 }}>
+                            <Text strong style={{ fontSize: 12, color: isMe ? '#531dab' : '#1d39c4' }}>{msg.senderName}</Text>
                             <Text type="secondary" style={{ fontSize: 10, marginLeft: 8 }}>
                               {new Date(msg.createdAt).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                             </Text>
                           </div>
                           <div style={{
-                            background: isMe ? '#722ed1' : '#fff',
-                            color: isMe ? '#fff' : '#333',
-                            padding: '10px 14px',
-                            borderRadius: isMe ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
-                            boxShadow: '0 1px 2px rgba(0,0,0,0.08)',
-                            fontSize: 14, lineHeight: '1.5',
+                            background: isMe ? '#722ed1' : '#ffffff',
+                            color: isMe ? '#fff' : '#262626',
+                            padding: '12px 16px',
+                            borderRadius: isMe ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                            boxShadow: isMe ? '0 2px 8px rgba(114,46,209,0.25)' : '0 2px 8px rgba(0,0,0,0.1)',
+                            border: isMe ? 'none' : '1px solid #d9d9d9',
+                            fontSize: 14, lineHeight: '1.6',
                           }}>
                             {msg.content}
                           </div>
