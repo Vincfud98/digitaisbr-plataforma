@@ -6,7 +6,7 @@ import obfuscatorPlugin from './vite-obfuscator-plugin.mjs'
 export default defineConfig({
   plugins: [
     react(),
-    obfuscatorPlugin(),
+    // obfuscatorPlugin(),
   ],
   server: {
     port: parseInt(process.env.PORT || '5173'),
