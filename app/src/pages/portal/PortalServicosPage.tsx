@@ -21,7 +21,7 @@ const statusLabels: Record<string, { color: string; label: string }> = {
   aberto: { color: 'blue', label: 'Aberto' },
   'em-andamento': { color: 'orange', label: 'Em Andamento' },
   concluido: { color: 'green', label: 'Concluído' },
-  cancelado: { color: 'default', label: 'Cancelado' },
+  cancelado: { color: 'red', label: 'Cancelado' },
 };
 
 interface PartnerFirm {

@@ -138,6 +138,8 @@ export default function CuponsPage() {
     {
       title: 'Ações',
       key: 'actions',
+      width: 120,
+      fixed: 'right' as const,
       render: (_: unknown, r: Coupon) => (
         <Space>
           <Button type="text" size="small" onClick={() => toggleCoupon(r.id)}>
@@ -175,7 +177,7 @@ export default function CuponsPage() {
       </Row>
 
       <Card>
-        <Table columns={columns} dataSource={coupons} rowKey="id" size="small" pagination={{ pageSize: 10 }} />
+        <Table columns={columns} dataSource={coupons} rowKey="id" size="small" pagination={{ pageSize: 10 }} scroll={{ x: 700 }} />
       </Card>
 
       <Modal

@@ -90,6 +90,7 @@ export default function LojasListPage() {
       title: 'Ações',
       key: 'actions',
       width: 120,
+      fixed: 'right' as const,
       render: (_: unknown, r: Store) => (
         <Space>
           <Button type="link" size="small" icon={<EyeOutlined />} onClick={() => navigate(`/lojas/${r.id}/preview`)} title="Preview" />
@@ -134,6 +135,7 @@ export default function LojasListPage() {
           rowKey="id"
           pagination={{ pageSize: 10, showSizeChanger: false, showTotal: (t) => `${t} lojas` }}
           size="middle"
+          scroll={{ x: 800 }}
         />
       </Card>
     </div>

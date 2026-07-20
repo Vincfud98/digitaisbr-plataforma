@@ -280,7 +280,7 @@ export default function MinhaLojaPage() {
             <ShopOutlined style={{ marginRight: 8 }} />
             {loja.name}
           </Title>
-          <Tag color={loja.active ? 'green' : 'orange'}>{loja.active ? 'Ativa' : 'Inativa'}</Tag>
+          <Tag color={loja.active ? 'green' : 'default'}>{loja.active ? 'Ativa' : 'Inativa'}</Tag>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <Button type="primary" icon={<EyeOutlined />} onClick={() => navigate(`/loja/${loja.slug}`)}>

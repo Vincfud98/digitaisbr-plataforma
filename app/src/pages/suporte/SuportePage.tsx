@@ -326,6 +326,7 @@ export default function SuportePage() {
       title: 'Ações',
       key: 'actions',
       width: 100,
+      fixed: 'right' as const,
       render: (_: unknown, r: SupportTicket) => (
         <Button type="link" size="small" onClick={() => openChat(r)}>
           {r.status === 'aberto' ? 'Atender' : 'Abrir'}
@@ -384,6 +385,7 @@ export default function SuportePage() {
           rowKey="id"
           pagination={{ pageSize: 10, showSizeChanger: false, showTotal: (t) => `${t} tickets` }}
           size="middle"
+          scroll={{ x: 900 }}
           onRow={(record) => ({ onClick: () => openChat(record), style: { cursor: 'pointer' } })}
         />
       </Card>

@@ -323,7 +323,7 @@ export default function DashboardPage() {
                       <Text type="secondary">{t.views} views</Text>
                     </Space>
                   </div>
-                  <Tag color={t.status === 'fixado' ? 'gold' : t.status === 'aberto' ? 'green' : 'default'}>
+                  <Tag color={t.status === 'fixado' ? 'gold' : t.status === 'aberto' ? 'blue' : 'default'}>
                     {t.status === 'fixado' ? 'Fixado' : t.status === 'aberto' ? 'Aberto' : 'Fechado'}
                   </Tag>
                 </List.Item>

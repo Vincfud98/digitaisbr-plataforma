@@ -68,6 +68,7 @@ export default function ParceirosPage() {
       title: 'Ações',
       key: 'actions',
       width: 120,
+      fixed: 'right' as const,
       render: (_: unknown, r: Partner) => (
         <Space>
           <Button type="link" size="small" icon={<EyeOutlined />} onClick={() => setDetailPartner(r)} />
@@ -120,6 +121,7 @@ export default function ParceirosPage() {
           rowKey="id"
           pagination={{ pageSize: 10, showSizeChanger: false, showTotal: (t) => `${t} parceiros` }}
           size="middle"
+          scroll={{ x: 800 }}
         />
       </Card>
 

@@ -16,7 +16,7 @@ const statusConfig: Record<ServiceRequestStatus, { color: string; label: string 
   aberto: { color: 'blue', label: 'Aberto' },
   'em-andamento': { color: 'orange', label: 'Em Andamento' },
   concluido: { color: 'green', label: 'Concluído' },
-  cancelado: { color: 'default', label: 'Cancelado' },
+  cancelado: { color: 'red', label: 'Cancelado' },
 };
 
 const typeConfig: Record<ServiceType, { color: string; hex: string; label: string; icon: React.ReactNode }> = {

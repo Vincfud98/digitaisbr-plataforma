@@ -129,6 +129,8 @@ export default function LinksAfiliadoPage() {
     {
       title: 'Ações',
       key: 'actions',
+      width: 100,
+      fixed: 'right' as const,
       render: (_: unknown, r: AffiliateLink) => (
         <Space>
           <Tooltip title="Copiar link"><Button type="text" icon={<CopyOutlined />} size="small" onClick={() => copyLink(r.url)} /></Tooltip>
@@ -170,7 +172,7 @@ export default function LinksAfiliadoPage() {
         title={<><BarChartOutlined /> Meus Links</>}
         extra={<Input placeholder="Buscar..." prefix={<LinkOutlined />} value={search} onChange={(e) => setSearch(e.target.value)} style={{ width: 220 }} allowClear size="small" />}
       >
-        <Table columns={columns} dataSource={filtered} rowKey="id" size="small" pagination={{ pageSize: 10 }} />
+        <Table columns={columns} dataSource={filtered} rowKey="id" size="small" pagination={{ pageSize: 10 }} scroll={{ x: 800 }} />
       </Card>
 
       <Modal title="Link de Afiliado" open={!!qrModal} onCancel={() => setQrModal(null)} footer={[

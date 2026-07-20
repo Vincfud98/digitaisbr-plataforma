@@ -247,6 +247,7 @@ export default function ComunicacoesPage() {
       title: 'Ações',
       key: 'actions',
       width: 120,
+      fixed: 'right' as const,
       render: (_: unknown, r: Campaign) => (
         <Space>
           <Tooltip title="Visualizar">
@@ -299,6 +300,7 @@ export default function ComunicacoesPage() {
           rowKey="id"
           pagination={{ pageSize: 10, showTotal: (t) => `${t} comunicações` }}
           size="middle"
+          scroll={{ x: 900 }}
         />
       </Card>
 

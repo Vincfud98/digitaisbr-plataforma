@@ -15,7 +15,7 @@ const statusConfig: Record<SaleStatus, { color: string; label: string }> = {
   pendente: { color: 'orange', label: 'Aguardando Pgto' },
   aprovada: { color: 'green', label: 'Paga' },
   cancelada: { color: 'red', label: 'Cancelada' },
-  reembolsada: { color: 'default', label: 'Reembolsada' },
+  reembolsada: { color: 'purple', label: 'Reembolsada' },
 };
 
 export default function VendasPage() {
@@ -182,6 +182,7 @@ export default function VendasPage() {
       title: 'Ações',
       key: 'actions',
       width: 130,
+      fixed: 'right' as const,
       render: (_: unknown, r: Sale) => (
         <Space size={4}>
           {r.status === 'pendente' && (

@@ -153,6 +153,7 @@ export default function AssociadosListPage() {
     {
       title: 'Ações',
       width: 120,
+      fixed: 'right' as const,
       render: (_: unknown, record) => (
         <Space size="small">
           <Tooltip title="Ver perfil">
@@ -198,6 +199,7 @@ export default function AssociadosListPage() {
           rowKey="id"
           pagination={{ pageSize: 10, showSizeChanger: true, showTotal: (total) => `${total} influencers` }}
           size="middle"
+          scroll={{ x: 1000 }}
         />
       </Card>
     </div>

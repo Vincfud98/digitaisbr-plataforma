@@ -107,6 +107,7 @@ export default function CatalogoListPage() {
       title: 'Ações',
       key: 'actions',
       width: 150,
+      fixed: 'right' as const,
       render: (_: unknown, r: Product) => (
         <Space>
           <Button type="link" size="small" icon={<EyeOutlined />} onClick={() => navigate(`/catalogo/${r.id}`)} />
@@ -170,6 +171,7 @@ export default function CatalogoListPage() {
           rowKey="id"
           pagination={{ pageSize: 10, showSizeChanger: false, showTotal: (t) => `${t} produtos` }}
           size="middle"
+          scroll={{ x: 900 }}
         />
       </Card>
     </div>
