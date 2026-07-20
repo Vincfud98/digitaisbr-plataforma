@@ -85,6 +85,40 @@ export default function VendasPage() {
     message.info('Venda marcada como reembolsada.');
   };
 
+  const escapeCSV = (value: string | number) => {
+    const str = String(value);
+    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+  };
+
+  const handleExportCSV = () => {
+    if (filtered.length === 0) {
+      message.warning('Nenhuma venda para exportar.');
+      return;
+    }
+    const headers = ['ID', 'Produto', 'Cliente', 'Email', 'Valor', 'Status', 'Data'];
+    const rows = filtered.map((s) => [
+      escapeCSV(s.id),
+      escapeCSV(productMap[s.productId]?.name || s.productId),
+      escapeCSV(s.customerName),
+      escapeCSV(s.customerEmail),
+      escapeCSV(s.totalPrice.toFixed(2)),
+      escapeCSV(statusConfig[s.status].label),
+      escapeCSV(new Date(s.createdAt).toLocaleDateString('pt-BR')),
+    ]);
+    const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'vendas.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    message.success(`${filtered.length} vendas exportadas com sucesso.`);
+  };
+
   const getCommission = (sale: Sale) => {
     const product = productMap[sale.productId];
     return product ? sale.totalPrice * product.commissionPercent / 100 : 0;
@@ -227,7 +261,7 @@ export default function VendasPage() {
           <DollarOutlined style={{ marginRight: 8 }} />
           Gestão de Vendas
         </Title>
-        <Button icon={<DownloadOutlined />} onClick={() => message.info('Exportação será implementada com Cloud Functions.')}>Exportar CSV</Button>
+        <Button icon={<DownloadOutlined />} onClick={handleExportCSV}>Exportar CSV</Button>
       </div>
 
       <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>

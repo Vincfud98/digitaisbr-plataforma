@@ -88,7 +88,7 @@ async function syncToFirestore(collectionName: string, actionName: string, paylo
       if (id) {
         const state = getState() as { lojas: { list: Array<{ id: string; active: boolean }> } };
         const store = state.lojas.list.find((s) => s.id === id);
-        if (store) updateDocument(collectionName, id, { active: !store.active }).catch(console.error);
+        if (store) updateDocument(collectionName, id, { active: store.active }).catch(console.error);
       }
       break;
     }

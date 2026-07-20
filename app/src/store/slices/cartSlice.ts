@@ -15,12 +15,6 @@ function loadCart(): CartState {
   return { items: [], storeSlug: null };
 }
 
-function saveCart(state: CartState) {
-  try {
-    localStorage.setItem('digitaisbr_cart', JSON.stringify(state));
-  } catch {}
-}
-
 const cartSlice = createSlice({
   name: 'cart',
   initialState: loadCart(),
@@ -36,7 +30,6 @@ const cartSlice = createSlice({
       } else {
         state.items.push(action.payload.item);
       }
-      saveCart(state);
     },
     updateQuantity(state, action: PayloadAction<{ productId: string; quantity: number }>) {
       const item = state.items.find((i) => i.productId === action.payload.productId);
@@ -48,17 +41,14 @@ const cartSlice = createSlice({
         }
       }
       if (state.items.length === 0) state.storeSlug = null;
-      saveCart(state);
     },
     removeFromCart(state, action: PayloadAction<string>) {
       state.items = state.items.filter((i) => i.productId !== action.payload);
       if (state.items.length === 0) state.storeSlug = null;
-      saveCart(state);
     },
     clearCart(state) {
       state.items = [];
       state.storeSlug = null;
-      saveCart(state);
     },
   },
 });

@@ -100,7 +100,7 @@ export default function ServicosPage() {
   const handleCreate = (values: { title: string; type: ServiceType; associadoId: string; professionalName?: string; scheduledAt?: any; description: string }) => {
     const assoc = associados.find((a) => a.id === values.associadoId);
     const req: ServiceRequest = {
-      id: `srv-${Date.now()}`, type: values.type, title: values.title, description: values.description,
+      id: `srv-${crypto.randomUUID()}`, type: values.type, title: values.title, description: values.description,
       associadoId: values.associadoId, associadoName: assoc?.name || 'Associado',
       professionalName: values.professionalName || '', status: 'aberto',
       scheduledAt: values.scheduledAt ? values.scheduledAt.toISOString() : null,

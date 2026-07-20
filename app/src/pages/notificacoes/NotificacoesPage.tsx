@@ -58,7 +58,7 @@ export default function NotificacoesPage() {
     const targetIds = values.userId === '__all__' ? associados.map((a) => a.id) : [values.userId];
     targetIds.forEach((uid) => {
       const notif: Notification = {
-        id: `notif-${Date.now()}-${uid}`,
+        id: `notif-${crypto.randomUUID()}-${uid}`,
         type: values.type,
         title: values.title,
         message: values.messageText,

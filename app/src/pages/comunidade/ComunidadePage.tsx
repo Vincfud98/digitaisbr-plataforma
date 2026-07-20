@@ -10,6 +10,7 @@ import {
 import { useAppSelector, useAppDispatch } from '../../store';
 import { addTopic } from '../../store/slices/comunidadeSlice';
 import type { ForumTopic } from '../../types';
+import { planLabels, planColorsHex as planColors } from '../../constants';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -25,8 +26,6 @@ const categoryConfig: Record<string, { color: string; emoji: string }> = {
   'Novidades': { color: 'lime', emoji: '🆕' },
 };
 
-const planColors: Record<string, string> = { basico: '#1677ff', intermediario: '#722ed1', avancado: '#faad14' };
-const planLabels: Record<string, string> = { basico: 'Básico', intermediario: 'Intermediário', avancado: 'Avançado' };
 const authorPlans: Record<string, string> = {
   'Maria Silva': 'avancado', 'João Santos': 'intermediario', 'Ana Oliveira': 'avancado',
   'Carlos Mendes': 'basico', 'Juliana Costa': 'avancado', 'Pedro Lima': 'intermediario',
@@ -110,7 +109,7 @@ export default function ComunidadePage() {
 
   const handleCreate = (values: { title: string; category: string; body: string }) => {
     const topic: ForumTopic = {
-      id: `post-${Date.now()}`, title: values.title, body: values.body,
+      id: `post-${crypto.randomUUID()}`, title: values.title, body: values.body,
       authorId: user?.id || 'admin', authorName: user?.name || 'Admin',
       category: values.category, status: 'aberto', replies: 0, views: 0, likes: 0,
       lastReplyAt: null, createdAt: new Date().toISOString(),

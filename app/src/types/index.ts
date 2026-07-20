@@ -2,6 +2,16 @@ export type PlanType = 'basico' | 'intermediario' | 'avancado';
 export type AssociadoStatus = 'ativo' | 'inativo' | 'suspenso' | 'cancelado';
 export type UserRole = 'associado' | 'parceiro' | 'admin';
 
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  plan?: PlanType;
+  avatar?: string;
+  firebaseUid?: string;
+}
+
 export interface Plan {
   id: string;
   name: string;

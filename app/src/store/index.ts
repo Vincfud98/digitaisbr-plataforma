@@ -19,10 +19,11 @@ import suporteReducer from './slices/suporteSlice';
 import relatoriosReducer from './slices/relatoriosSlice';
 import cartReducer from './slices/cartSlice';
 import firestoreMiddleware from './firestoreMiddleware';
+import localStorageMiddleware from './localStorageMiddleware';
 
 export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(firestoreMiddleware),
+    getDefaultMiddleware().concat(firestoreMiddleware, localStorageMiddleware),
   reducer: {
     auth: authReducer,
     associados: associadosReducer,

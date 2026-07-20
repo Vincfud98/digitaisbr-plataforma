@@ -8,11 +8,10 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAppSelector } from '../../store';
 import type { PlanType, Content, ContentType } from '../../types';
+import { planLabels, planColors } from '../../constants';
 
 const { Title, Text, Paragraph } = Typography;
 
-const planLabels: Record<PlanType, string> = { basico: 'Básico', intermediario: 'Intermediário', avancado: 'Avançado' };
-const planColors: Record<PlanType, string> = { basico: 'blue', intermediario: 'purple', avancado: 'gold' };
 const planOrder: PlanType[] = ['basico', 'intermediario', 'avancado'];
 
 const typeConfig: Record<ContentType, { color: string; hex: string; label: string; icon: React.ReactNode }> = {

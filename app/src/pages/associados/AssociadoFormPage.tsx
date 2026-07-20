@@ -45,7 +45,7 @@ export default function AssociadoFormPage() {
     } else {
       dispatch(addAssociado({
         ...values,
-        id: `assoc-${Date.now()}`,
+        id: `assoc-${crypto.randomUUID()}`,
         planType: plan?.type || 'basico',
         storeSlug: slug,
         storeName: `Loja ${values.name.split(' ')[0]}`,

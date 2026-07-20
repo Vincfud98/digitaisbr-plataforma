@@ -41,7 +41,7 @@ export default function PortalSuportePage() {
   const handleSend = () => {
     if (!inputValue.trim() || !selectedTicket) return;
     const msg: TicketMessage = {
-      id: `MSG-${selectedTicket.id}-${Date.now()}`,
+      id: `MSG-${selectedTicket.id}-${crypto.randomUUID()}`,
       ticketId: selectedTicket.id,
       sender: 'user',
       senderName: user?.name || 'Associado',

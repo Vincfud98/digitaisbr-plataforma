@@ -235,7 +235,7 @@ export default function MinhaLojaPage() {
 
   const handleCreateProduct = (values: { name: string; description: string; categoryId: string; price: number; stock: number }) => {
     const newProduct: Product = {
-      id: `own-${Date.now()}`,
+      id: `own-${crypto.randomUUID()}`,
       name: values.name,
       description: values.description,
       categoryId: values.categoryId,
@@ -244,7 +244,7 @@ export default function MinhaLojaPage() {
       image: '',
       status: 'ativo',
       exclusivity: 'todos',
-      sku: `OWN-${Date.now().toString(36).toUpperCase()}`,
+      sku: `OWN-${crypto.randomUUID().split('-')[0].toUpperCase()}`,
       stock: values.stock || 0,
       checkoutUrl: '',
       createdAt: new Date().toISOString().split('T')[0],

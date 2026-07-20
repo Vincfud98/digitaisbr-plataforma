@@ -46,7 +46,7 @@ export default function CuponsPage() {
       return;
     }
     const newCoupon: Coupon = {
-      id: `cup-${Date.now()}`,
+      id: `cup-${crypto.randomUUID()}`,
       code: values.code.toUpperCase(),
       type: values.type,
       value: values.value,

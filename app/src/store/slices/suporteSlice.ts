@@ -22,27 +22,38 @@ const suporteSlice = createSlice({
     addTicket(state, action: PayloadAction<SupportTicket>) {
       state.list.unshift(action.payload);
     },
-    updateTicketStatus(state, action: PayloadAction<{ id: string; status: TicketStatus }>) {
-      const ticket = state.list.find((t) => t.id === action.payload.id);
-      if (ticket) {
-        ticket.status = action.payload.status;
-        ticket.updatedAt = new Date().toISOString();
-        if (action.payload.status === 'resolvido') {
-          ticket.resolvedAt = new Date().toISOString();
+    updateTicketStatus: {
+      reducer(state, action: PayloadAction<{ id: string; status: TicketStatus; timestamp: string }>) {
+        const ticket = state.list.find((t) => t.id === action.payload.id);
+        if (ticket) {
+          ticket.status = action.payload.status;
+          ticket.updatedAt = action.payload.timestamp;
+          if (action.payload.status === 'resolvido') {
+            ticket.resolvedAt = action.payload.timestamp;
+          }
         }
-      }
+      },
+      prepare(payload: { id: string; status: TicketStatus }) {
+        return { payload: { ...payload, timestamp: new Date().toISOString() } };
+      },
     },
     assignTicket(state, action: PayloadAction<{ id: string; assignedTo: string }>) {
       const ticket = state.list.find((t) => t.id === action.payload.id);
       if (ticket) ticket.assignedTo = action.payload.assignedTo;
     },
-    addMessage(state, action: PayloadAction<TicketMessage>) {
-      state.messages.push(action.payload);
-      const ticket = state.list.find((t) => t.id === action.payload.ticketId);
-      if (ticket) {
-        ticket.messages += 1;
-        ticket.updatedAt = new Date().toISOString();
-      }
+    addMessage: {
+      reducer(state, action: PayloadAction<TicketMessage & { timestamp: string }>) {
+        const { timestamp, ...msg } = action.payload;
+        state.messages.push(msg);
+        const ticket = state.list.find((t) => t.id === msg.ticketId);
+        if (ticket) {
+          ticket.messages += 1;
+          ticket.updatedAt = timestamp;
+        }
+      },
+      prepare(payload: TicketMessage) {
+        return { payload: { ...payload, timestamp: new Date().toISOString() } };
+      },
     },
   },
 });

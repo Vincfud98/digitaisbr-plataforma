@@ -19,9 +19,14 @@ const relatoriosSlice = createSlice({
       const report = state.list.find((r) => r.id === action.payload);
       if (report) report.favorite = !report.favorite;
     },
-    markGenerated(state, action: PayloadAction<string>) {
-      const report = state.list.find((r) => r.id === action.payload);
-      if (report) report.lastGenerated = new Date().toISOString();
+    markGenerated: {
+      reducer(state, action: PayloadAction<{ id: string; timestamp: string }>) {
+        const report = state.list.find((r) => r.id === action.payload.id);
+        if (report) report.lastGenerated = action.payload.timestamp;
+      },
+      prepare(id: string) {
+        return { payload: { id, timestamp: new Date().toISOString() } };
+      },
     },
   },
 });

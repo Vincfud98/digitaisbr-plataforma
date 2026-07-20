@@ -4,10 +4,11 @@ import { CrownOutlined, EditOutlined, CheckCircleOutlined, StarOutlined, TeamOut
 import { useAppSelector, useAppDispatch } from '../../store';
 import { updatePlan } from '../../store/slices/planosSlice';
 import type { Plan, PlanType } from '../../types';
+import { planColorsHex } from '../../constants';
 
 const { Title, Text } = Typography;
 
-const planColors: Record<PlanType, string> = { basico: '#1677ff', intermediario: '#722ed1', avancado: '#faad14' };
+const planColors = planColorsHex;
 const planIcons: Record<PlanType, React.ReactNode> = {
   basico: <CrownOutlined style={{ fontSize: 32, color: '#1677ff' }} />,
   intermediario: <CrownOutlined style={{ fontSize: 32, color: '#722ed1' }} />,

@@ -28,8 +28,10 @@ import {
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { logout } from '../../store/slices/authSlice';
+import { selectUnreadNotificationsCount } from '../../store/selectors';
 import { logoutUser } from '../../lib/authService';
 import PushNotificationPrompt from '../PushNotificationPrompt';
+import { planLabels, planColors } from '../../constants';
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
@@ -55,9 +57,6 @@ const menuItems = [
   { key: '/portal/suporte', icon: <CustomerServiceOutlined />, label: 'Suporte' },
 ];
 
-const planLabels: Record<string, string> = { basico: 'Básico', intermediario: 'Intermediário', avancado: 'Avançado' };
-const planColors: Record<string, string> = { basico: 'blue', intermediario: 'purple', avancado: 'gold' };
-
 function getSelectedKey(pathname: string): string {
   if (pathname === '/portal') return '/portal';
   const match = menuItems.find((m) => m.key !== '/portal' && pathname.startsWith(m.key));
@@ -72,7 +71,7 @@ export default function PortalLayout() {
   const location = useLocation();
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((s) => s.auth);
-  const unreadCount = useAppSelector((s) => s.notificacoes.list.filter((n) => !n.read).length);
+  const unreadCount = useAppSelector(selectUnreadNotificationsCount);
   const { token } = theme.useToken();
 
   useEffect(() => {

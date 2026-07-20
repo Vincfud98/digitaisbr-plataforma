@@ -12,13 +12,11 @@ import {
 } from 'recharts';
 import { useAppSelector } from '../../store';
 import type { PlanType } from '../../types';
+import { planLabels, planColors } from '../../constants';
 
 const { Title, Text } = Typography;
 const CHART_COLORS = ['#4361ee', '#7209b7', '#ffd166', '#06d6a0', '#ef476f', '#00b4d8'];
 const chartCardStyle: React.CSSProperties = { borderRadius: 12, overflow: 'hidden' };
-
-const planColors: Record<PlanType, string> = { basico: 'blue', intermediario: 'purple', avancado: 'gold' };
-const planLabels: Record<PlanType, string> = { basico: 'Básico', intermediario: 'Intermediário', avancado: 'Avançado' };
 
 export default function DashboardPage() {
   const { user } = useAppSelector((s) => s.auth);

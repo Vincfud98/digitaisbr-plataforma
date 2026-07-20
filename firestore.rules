@@ -18,8 +18,8 @@ service cloud.firestore {
     // Users — each user can read/write their own profile, admins can read all
     match /users/{userId} {
       allow read: if isAuth();
-      allow create: if isOwner(userId);
-      allow update: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && request.resource.data.role == 'associado';
+      allow update: if (isOwner(userId) && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role'])) || isAdmin();
       allow delete: if isAdmin();
     }
 
@@ -71,18 +71,22 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // Sales — public can create (checkout), admin/owner can read
+    // Sales — checkout creates, must include required fields
     match /sales/{doc} {
       allow read: if isAuth();
-      allow create: if true;
+      allow create: if true
+        && request.resource.data.keys().hasAll(['productId', 'customerName', 'customerEmail', 'totalPrice', 'status'])
+        && request.resource.data.status == 'pendente';
       allow update: if isAdmin();
       allow delete: if isAdmin();
     }
 
-    // Orders — public can create (checkout), admin/owner can read
+    // Orders — checkout creates, must include required fields
     match /orders/{doc} {
       allow read: if isAuth();
-      allow create: if true;
+      allow create: if true
+        && request.resource.data.keys().hasAll(['storeSlug', 'items', 'total', 'status', 'customer'])
+        && request.resource.data.status == 'aguardando_pagamento';
       allow update: if isAdmin();
     }
 
@@ -120,11 +124,11 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
-    // Support tickets — associado creates, both can read/update
+    // Support tickets — associado creates, owner and admin can update
     match /tickets/{doc} {
       allow read: if isAuth();
       allow create: if isAuth();
-      allow update: if isAuth();
+      allow update: if isAuth() && (resource.data.userId == request.auth.uid || isAdmin());
       allow delete: if isAdmin();
     }
     match /ticketMessages/{doc} {

@@ -6,13 +6,11 @@ import {
 } from '@ant-design/icons';
 import { useAppSelector } from '../../store';
 import type { PlanType } from '../../types';
+import { planLabels, planColorsHex as planColors, planPrices } from '../../constants';
 
 const { Title, Text } = Typography;
 
 const planOrder: PlanType[] = ['basico', 'intermediario', 'avancado'];
-const planLabels: Record<PlanType, string> = { basico: 'Básico', intermediario: 'Intermediário', avancado: 'Avançado' };
-const planColors: Record<PlanType, string> = { basico: '#1677ff', intermediario: '#722ed1', avancado: '#faad14' };
-const planPrices: Record<PlanType, number> = { basico: 49.90, intermediario: 99.90, avancado: 199.90 };
 const planMaxProducts: Record<PlanType, number> = { basico: 20, intermediario: 50, avancado: 999 };
 
 const fmt = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -247,7 +245,7 @@ export default function MeuPlanoPage() {
                 size="large"
                 icon={<RiseOutlined />}
                 style={{ background: planColors[nextPlan], borderColor: planColors[nextPlan] }}
-                onClick={() => message.info('Funcionalidade de upgrade em breve! Contate o suporte.')}
+                onClick={() => message.info('Para upgrade de plano, entre em contato pelo suporte.')}
               >
                 {fmt(planPrices[nextPlan])}/mês
               </Button>

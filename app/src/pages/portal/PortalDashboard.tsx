@@ -13,12 +13,10 @@ import {
   Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
 } from 'recharts';
 import type { PlanType } from '../../types';
+import { planLabels, planColors, planPrices } from '../../constants';
 
 const { Title, Text } = Typography;
 
-const planLabels: Record<PlanType, string> = { basico: 'Básico', intermediario: 'Intermediário', avancado: 'Avançado' };
-const planColors: Record<PlanType, string> = { basico: 'blue', intermediario: 'purple', avancado: 'gold' };
-const planPrices: Record<PlanType, number> = { basico: 49.90, intermediario: 99.90, avancado: 199.90 };
 const CHART_COLORS = ['#52c41a', '#1677ff', '#fa8c16', '#f5222d'];
 
 export default function PortalDashboard() {

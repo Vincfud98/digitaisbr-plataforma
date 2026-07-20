@@ -1,15 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
+import type { User } from '../../types';
 
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: 'associado' | 'parceiro' | 'admin';
-  plan?: 'basico' | 'intermediario' | 'avancado';
-  avatar?: string;
-  firebaseUid?: string;
-}
+export type { User };
 
 interface AuthState {
   user: User | null;
@@ -38,7 +31,6 @@ const authSlice = createSlice({
       state.user = action.payload;
       state.isAuthenticated = true;
       state.loading = false;
-      localStorage.setItem('digitaisbr_user', JSON.stringify(action.payload));
     },
     loginFailure(state) {
       state.loading = false;
@@ -47,12 +39,10 @@ const authSlice = createSlice({
       state.user = null;
       state.isAuthenticated = false;
       state.loading = false;
-      localStorage.removeItem('digitaisbr_user');
     },
     updateProfile(state, action: PayloadAction<Partial<User>>) {
       if (state.user) {
         state.user = { ...state.user, ...action.payload };
-        localStorage.setItem('digitaisbr_user', JSON.stringify(state.user));
       }
     },
     setFirebaseReady(state, action: PayloadAction<boolean>) {

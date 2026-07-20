@@ -136,7 +136,7 @@ export default function ParceirosPage() {
       >
         <Form form={form} layout="vertical" onFinish={(values) => {
           const partner: Partner = {
-            id: `par-${Date.now()}`,
+            id: `par-${crypto.randomUUID()}`,
             ...values,
             logo: '',
             benefitCount: 0,

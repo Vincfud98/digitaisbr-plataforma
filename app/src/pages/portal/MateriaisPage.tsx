@@ -105,7 +105,7 @@ export default function MateriaisPage() {
                           <Button key="copy" type="link" icon={<CopyOutlined />} onClick={() => copyCopyText(m.copyText!)}>Copiar Texto</Button>,
                         ]
                       : [
-                          <Button key="dl" type="link" icon={<DownloadOutlined />} onClick={() => message.info('Download disponível em breve!')}>Baixar</Button>,
+                          <Button key="dl" type="link" icon={<DownloadOutlined />} onClick={() => message.info('Downloads serão integrados ao Firebase Storage.')}>Baixar</Button>,
                         ]
                   }
                 >

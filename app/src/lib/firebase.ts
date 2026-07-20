@@ -4,12 +4,12 @@ import type { Firestore } from 'firebase/firestore';
 import type { FirebaseStorage } from 'firebase/storage';
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyDgbTuXzez0jpdbYv0sTY1oGwR2MaQ3ZPE',
-  authDomain: 'digitaisbr-plataforma.firebaseapp.com',
-  projectId: 'digitaisbr-plataforma',
-  storageBucket: 'digitaisbr-plataforma.firebasestorage.app',
-  messagingSenderId: '401371609866',
-  appId: '1:401371609866:web:ccd98275d34b41ed4698f3',
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyDgbTuXzez0jpdbYv0sTY1oGwR2MaQ3ZPE',
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'digitaisbr-plataforma.firebaseapp.com',
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'digitaisbr-plataforma',
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'digitaisbr-plataforma.firebasestorage.app',
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '401371609866',
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:401371609866:web:ccd98275d34b41ed4698f3',
 };
 
 const app = initializeApp(firebaseConfig);

@@ -3,11 +3,10 @@ import { useState } from 'react';
 import { GiftOutlined, SearchOutlined, LockOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { useAppSelector } from '../../store';
 import type { PlanType } from '../../types';
+import { planLabels, planColors } from '../../constants';
 
 const { Title, Text } = Typography;
 
-const planLabels: Record<PlanType, string> = { basico: 'Básico', intermediario: 'Intermediário', avancado: 'Avançado' };
-const planColors: Record<PlanType, string> = { basico: 'blue', intermediario: 'purple', avancado: 'gold' };
 const planOrder: PlanType[] = ['basico', 'intermediario', 'avancado'];
 
 export default function MeusBeneficiosPage() {

@@ -66,7 +66,7 @@ export default function FinanceiroPortalPage() {
       return;
     }
     const newW: Withdrawal = {
-      id: `saq-${Date.now()}`,
+      id: `saq-${crypto.randomUUID()}`,
       amount: values.amount,
       method: values.method,
       status: 'pendente',

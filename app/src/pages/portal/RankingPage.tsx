@@ -6,6 +6,7 @@ import {
   HeartOutlined, UserOutlined,
 } from '@ant-design/icons';
 import { useAppSelector } from '../../store';
+import { planLabels, planColors } from '../../constants';
 
 const { Title, Text } = Typography;
 
@@ -76,8 +77,6 @@ export default function RankingPage() {
   ];
 
   const unlockedCount = achievements.filter((a) => a.unlocked).length;
-  const planColors: Record<string, string> = { basico: 'blue', intermediario: 'purple', avancado: 'gold' };
-  const planLabels: Record<string, string> = { basico: 'Básico', intermediario: 'Intermediário', avancado: 'Avançado' };
   const rankColors = ['#faad14', '#8c8c8c', '#d48806'];
 
   return (

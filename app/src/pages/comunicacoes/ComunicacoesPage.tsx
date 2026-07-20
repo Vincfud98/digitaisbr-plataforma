@@ -7,6 +7,7 @@ import {
 } from '@ant-design/icons';
 import { useAppSelector } from '../../store';
 import type { PlanType } from '../../types';
+import { planLabels, planColors } from '../../constants';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -109,9 +110,6 @@ const statusConfig: Record<string, { color: string; label: string }> = {
   enviada: { color: 'green', label: 'Enviada' },
   agendada: { color: 'blue', label: 'Agendada' },
 };
-
-const planLabels: Record<PlanType, string> = { basico: 'Básico', intermediario: 'Intermediário', avancado: 'Avançado' };
-const planColors: Record<PlanType, string> = { basico: 'blue', intermediario: 'purple', avancado: 'gold' };
 
 export default function ComunicacoesPage() {
   const associados = useAppSelector((s) => s.associados.list);

@@ -85,7 +85,7 @@ export default function PortalServicosPage() {
 
   const handleRequest = (values: { title: string; type: ServiceType; professionalName?: string; description: string }) => {
     const req: ServiceRequest = {
-      id: `srv-${Date.now()}`, type: values.type, title: values.title, description: values.description,
+      id: `srv-${crypto.randomUUID()}`, type: values.type, title: values.title, description: values.description,
       associadoId: associado?.id || 'assoc-1', associadoName: associado?.name || user?.name || 'Associado',
       professionalName: values.professionalName || '', status: 'aberto',
       scheduledAt: null, documents: [], rating: null, createdAt: new Date().toISOString(),

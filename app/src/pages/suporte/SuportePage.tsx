@@ -49,7 +49,7 @@ function ChatModal({ ticket, open, onClose }: { ticket: SupportTicket | null; op
   const handleSend = () => {
     if (!inputValue.trim() || !ticket) return;
     const msg: TicketMessage = {
-      id: `MSG-${ticket.id}-${Date.now()}`,
+      id: `MSG-${ticket.id}-${crypto.randomUUID()}`,
       ticketId: ticket.id,
       sender: 'agent',
       senderName: user?.name || 'Admin',
@@ -71,7 +71,7 @@ function ChatModal({ ticket, open, onClose }: { ticket: SupportTicket | null; op
     dispatch(updateTicketStatus({ id: ticket.id, status }));
     const labels: Record<TicketStatus, string> = { aberto: 'Reaberto', 'em-andamento': 'Em andamento', resolvido: 'Resolvido', fechado: 'Fechado' };
     const sysMsg: TicketMessage = {
-      id: `MSG-${ticket.id}-sys-${Date.now()}`,
+      id: `MSG-${ticket.id}-sys-${crypto.randomUUID()}`,
       ticketId: ticket.id,
       sender: 'system',
       senderName: 'Sistema',

@@ -5,13 +5,11 @@ import type { Associado } from '../../types';
 interface AssociadosState {
   list: Associado[];
   selected: Associado | null;
-  loading: boolean;
 }
 
 const initialState: AssociadosState = {
   list: [],
   selected: null,
-  loading: false,
 };
 
 const associadosSlice = createSlice({

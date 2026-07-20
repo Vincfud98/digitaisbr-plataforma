@@ -180,7 +180,7 @@ export default function ConteudosPage() {
       >
         <Form form={form} layout="vertical" onFinish={(values) => {
           const content: Content = {
-            id: `cnt-${Date.now()}`,
+            id: `cnt-${crypto.randomUUID()}`,
             title: values.title,
             summary: values.summary,
             body: values.body || '',

@@ -17,14 +17,24 @@ const comissoesSlice = createSlice({
     setAll(state, action: PayloadAction<Commission[]>) {
       state.list = action.payload;
     },
-    updateCommissionStatus(state, action: PayloadAction<{ id: string; status: CommissionStatus }>) {
-      const comm = state.list.find((c) => c.id === action.payload.id);
-      if (comm) {
-        comm.status = action.payload.status;
-        if (action.payload.status === 'paga') {
-          comm.paidAt = new Date().toISOString().split('T')[0];
+    updateCommissionStatus: {
+      reducer(state, action: PayloadAction<{ id: string; status: CommissionStatus; paidAt?: string }>) {
+        const comm = state.list.find((c) => c.id === action.payload.id);
+        if (comm) {
+          comm.status = action.payload.status;
+          if (action.payload.paidAt) {
+            comm.paidAt = action.payload.paidAt;
+          }
         }
-      }
+      },
+      prepare(payload: { id: string; status: CommissionStatus }) {
+        return {
+          payload: {
+            ...payload,
+            paidAt: payload.status === 'paga' ? new Date().toISOString().split('T')[0] : undefined,
+          },
+        };
+      },
     },
   },
 });

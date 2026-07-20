@@ -27,6 +27,16 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      window.addEventListener('vite:preloadError', function() {
+        var k = 'digitaisbr_chunk_reload', now = Date.now();
+        var last = sessionStorage.getItem(k);
+        if (!last || now - Number(last) > 10000) {
+          sessionStorage.setItem(k, String(now));
+          window.location.reload();
+        }
+      });
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

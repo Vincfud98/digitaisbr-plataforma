@@ -16,6 +16,47 @@ import type { PaymentMethod, OrderCustomer } from '../../types';
 
 const { Title, Text } = Typography;
 
+function formatCPF(value: string) {
+  return value
+    .replace(/\D/g, '')
+    .slice(0, 11)
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+}
+
+function formatPhone(value: string) {
+  const digits = value.replace(/\D/g, '').slice(0, 11);
+  if (digits.length <= 10) {
+    return digits.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2');
+  }
+  return digits.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2');
+}
+
+function formatCEP(value: string) {
+  return value
+    .replace(/\D/g, '')
+    .slice(0, 8)
+    .replace(/(\d{5})(\d)/, '$1-$2');
+}
+
+function validateCPF(cpf: string): boolean {
+  const digits = cpf.replace(/\D/g, '');
+  if (digits.length !== 11) return false;
+  if (/^(\d)\1+$/.test(digits)) return false;
+  let sum = 0;
+  for (let i = 0; i < 9; i++) sum += parseInt(digits.charAt(i)) * (10 - i);
+  let check = 11 - (sum % 11);
+  if (check >= 10) check = 0;
+  if (check !== parseInt(digits.charAt(9))) return false;
+  sum = 0;
+  for (let i = 0; i < 10; i++) sum += parseInt(digits.charAt(i)) * (11 - i);
+  check = 11 - (sum % 11);
+  if (check >= 10) check = 0;
+  if (check !== parseInt(digits.charAt(10))) return false;
+  return true;
+}
+
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -215,14 +256,47 @@ export default function CheckoutPage() {
               <Form.Item name="email" label="Email" rules={[{ required: true, message: 'Informe seu email' }, { type: 'email', message: 'Email inválido' }]}>
                 <Input placeholder="joao@email.com" />
               </Form.Item>
-              <Form.Item name="phone" label="Telefone" rules={[{ required: true, message: 'Informe seu telefone' }]}>
-                <Input placeholder="(11) 99999-9999" />
+              <Form.Item name="phone" label="Telefone" rules={[
+                { required: true, message: 'Informe seu telefone' },
+                { validator: (_, val) => {
+                  if (!val) return Promise.resolve();
+                  const digits = val.replace(/\D/g, '');
+                  return digits.length >= 10 && digits.length <= 11
+                    ? Promise.resolve()
+                    : Promise.reject('Telefone inválido. Use (XX) XXXXX-XXXX');
+                }},
+              ]}>
+                <Input
+                  placeholder="(11) 99999-9999"
+                  maxLength={15}
+                  onChange={(e) => form.setFieldValue('phone', formatPhone(e.target.value))}
+                />
               </Form.Item>
-              <Form.Item name="cpf" label="CPF" rules={[{ required: true, message: 'Informe seu CPF' }]}>
-                <Input placeholder="000.000.000-00" />
+              <Form.Item name="cpf" label="CPF" rules={[
+                { required: true, message: 'Informe seu CPF' },
+                { validator: (_, val) => val && validateCPF(val) ? Promise.resolve() : Promise.reject('CPF inválido') },
+              ]}>
+                <Input
+                  placeholder="000.000.000-00"
+                  maxLength={14}
+                  onChange={(e) => form.setFieldValue('cpf', formatCPF(e.target.value))}
+                />
               </Form.Item>
-              <Form.Item name="cep" label="CEP" rules={[{ required: true, message: 'Informe seu CEP' }]}>
-                <Input placeholder="00000-000" />
+              <Form.Item name="cep" label="CEP" rules={[
+                { required: true, message: 'Informe seu CEP' },
+                { validator: (_, val) => {
+                  if (!val) return Promise.resolve();
+                  const digits = val.replace(/\D/g, '');
+                  return digits.length === 8
+                    ? Promise.resolve()
+                    : Promise.reject('CEP inválido. Use XXXXX-XXX');
+                }},
+              ]}>
+                <Input
+                  placeholder="00000-000"
+                  maxLength={9}
+                  onChange={(e) => form.setFieldValue('cep', formatCEP(e.target.value))}
+                />
               </Form.Item>
               <Button type="primary" htmlType="submit" block style={{ background: primaryColor, borderColor: primaryColor }}>
                 Continuar para pagamento

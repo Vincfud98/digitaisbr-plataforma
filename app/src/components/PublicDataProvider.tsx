@@ -15,14 +15,46 @@ export default function PublicDataProvider({ children }: Props) {
 
   useEffect(() => {
     if (ready) return;
-    Promise.all([
-      import('../data/products'),
-      import('../data/stores'),
-    ]).then(([{ mockProducts }, { mockStores }]) => {
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const { getDb } = await import('../lib/firebase');
+        const [db, { collection, getDocs }] = await Promise.all([
+          getDb(),
+          import('firebase/firestore'),
+        ]);
+
+        const [prodSnap, storeSnap] = await Promise.all([
+          getDocs(collection(db, 'products')),
+          getDocs(collection(db, 'stores')),
+        ]);
+
+        if (cancelled) return;
+
+        if (prodSnap.size > 0 || storeSnap.size > 0) {
+          dispatch(setCatalogo(prodSnap.docs.map((d) => ({ id: d.id, ...d.data() }) as any)));
+          dispatch(setLojas(storeSnap.docs.map((d) => ({ id: d.id, ...d.data() }) as any)));
+          setReady(true);
+          return;
+        }
+      } catch {
+        // Firestore unavailable — fall through to mock data
+      }
+
+      if (cancelled) return;
+
+      const [{ mockProducts }, { mockStores }] = await Promise.all([
+        import('../data/products'),
+        import('../data/stores'),
+      ]);
       dispatch(setCatalogo(mockProducts));
       dispatch(setLojas(mockStores));
       setReady(true);
-    });
+    })();
+
+    return () => { cancelled = true; };
   }, [dispatch, ready]);
 
   if (!ready) {

@@ -27,8 +27,10 @@ import {
 import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { logout } from '../../store/slices/authSlice';
+import { selectUnreadNotificationsCount, selectOpenTicketsCount } from '../../store/selectors';
 import { logoutUser } from '../../lib/authService';
 import PushNotificationPrompt from '../PushNotificationPrompt';
+import { planLabels, planColors } from '../../constants';
 
 const { Header, Sider, Content } = Layout;
 const { Text } = Typography;
@@ -65,9 +67,6 @@ const menuItems = [
   { key: '/relatorios', icon: <BarChartOutlined />, label: 'Relatórios' },
   { key: '/financeiro', icon: <BankOutlined />, label: 'Financeiro' },
 ];
-
-const planLabels: Record<string, string> = { basico: 'Básico', intermediario: 'Intermediário', avancado: 'Avançado' };
-const planColors: Record<string, string> = { basico: 'blue', intermediario: 'purple', avancado: 'gold' };
 
 const breadcrumbMap: Record<string, string> = {
   associados: 'Associados',
@@ -111,8 +110,8 @@ export default function AppLayout() {
   const location = useLocation();
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((s) => s.auth);
-  const unreadCount = useAppSelector((s) => s.notificacoes.list.filter((n) => !n.read).length);
-  const openTickets = useAppSelector((s) => s.suporte.list.filter((t) => t.status === 'aberto').length);
+  const unreadCount = useAppSelector(selectUnreadNotificationsCount);
+  const openTickets = useAppSelector(selectOpenTicketsCount);
   const { token } = theme.useToken();
 
   useEffect(() => {

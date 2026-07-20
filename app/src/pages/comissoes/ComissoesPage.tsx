@@ -70,6 +70,39 @@ export default function ComissoesPage() {
     return Array.from(map.entries()).map(([id, data]) => ({ id, ...data })).sort((a, b) => b.total - a.total);
   }, [commissions, assocMap]);
 
+  const escapeCSV = (value: string | number) => {
+    const str = String(value);
+    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+  };
+
+  const handleExportCSV = () => {
+    if (filtered.length === 0) {
+      message.warning('Nenhuma comissão para exportar.');
+      return;
+    }
+    const headers = ['ID', 'Associado', 'Produto', 'Valor', 'Status', 'Data'];
+    const rows = filtered.map((c) => [
+      escapeCSV(c.id),
+      escapeCSV(assocMap[c.associadoId]?.name || c.associadoId),
+      escapeCSV(productMap[c.productId]?.name || c.productId),
+      escapeCSV(c.commissionValue.toFixed(2)),
+      escapeCSV(statusConfig[c.status].label),
+      escapeCSV(new Date(c.createdAt).toLocaleDateString('pt-BR')),
+    ]);
+    const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'comissoes.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    message.success(`${filtered.length} comissões exportadas com sucesso.`);
+  };
+
   const associadosWithComms = useMemo(() => {
     const ids = new Set(commissions.map((c) => c.associadoId));
     return associados.filter((a) => ids.has(a.id));
@@ -176,7 +209,7 @@ export default function ComissoesPage() {
           <BankOutlined style={{ marginRight: 8 }} />
           Gestão de Comissões
         </Title>
-        <Button icon={<DownloadOutlined />} onClick={() => message.info('Exportação será implementada com Cloud Functions.')}>Exportar</Button>
+        <Button icon={<DownloadOutlined />} onClick={handleExportCSV}>Exportar</Button>
       </div>
 
       <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
