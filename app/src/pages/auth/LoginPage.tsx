@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button, Card, Form, Input, Typography, message, Divider, Modal } from 'antd';
 import { UserOutlined, LockOutlined, GoogleOutlined } from '@ant-design/icons';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { loginStart, loginSuccess, loginFailure } from '../../store/slices/authSlice';
 import { loginUser, loginWithGoogle, resetPassword } from '../../lib/authService';
+import { getDb } from '../../lib/firebase';
 
 const { Text } = Typography;
 
@@ -15,6 +16,10 @@ export default function LoginPage() {
   const [resetOpen, setResetOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [resetLoading, setResetLoading] = useState(false);
+
+  useEffect(() => {
+    getDb();
+  }, []);
 
   const onFinish = async (values: { email: string; password: string }) => {
     dispatch(loginStart());

@@ -189,7 +189,7 @@ export const forumTopics: ForumTopic[] = posts.map((p, i) => {
     body: p.body,
     authorId: `assoc-${String((i % 10) + 1).padStart(3, '0')}`,
     authorName: authors[i % authors.length].name,
-    authorRole: p.authorRole,
+    authorRole: p.authorRole || '',
     category: p.category,
     status: statusRoll > 0.85 ? 'fixado' : 'aberto',
     replies: Math.floor(seededRandom(seed * 11) * 30) + 2,
@@ -197,6 +197,6 @@ export const forumTopics: ForumTopic[] = posts.map((p, i) => {
     likes: Math.floor(seededRandom(seed * 17) * 60) + 3,
     lastReplyAt: new Date(date.getTime() + 86400000 * Math.floor(seededRandom(seed * 23) * 5 + 1)).toISOString(),
     createdAt: date.toISOString(),
-    media: p.media,
+    media: p.media || [],
   };
 });

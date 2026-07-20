@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button, Card, Form, Input, Typography, Divider, Steps, Row, Col, Upload, Checkbox, Tag, Space, Result, message } from 'antd';
 import {
   UserOutlined, LockOutlined, MailOutlined, IdcardOutlined, ShopOutlined,
@@ -10,6 +10,7 @@ import { useAppDispatch, useAppSelector } from '../../store';
 import { loginStart, loginSuccess } from '../../store/slices/authSlice';
 import { registerUser } from '../../lib/authService';
 import { createDocument } from '../../lib/firestoreService';
+import { getDb } from '../../lib/firebase';
 import type { Associado, Store, StoreConfig, PlanType } from '../../types';
 
 const { Title, Text, Paragraph } = Typography;
@@ -102,6 +103,9 @@ export default function RegisterPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { loading } = useAppSelector((s) => s.auth);
+
+  useEffect(() => { getDb(); }, []);
+
   const [step, setStep] = useState(0);
   const [selectedPlan, setSelectedPlan] = useState<string>('');
   const [form] = Form.useForm();

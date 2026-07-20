@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react';
 import { notification } from 'antd';
 import { useAppDispatch } from '../store';
 import { getCollection } from '../lib/firestoreService';
-import { auth } from '../lib/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
 import PageSkeleton from './PageSkeleton';
 import { setAll as setAssociados } from '../store/slices/associadosSlice';
 import { setAll as setPlanos } from '../store/slices/planosSlice';
@@ -33,7 +31,6 @@ interface Props {
 
 export default function DataLoader({ children }: Props) {
   const [phase, setPhase] = useState<'waiting' | 'core' | 'ready'>('waiting');
-  const [firebaseUser, setFirebaseUser] = useState<boolean | null>(null);
   const dispatch = useAppDispatch();
 
   const loadFallbackData = async () => {
@@ -80,20 +77,6 @@ export default function DataLoader({ children }: Props) {
   };
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => {
-      setFirebaseUser(!!user);
-    });
-    return unsub;
-  }, []);
-
-  useEffect(() => {
-    if (firebaseUser === null) return;
-
-    if (!firebaseUser) {
-      loadFallbackData().then(() => setPhase('ready'));
-      return;
-    }
-
     let cancelled = false;
 
     async function loadAll() {
@@ -224,7 +207,7 @@ export default function DataLoader({ children }: Props) {
     });
 
     return () => { cancelled = true; if (unsubPush) unsubPush(); };
-  }, [firebaseUser, dispatch]);
+  }, [dispatch]);
 
   if (phase !== 'ready') {
     return <PageSkeleton />;
