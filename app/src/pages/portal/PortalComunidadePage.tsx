@@ -125,7 +125,7 @@ export default function PortalComunidadePage() {
       const vid = media.find((m) => m.type === 'video')!;
       return (
         <div style={{ margin: '8px -16px 0', borderTop: '1px solid #f0f0f0', borderBottom: '1px solid #f0f0f0' }}>
-          <div style={{ position: 'relative', background: '#000', height: 280, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+          <div style={{ position: 'relative', background: '#000', aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
             onClick={() => message.info('Player de vídeo será integrado com Firestore/Storage.')}>
             <div style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <div style={{ textAlign: 'center' }}>
@@ -141,7 +141,7 @@ export default function PortalComunidadePage() {
     if (media.length === 1) {
       return (
         <div style={{ margin: '8px -16px 0', borderTop: '1px solid #f0f0f0', borderBottom: '1px solid #f0f0f0' }}>
-          <div style={{ height: 260, background: media[0].url, display: 'flex', alignItems: 'flex-end' }}>
+          <div style={{ aspectRatio: '16/9', background: media[0].url, backgroundSize: 'cover', backgroundPosition: 'center', display: 'flex', alignItems: 'flex-end' }}>
             {media[0].caption && (
               <div style={{ width: '100%', padding: '24px 16px 12px', background: 'linear-gradient(transparent, rgba(0,0,0,0.6))', color: '#fff', fontSize: 12 }}>
                 <FileImageOutlined style={{ marginRight: 6 }} />{media[0].caption}
@@ -155,7 +155,7 @@ export default function PortalComunidadePage() {
     return (
       <div style={{ margin: '8px -16px 0', borderTop: '1px solid #f0f0f0', borderBottom: '1px solid #f0f0f0', display: 'flex', gap: 2 }}>
         {media.map((m, i) => (
-          <div key={i} style={{ flex: 1, height: 200, background: m.url, position: 'relative', display: 'flex', alignItems: 'flex-end' }}>
+          <div key={i} style={{ flex: 1, aspectRatio: '16/9', background: m.url, backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative', display: 'flex', alignItems: 'flex-end' }}>
             {m.caption && (
               <div style={{ width: '100%', padding: '20px 8px 6px', background: 'linear-gradient(transparent, rgba(0,0,0,0.6))', color: '#fff', fontSize: 11 }}>
                 {m.caption}

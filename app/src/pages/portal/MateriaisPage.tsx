@@ -86,7 +86,7 @@ export default function MateriaisPage() {
                   hoverable
                   cover={
                     <div style={{
-                      height: m.type === 'story' ? 180 : 140,
+                      aspectRatio: '16/9',
                       background: m.preview,
                       display: 'flex',
                       alignItems: 'center',

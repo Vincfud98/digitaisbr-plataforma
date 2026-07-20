@@ -107,16 +107,16 @@ export default function ConteudosPage() {
                   style={{ height: '100%', borderRadius: 12, overflow: 'hidden' }}
                   styles={{ body: { padding: 16 } }}
                   cover={
-                    <div style={{ height: 160, position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ aspectRatio: '16/9', position: 'relative', overflow: 'hidden' }}>
                       {content.imageUrl ? (
                         <img
                           src={content.imageUrl}
                           alt={content.title}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                         />
                       ) : (
                         <div style={{
-                          height: '100%',
+                          width: '100%', height: '100%',
                           background: `linear-gradient(135deg, ${tc.hex}22, ${tc.hex}44)`,
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                         }}>

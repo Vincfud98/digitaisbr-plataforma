@@ -89,11 +89,11 @@ export default function PortalConteudosPage() {
                 style={{ height: '100%', borderRadius: 12, overflow: 'hidden' }}
                 styles={{ body: { padding: 16 } }}
                 cover={
-                  <div style={{ height: 140, position: 'relative', overflow: 'hidden' }}>
+                  <div style={{ aspectRatio: '16/9', position: 'relative', overflow: 'hidden' }}>
                     {c.imageUrl ? (
-                      <img src={c.imageUrl} alt={c.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <img src={c.imageUrl} alt={c.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                     ) : (
-                      <div style={{ height: '100%', background: `linear-gradient(135deg, ${tc.hex}22, ${tc.hex}44)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div style={{ width: '100%', height: '100%', background: `linear-gradient(135deg, ${tc.hex}22, ${tc.hex}44)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <div style={{ fontSize: 40, color: tc.hex, opacity: 0.6 }}>{tc.icon}</div>
                       </div>
                     )}
