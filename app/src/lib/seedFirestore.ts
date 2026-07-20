@@ -1,5 +1,4 @@
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from './firebase';
+import { getDb } from './firebase';
 import { plans } from '../data/plans';
 import { categories } from '../data/categories';
 import { mockProducts } from '../data/products';
@@ -20,6 +19,7 @@ import { batchWrite } from './firestoreService';
 
 export async function seedIfNeeded(): Promise<boolean> {
   try {
+    const [db, { doc, getDoc }] = await Promise.all([getDb(), import('firebase/firestore')]);
     const flag = await getDoc(doc(db, '_meta', 'seeded'));
     if (flag.exists()) return false;
   } catch {
@@ -59,6 +59,7 @@ export async function seedIfNeeded(): Promise<boolean> {
       await batchWrite(allOps.slice(i, i + BATCH_SIZE));
     }
 
+    const [db, { doc, setDoc }] = await Promise.all([getDb(), import('firebase/firestore')]);
     await setDoc(doc(db, '_meta', 'seeded'), { seededAt: new Date().toISOString(), count: allOps.length });
     console.log(`Firestore seeded with ${allOps.length} documents.`);
     return true;

@@ -9,8 +9,22 @@ import {
   signInWithPopup,
 } from 'firebase/auth';
 import type { User as FirebaseUser } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db } from './firebase';
+import { auth, getDb } from './firebase';
+
+async function fsDoc(collection: string, docId: string) {
+  const [db, { doc }] = await Promise.all([getDb(), import('firebase/firestore')]);
+  return doc(db, collection, docId);
+}
+
+async function fsSetDoc(collection: string, docId: string, data: any) {
+  const [ref, { setDoc }] = await Promise.all([fsDoc(collection, docId), import('firebase/firestore')]);
+  await setDoc(ref, data);
+}
+
+async function fsGetDoc(collection: string, docId: string) {
+  const [ref, { getDoc }] = await Promise.all([fsDoc(collection, docId), import('firebase/firestore')]);
+  return getDoc(ref);
+}
 
 export interface UserProfile {
   uid: string;
@@ -45,7 +59,7 @@ export async function registerUser(
     createdAt: new Date().toISOString(),
   };
 
-  await setDoc(doc(db, 'users', cred.user.uid), profile);
+  await fsSetDoc('users', cred.user.uid, profile);
   return profile;
 }
 
@@ -57,7 +71,7 @@ export async function loginUser(email: string, password: string): Promise<UserPr
 export async function loginWithGoogle(): Promise<UserProfile> {
   const provider = new GoogleAuthProvider();
   const cred = await signInWithPopup(auth, provider);
-  const existing = await getDoc(doc(db, 'users', cred.user.uid));
+  const existing = await fsGetDoc('users', cred.user.uid);
   if (existing.exists()) {
     return existing.data() as UserProfile;
   }
@@ -69,7 +83,7 @@ export async function loginWithGoogle(): Promise<UserProfile> {
     plan: 'basico',
     createdAt: new Date().toISOString(),
   };
-  await setDoc(doc(db, 'users', cred.user.uid), profile);
+  await fsSetDoc('users', cred.user.uid, profile);
   return profile;
 }
 
@@ -82,7 +96,7 @@ export async function resetPassword(email: string): Promise<void> {
 }
 
 export async function getUserProfile(firebaseUser: FirebaseUser): Promise<UserProfile> {
-  const snap = await getDoc(doc(db, 'users', firebaseUser.uid));
+  const snap = await fsGetDoc('users', firebaseUser.uid);
   if (snap.exists()) {
     return snap.data() as UserProfile;
   }

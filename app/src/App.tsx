@@ -5,7 +5,6 @@ import { ConfigProvider, Spin } from 'antd';
 import ptBR from 'antd/locale/pt_BR';
 import ErrorBoundary from './components/ErrorBoundary';
 import PrivateRoute from './routes/PrivateRoute';
-import DataLoader from './components/DataLoader';
 
 const AppLayout = lazy(() => import('./components/layout/AppLayout'));
 const PortalLayout = lazy(() => import('./components/layout/PortalLayout'));
@@ -58,6 +57,9 @@ const PortalServicosPage = lazy(() => import('./pages/portal/PortalServicosPage'
 const LojaPublicaPage = lazy(() => import('./pages/public/LojaPublicaPage'));
 const CheckoutPage = lazy(() => import('./pages/public/CheckoutPage'));
 
+const DataLoader = lazy(() => import('./components/DataLoader'));
+const PublicDataProvider = lazy(() => import('./components/PublicDataProvider'));
+
 const PageFallback = (
   <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
     <Spin size="large" />
@@ -70,18 +72,24 @@ export default function App() {
       <HelmetProvider>
       <ConfigProvider locale={ptBR} theme={{ token: { colorPrimary: '#1677ff', borderRadius: 8 } }}>
         <BrowserRouter>
-          <DataLoader>
           <Suspense fallback={PageFallback}>
           <Routes>
+            {/* Public routes — no data loading, no auth wait */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/registro" element={<RegisterPage />} />
-            <Route path="/loja/:slug" element={<LojaPublicaPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
+
+            {/* Public store — loads only products + stores */}
+            <Route path="/loja/:slug" element={<PublicDataProvider><LojaPublicaPage /></PublicDataProvider>} />
+            <Route path="/checkout" element={<PublicDataProvider><CheckoutPage /></PublicDataProvider>} />
+
+            {/* Admin routes — DataLoader loads all data */}
             <Route
               path="/"
               element={
                 <PrivateRoute>
-                  <AppLayout />
+                  <DataLoader>
+                    <AppLayout />
+                  </DataLoader>
                 </PrivateRoute>
               }
             >
@@ -112,11 +120,15 @@ export default function App() {
               <Route path="comunicacoes" element={<ComunicacoesPage />} />
               <Route path="relatorios" element={<RelatoriosPage />} />
             </Route>
+
+            {/* Portal routes — DataLoader loads all data */}
             <Route
               path="/portal"
               element={
                 <PrivateRoute>
-                  <PortalLayout />
+                  <DataLoader>
+                    <PortalLayout />
+                  </DataLoader>
                 </PrivateRoute>
               }
             >
@@ -143,7 +155,6 @@ export default function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
           </Suspense>
-          </DataLoader>
         </BrowserRouter>
       </ConfigProvider>
       </HelmetProvider>

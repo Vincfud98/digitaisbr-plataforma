@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Spin, notification } from 'antd';
+import { notification } from 'antd';
 import { useAppDispatch } from '../store';
-import { onPushMessage } from '../lib/pushService';
 import { getCollection } from '../lib/firestoreService';
 import { auth } from '../lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
+import PageSkeleton from './PageSkeleton';
 import { setAll as setAssociados } from '../store/slices/associadosSlice';
 import { setAll as setPlanos } from '../store/slices/planosSlice';
 import { setAll as setCatalogo } from '../store/slices/catalogoSlice';
@@ -32,7 +32,7 @@ interface Props {
 }
 
 export default function DataLoader({ children }: Props) {
-  const [loading, setLoading] = useState(true);
+  const [phase, setPhase] = useState<'waiting' | 'core' | 'ready'>('waiting');
   const [firebaseUser, setFirebaseUser] = useState<boolean | null>(null);
   const dispatch = useAppDispatch();
 
@@ -90,8 +90,7 @@ export default function DataLoader({ children }: Props) {
     if (firebaseUser === null) return;
 
     if (!firebaseUser) {
-      loadFallbackData();
-      setLoading(false);
+      loadFallbackData().then(() => setPhase('ready'));
       return;
     }
 
@@ -101,13 +100,54 @@ export default function DataLoader({ children }: Props) {
       const timeout = new Promise<'timeout'>((resolve) => setTimeout(() => resolve('timeout'), 3000));
 
       try {
-        const firestoreLoad = Promise.all([
+        // Phase 1: core data (6 collections — enough for dashboard cards + charts)
+        const coreLoad = Promise.all([
           getCollection<Associado>('associados'),
           getCollection<Plan>('plans'),
           getCollection<Product>('products'),
           getCollection<Store>('stores'),
           getCollection<Sale>('sales'),
           getCollection<Commission>('commissions'),
+        ]);
+
+        const coreResult = await Promise.race([coreLoad, timeout]);
+
+        if (cancelled) return;
+
+        if (coreResult === 'timeout') {
+          console.warn('Firestore timeout, using local data');
+          await loadFallbackData();
+          setPhase('ready');
+          return;
+        }
+
+        const [associados, planos, produtos, lojas, vendas, comissoes] = coreResult;
+        const hasData = associados.length > 0 || produtos.length > 0;
+
+        if (!hasData) {
+          const { seedIfNeeded } = await import('../lib/seedFirestore');
+          const seeded = await seedIfNeeded();
+          if (seeded) {
+            window.location.reload();
+            return;
+          }
+          await loadFallbackData();
+          setPhase('ready');
+          return;
+        }
+
+        // Dispatch core data and show the page
+        dispatch(setAssociados(associados));
+        dispatch(setPlanos(planos));
+        dispatch(setCatalogo(produtos));
+        dispatch(setLojas(lojas));
+        dispatch(setVendas(vendas));
+        dispatch(setComissoes(comissoes));
+
+        if (!cancelled) setPhase('ready');
+
+        // Phase 2: remaining data in background (page already visible)
+        const secondaryLoad = Promise.all([
           getCollection<FinancialTransaction>('financial'),
           getCollection<Benefit>('benefits'),
           getCollection<Partner>('partners'),
@@ -120,73 +160,74 @@ export default function DataLoader({ children }: Props) {
           getCollection<TicketMessage>('ticketMessages'),
         ]);
 
-        const result = await Promise.race([firestoreLoad, timeout]);
+        const secondaryTimeout = new Promise<'timeout'>((resolve) => setTimeout(() => resolve('timeout'), 5000));
+        const secondaryResult = await Promise.race([secondaryLoad, secondaryTimeout]);
 
         if (cancelled) return;
 
-        if (result === 'timeout') {
-          console.warn('Firestore timeout, using local data');
-          await loadFallbackData();
+        if (secondaryResult !== 'timeout') {
+          const [financeiro, beneficios, parceiros, conteudos, comunidade, notificacoes, servicos, tickets, relatorios, messages] = secondaryResult;
+          dispatch(setFinanceiro(financeiro));
+          dispatch(setBeneficios(beneficios));
+          dispatch(setParceiros(parceiros));
+          dispatch(setConteudos(conteudos));
+          dispatch(setComunidade(comunidade));
+          dispatch(setNotificacoes(notificacoes));
+          dispatch(setServicos(servicos));
+          dispatch(setSuporteTickets(tickets));
+          dispatch(setRelatorios(relatorios));
+          dispatch(setSuporteMsgs(messages));
         } else {
+          console.warn('Secondary data timeout, loading fallback for remaining');
           const [
-            associados, planos, produtos, lojas, vendas, comissoes,
-            financeiro, beneficios, parceiros, conteudos, comunidade,
-            notificacoes, servicos, tickets, relatorios, messages,
-          ] = result;
-
-          const hasData = associados.length > 0 || produtos.length > 0;
-          if (!hasData) {
-            const { seedIfNeeded } = await import('../lib/seedFirestore');
-            const seeded = await seedIfNeeded();
-            if (seeded) {
-              console.log('Firestore seeded, reloading data...');
-              window.location.reload();
-              return;
-            }
-            await loadFallbackData();
-          } else {
-            dispatch(setAssociados(associados));
-            dispatch(setPlanos(planos));
-            dispatch(setCatalogo(produtos));
-            dispatch(setLojas(lojas));
-            dispatch(setVendas(vendas));
-            dispatch(setComissoes(comissoes));
-            dispatch(setFinanceiro(financeiro));
-            dispatch(setBeneficios(beneficios));
-            dispatch(setParceiros(parceiros));
-            dispatch(setConteudos(conteudos));
-            dispatch(setComunidade(comunidade));
-            dispatch(setNotificacoes(notificacoes));
-            dispatch(setServicos(servicos));
-            dispatch(setSuporteTickets(tickets));
-            dispatch(setRelatorios(relatorios));
-            dispatch(setSuporteMsgs(messages));
-          }
+            { mockTransactions }, { mockBenefits }, { mockPartners }, { mockContents },
+            { forumTopics }, { notifications }, { serviceRequests }, { supportTickets },
+            { reportConfigs }, { ticketMessages },
+          ] = await Promise.all([
+            import('../data/financial'),
+            import('../data/benefits'),
+            import('../data/partners'),
+            import('../data/contents'),
+            import('../data/forum'),
+            import('../data/notifications'),
+            import('../data/services'),
+            import('../data/tickets'),
+            import('../data/reports'),
+            import('../data/ticketMessages'),
+          ]);
+          dispatch(setFinanceiro(mockTransactions));
+          dispatch(setBeneficios(mockBenefits));
+          dispatch(setParceiros(mockPartners));
+          dispatch(setConteudos(mockContents));
+          dispatch(setComunidade(forumTopics));
+          dispatch(setNotificacoes(notifications));
+          dispatch(setServicos(serviceRequests));
+          dispatch(setSuporteTickets(supportTickets));
+          dispatch(setRelatorios(reportConfigs));
+          dispatch(setSuporteMsgs(ticketMessages));
         }
       } catch (err) {
         console.error('Failed to load Firestore data, using fallback:', err);
         await loadFallbackData();
-      } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) setPhase('ready');
       }
     }
 
     loadAll();
 
-    const unsubPush = onPushMessage((msg) => {
-      notification.info({ message: msg.title, description: msg.body, placement: 'topRight' });
+    let unsubPush: (() => void) | undefined;
+    import('../lib/pushService').then(({ onPushMessage }) => {
+      if (cancelled) return;
+      unsubPush = onPushMessage((msg) => {
+        notification.info({ message: msg.title, description: msg.body, placement: 'topRight' });
+      });
     });
 
     return () => { cancelled = true; if (unsubPush) unsubPush(); };
   }, [firebaseUser, dispatch]);
 
-  if (firebaseUser === null || (firebaseUser && loading)) {
-    return (
-      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16 }}>
-        <Spin size="large" />
-        <span style={{ color: '#888' }}>Carregando...</span>
-      </div>
-    );
+  if (phase !== 'ready') {
+    return <PageSkeleton />;
   }
 
   return <>{children}</>;

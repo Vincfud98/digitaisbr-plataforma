@@ -415,6 +415,30 @@ function DocumentsTab({ associado }: { associado: any }) {
                 </div>
               ))}
             </div>
+            {approvedCount < 3 && (
+              <>
+                <Divider style={{ margin: '12px 0' }} />
+                <div style={{ background: '#fffbe6', border: '1px solid #ffe58f', borderRadius: 8, padding: 12 }}>
+                  <Text strong style={{ fontSize: 13, color: '#d48806', display: 'block', marginBottom: 6 }}>
+                    <ExclamationCircleOutlined style={{ marginRight: 4 }} />
+                    Ações necessárias para concluir:
+                  </Text>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    {docs.slice(0, 3).filter((d) => d.status !== 'aprovado').map((doc) => (
+                      <div key={doc.key} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
+                        <span style={{ color: statusConfig[doc.status].color }}>{statusConfig[doc.status].icon}</span>
+                        <Text style={{ fontSize: 12 }}>
+                          {doc.status === 'enviado' && <><Text strong style={{ fontSize: 12 }}>Aprovar</Text> {doc.label.split('(')[0].trim()}</>}
+                          {doc.status === 'rejeitado' && <>Aguardar reenvio de {doc.label.split('(')[0].trim()}</>}
+                          {doc.status === 'nao_enviado' && <>Solicitar envio de {doc.label.split('(')[0].trim()}</>}
+                          {doc.status === 'pendente' && <>Verificar {doc.label.split('(')[0].trim()}</>}
+                        </Text>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
           </Card>
 
           <Card title="Dados de Contato" size="small" style={{ marginTop: 16 }}>
@@ -675,28 +699,69 @@ function ComplianceTab({ store }: { store: Store }) {
         <Col xs={24} lg={16}>
           {alerts.length > 0 ? (
             <Card title={<><ExclamationCircleOutlined style={{ marginRight: 8, color: '#ff4d4f' }} />Alertas de Fraude ({alerts.length})</>} size="small" style={{ marginBottom: 16 }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {alerts.map((alert, i) => (
-                  <Alert
-                    key={i}
-                    title={alert.message}
-                    description={<><Text type="secondary" style={{ fontSize: 12 }}>{new Date(alert.date).toLocaleDateString('pt-BR')} — </Text>{alert.detail}</>}
-                    type={alert.type}
-                    showIcon
-                    action={
-                      <Space orientation="vertical" style={{ gap: 4 }}>
-                        {investigating.includes(alert.id) ? (
-                          <Tag color="processing">Em investigação</Tag>
-                        ) : (
-                          <Button size="small" type="primary" ghost onClick={() => { setInvestigating((prev) => [...prev, alert.id]); message.info(`Investigação aberta para: ${alert.message}`); }}>Investigar</Button>
-                        )}
-                        <Popconfirm title="Dispensar este alerta?" okText="Sim" cancelText="Não" onConfirm={() => { setDismissed((prev) => [...prev, alert.id]); message.success('Alerta dispensado'); }}>
-                          <Button size="small">Dispensar</Button>
-                        </Popconfirm>
-                      </Space>
-                    }
-                  />
-                ))}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {alerts.map((alert, i) => {
+                  const isChargeback = alert.id === 'a3';
+                  return (
+                    <div
+                      key={i}
+                      style={isChargeback ? {
+                        border: '2px solid #ff4d4f', borderRadius: 10, padding: 16, background: '#fff1f0',
+                        boxShadow: '0 2px 8px rgba(255,77,79,0.12)',
+                      } : undefined}
+                    >
+                      {isChargeback && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                          <Tag color="red" style={{ fontWeight: 700, fontSize: 12, padding: '2px 10px' }}>CHARGEBACK</Tag>
+                          <Text type="secondary" style={{ fontSize: 11 }}>{new Date(alert.date).toLocaleDateString('pt-BR')}</Text>
+                        </div>
+                      )}
+                      <Alert
+                        title={isChargeback ? (
+                          <Text strong style={{ fontSize: 15 }}>{alert.message}</Text>
+                        ) : alert.message}
+                        description={
+                          isChargeback ? (
+                            <div>
+                              <Text style={{ fontSize: 13 }}>{alert.detail}</Text>
+                              <div style={{ marginTop: 4 }}>
+                                <Text type="secondary" style={{ fontSize: 12 }}>Prazo para contestação: 15 dias</Text>
+                              </div>
+                            </div>
+                          ) : (
+                            <><Text type="secondary" style={{ fontSize: 12 }}>{new Date(alert.date).toLocaleDateString('pt-BR')} — </Text>{alert.detail}</>
+                          )
+                        }
+                        type={isChargeback ? 'error' : alert.type}
+                        showIcon
+                        action={
+                          <Space orientation="vertical" style={{ gap: 6 }}>
+                            {investigating.includes(alert.id) ? (
+                              <Tag color="processing">Em investigação</Tag>
+                            ) : (
+                              <Button
+                                size={isChargeback ? 'middle' : 'small'}
+                                type="primary"
+                                danger={isChargeback}
+                                ghost={!isChargeback}
+                                icon={isChargeback ? <AuditOutlined /> : undefined}
+                                onClick={() => { setInvestigating((prev) => [...prev, alert.id]); message.info(`Investigação aberta para: ${alert.message}`); }}
+                                style={isChargeback ? { fontWeight: 600 } : undefined}
+                              >
+                                Investigar
+                              </Button>
+                            )}
+                            <Popconfirm title="Dispensar este alerta?" okText="Sim" cancelText="Não" onConfirm={() => { setDismissed((prev) => [...prev, alert.id]); message.success('Alerta dispensado'); }}>
+                              <Button size="small" type={isChargeback ? 'text' : 'default'} style={isChargeback ? { color: '#8c8c8c' } : undefined}>
+                                {isChargeback ? 'Repassar ao financeiro' : 'Dispensar'}
+                              </Button>
+                            </Popconfirm>
+                          </Space>
+                        }
+                      />
+                    </div>
+                  );
+                })}
               </div>
             </Card>
           ) : (

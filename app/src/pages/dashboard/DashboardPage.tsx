@@ -14,7 +14,8 @@ import { useAppSelector } from '../../store';
 import type { PlanType } from '../../types';
 
 const { Title, Text } = Typography;
-const CHART_COLORS = ['#1677ff', '#722ed1', '#faad14', '#52c41a', '#f5222d', '#13c2c2'];
+const CHART_COLORS = ['#4361ee', '#7209b7', '#ffd166', '#06d6a0', '#ef476f', '#00b4d8'];
+const chartCardStyle: React.CSSProperties = { borderRadius: 12, overflow: 'hidden' };
 
 const planColors: Record<PlanType, string> = { basico: 'blue', intermediario: 'purple', avancado: 'gold' };
 const planLabels: Record<PlanType, string> = { basico: 'Básico', intermediario: 'Intermediário', avancado: 'Avançado' };
@@ -114,61 +115,72 @@ export default function DashboardPage() {
         </Text>
       </div>
 
-      <Row gutter={[16, 16]}>
-        <Col xs={24} sm={12} lg={6}>
-          <Card><Statistic title="Associados Ativos" value={assocAtivos} suffix={`/ ${totalAssociados}`} prefix={<TeamOutlined />} styles={{ content: { color: '#1677ff' } }} /></Card>
+      <Row gutter={[12, 12]}>
+        <Col xs={12} sm={12} lg={6}>
+          <Card style={{ borderRadius: 10, borderLeft: '4px solid #4361ee' }}><Statistic title="Associados Ativos" value={assocAtivos} suffix={`/ ${totalAssociados}`} prefix={<TeamOutlined />} styles={{ content: { color: '#4361ee', fontWeight: 700 } }} /></Card>
         </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card><Statistic title="Vendas Aprovadas" value={vendasAprovadas} suffix={`/ ${totalVendas}`} prefix={<ShoppingCartOutlined />} styles={{ content: { color: '#52c41a' } }} /></Card>
+        <Col xs={12} sm={12} lg={6}>
+          <Card style={{ borderRadius: 10, borderLeft: '4px solid #06d6a0' }}><Statistic title="Vendas Aprovadas" value={vendasAprovadas} suffix={`/ ${totalVendas}`} prefix={<ShoppingCartOutlined />} styles={{ content: { color: '#06d6a0', fontWeight: 700 } }} /></Card>
         </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card><Statistic title="Receita Total" value={receitaTotal} precision={2} prefix="R$" styles={{ content: { color: '#52c41a' } }} /></Card>
+        <Col xs={12} sm={12} lg={6}>
+          <Card style={{ borderRadius: 10, borderLeft: '4px solid #06d6a0' }}><Statistic title="Receita Total" value={receitaTotal} precision={2} prefix="R$" styles={{ content: { color: '#06d6a0', fontWeight: 700 } }} /></Card>
         </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card><Statistic title="Lojas Ativas" value={lojasAtivas} suffix={`/ ${lojas.length}`} prefix={<ShopOutlined />} styles={{ content: { color: '#722ed1' } }} /></Card>
+        <Col xs={12} sm={12} lg={6}>
+          <Card style={{ borderRadius: 10, borderLeft: '4px solid #7209b7' }}><Statistic title="Lojas Ativas" value={lojasAtivas} suffix={`/ ${lojas.length}`} prefix={<ShopOutlined />} styles={{ content: { color: '#7209b7', fontWeight: 700 } }} /></Card>
         </Col>
       </Row>
 
-      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
-        <Col xs={24} sm={12} lg={6}>
-          <Card><Statistic title="Comissões Pagas" value={comissaoPaga} precision={2} prefix="R$" styles={{ content: { color: '#faad14' } }} /></Card>
+      <Row gutter={[12, 12]} style={{ marginTop: 12 }}>
+        <Col xs={12} sm={12} lg={6}>
+          <Card style={{ borderRadius: 10, borderLeft: '4px solid #ffd166' }}><Statistic title="Comissões Pagas" value={comissaoPaga} precision={2} prefix="R$" styles={{ content: { color: '#d4a017', fontWeight: 700 } }} /></Card>
         </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card><Statistic title="Comissões Pendentes" value={comissaoPendente} precision={2} prefix="R$" styles={{ content: { color: '#fa8c16' } }} /></Card>
+        <Col xs={12} sm={12} lg={6}>
+          <Card style={{ borderRadius: 10, borderLeft: '4px solid #f77f00' }}><Statistic title="Comissões Pendentes" value={comissaoPendente} precision={2} prefix="R$" styles={{ content: { color: '#f77f00', fontWeight: 700 } }} /></Card>
         </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card><Statistic title="Saldo Financeiro" value={saldo} precision={2} prefix="R$" styles={{ content: { color: saldo >= 0 ? '#52c41a' : '#ff4d4f' } }} /></Card>
+        <Col xs={12} sm={12} lg={6}>
+          <Card style={{ borderRadius: 10, borderLeft: `4px solid ${saldo >= 0 ? '#06d6a0' : '#ef476f'}` }}><Statistic title="Saldo Financeiro" value={saldo} precision={2} prefix="R$" styles={{ content: { color: saldo >= 0 ? '#06d6a0' : '#ef476f', fontWeight: 700 } }} /></Card>
         </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card><Statistic title="Produtos Ativos" value={produtosAtivos} suffix={`/ ${produtos.length}`} prefix={<ShoppingCartOutlined />} styles={{ content: { color: '#13c2c2' } }} /></Card>
+        <Col xs={12} sm={12} lg={6}>
+          <Card style={{ borderRadius: 10, borderLeft: '4px solid #00b4d8' }}><Statistic title="Produtos Ativos" value={produtosAtivos} suffix={`/ ${produtos.length}`} prefix={<ShoppingCartOutlined />} styles={{ content: { color: '#00b4d8', fontWeight: 700 } }} /></Card>
         </Col>
       </Row>
 
       {/* Charts */}
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
         <Col xs={24} lg={16}>
-          <Card title={<><RiseOutlined /> Receita e Comissões (6 meses)</>} size="small">
-            <ResponsiveContainer width="100%" height={280}>
-              <AreaChart data={revenueChartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="mes" fontSize={12} />
-                <YAxis fontSize={12} />
-                <Tooltip formatter={(value: any, name: any) => [`R$ ${Number(value).toFixed(2)}`, name === 'receita' ? 'Receita' : 'Comissões']} />
-                <Area type="monotone" dataKey="receita" stroke="#52c41a" fill="#52c41a" fillOpacity={0.2} name="Receita" />
-                <Area type="monotone" dataKey="comissoes" stroke="#722ed1" fill="#722ed1" fillOpacity={0.15} name="Comissões" />
+          <Card title={<><RiseOutlined /> Receita e Comissões (6 meses)</>} size="small" style={chartCardStyle}>
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={revenueChartData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="gradDashReceita" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#06d6a0" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="#06d6a0" stopOpacity={0.02} />
+                  </linearGradient>
+                  <linearGradient id="gradDashComissoes" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#7209b7" stopOpacity={0.25} />
+                    <stop offset="100%" stopColor="#7209b7" stopOpacity={0.02} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="mes" tick={{ fontSize: 12, fill: '#8c8c8c' }} axisLine={{ stroke: '#e8e8e8' }} tickLine={false} />
+                <YAxis tick={{ fontSize: 12, fill: '#8c8c8c' }} axisLine={false} tickLine={false} />
+                <Tooltip formatter={(value: any, name: any) => [`R$ ${Number(value).toFixed(2)}`, name === 'receita' ? 'Receita' : 'Comissões']} contentStyle={{ borderRadius: 8, border: '1px solid #f0f0f0', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }} />
+                <Area type="monotone" dataKey="receita" stroke="#06d6a0" strokeWidth={2.5} fill="url(#gradDashReceita)" name="Receita" />
+                <Area type="monotone" dataKey="comissoes" stroke="#7209b7" strokeWidth={2} fill="url(#gradDashComissoes)" name="Comissões" />
+                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12, paddingTop: 4 }} />
               </AreaChart>
             </ResponsiveContainer>
           </Card>
         </Col>
         <Col xs={24} lg={8}>
-          <Card title="Associados por Plano" size="small">
-            <ResponsiveContainer width="100%" height={280}>
+          <Card title="Associados por Plano" size="small" style={chartCardStyle}>
+            <ResponsiveContainer width="100%" height={300}>
               <PieChart>
-                <Pie data={planChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label={({ name, percent }: any) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}>
+                <Pie data={planChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={55} outerRadius={90} paddingAngle={3} cornerRadius={4}>
                   {planChartData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
                 </Pie>
-                <Legend />
-                <Tooltip />
+                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
+                <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid #f0f0f0', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }} />
               </PieChart>
             </ResponsiveContainer>
           </Card>
@@ -177,14 +189,14 @@ export default function DashboardPage() {
 
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
         <Col xs={24}>
-          <Card title="Vendas por Mês" size="small">
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={revenueChartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="mes" fontSize={12} />
-                <YAxis fontSize={12} />
-                <Tooltip />
-                <Bar dataKey="vendas" fill="#1677ff" radius={[4, 4, 0, 0]} name="Vendas" />
+          <Card title="Vendas por Mês" size="small" style={chartCardStyle}>
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={revenueChartData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="mes" tick={{ fontSize: 12, fill: '#8c8c8c' }} axisLine={{ stroke: '#e8e8e8' }} tickLine={false} />
+                <YAxis tick={{ fontSize: 12, fill: '#8c8c8c' }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid #f0f0f0', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }} />
+                <Bar dataKey="vendas" fill="#4361ee" radius={[6, 6, 0, 0]} name="Vendas" barSize={24} />
               </BarChart>
             </ResponsiveContainer>
           </Card>

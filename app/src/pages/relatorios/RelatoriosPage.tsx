@@ -14,7 +14,12 @@ import { useAppSelector } from '../../store';
 
 const { Title, Text } = Typography;
 
-const COLORS = ['#1677ff', '#52c41a', '#faad14', '#ff4d4f', '#722ed1', '#13c2c2', '#eb2f96', '#fa8c16'];
+const COLORS = ['#4361ee', '#3a86ff', '#06d6a0', '#ffd166', '#ef476f', '#7209b7', '#00b4d8', '#f77f00'];
+
+const chartCardStyle: React.CSSProperties = { borderRadius: 12, overflow: 'hidden' };
+const kpiCardStyle = (color: string): React.CSSProperties => ({
+  borderRadius: 10, borderLeft: `4px solid ${color}`, minHeight: 88,
+});
 
 function exportCSV(filename: string, headers: string[], rows: string[][]) {
   const bom = '﻿';
@@ -190,35 +195,35 @@ export default function RelatoriosPage() {
       </div>
 
       {/* KPI Cards */}
-      <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
+      <Row gutter={[12, 12]} style={{ marginBottom: 20 }}>
         <Col xs={12} sm={8} lg={4}>
-          <Card size="small" style={{ borderLeft: '3px solid #1677ff' }}>
-            <Statistic title="Receita Total" value={receitaTotal} prefix="R$" precision={2} styles={{ content: { fontSize: 18, color: '#1677ff' } }} />
+          <Card size="small" style={kpiCardStyle('#4361ee')}>
+            <Statistic title="Receita Total" value={receitaTotal} prefix="R$" precision={2} styles={{ content: { fontSize: 17, fontWeight: 700, color: '#4361ee' } }} />
           </Card>
         </Col>
         <Col xs={12} sm={8} lg={4}>
-          <Card size="small" style={{ borderLeft: '3px solid #52c41a' }}>
-            <Statistic title="Vendas Aprovadas" value={vendasAprovadas.length} prefix={<CheckCircleOutlined />} styles={{ content: { fontSize: 18, color: '#52c41a' } }} />
+          <Card size="small" style={kpiCardStyle('#06d6a0')}>
+            <Statistic title="Vendas Aprovadas" value={vendasAprovadas.length} prefix={<CheckCircleOutlined />} styles={{ content: { fontSize: 17, fontWeight: 700, color: '#06d6a0' } }} />
           </Card>
         </Col>
         <Col xs={12} sm={8} lg={4}>
-          <Card size="small" style={{ borderLeft: '3px solid #722ed1' }}>
-            <Statistic title="Ticket Médio" value={ticketMedio} prefix="R$" precision={2} styles={{ content: { fontSize: 18, color: '#722ed1' } }} />
+          <Card size="small" style={kpiCardStyle('#7209b7')}>
+            <Statistic title="Ticket Médio" value={ticketMedio} prefix="R$" precision={2} styles={{ content: { fontSize: 17, fontWeight: 700, color: '#7209b7' } }} />
           </Card>
         </Col>
         <Col xs={12} sm={8} lg={4}>
-          <Card size="small" style={{ borderLeft: '3px solid #faad14' }}>
-            <Statistic title="Taxa Conversão" value={taxaConversao} suffix="%" precision={1} styles={{ content: { fontSize: 18, color: '#faad14' } }} />
+          <Card size="small" style={kpiCardStyle('#ffd166')}>
+            <Statistic title="Taxa Conversão" value={taxaConversao} suffix="%" precision={1} styles={{ content: { fontSize: 17, fontWeight: 700, color: '#d4a017' } }} />
           </Card>
         </Col>
         <Col xs={12} sm={8} lg={4}>
-          <Card size="small" style={{ borderLeft: '3px solid #13c2c2' }}>
-            <Statistic title="Associados Ativos" value={assocAtivos} prefix={<TeamOutlined />} styles={{ content: { fontSize: 18, color: '#13c2c2' } }} />
+          <Card size="small" style={kpiCardStyle('#00b4d8')}>
+            <Statistic title="Associados Ativos" value={assocAtivos} prefix={<TeamOutlined />} styles={{ content: { fontSize: 17, fontWeight: 700, color: '#00b4d8' } }} />
           </Card>
         </Col>
         <Col xs={12} sm={8} lg={4}>
-          <Card size="small" style={{ borderLeft: saldo >= 0 ? '3px solid #52c41a' : '3px solid #ff4d4f' }}>
-            <Statistic title="Saldo Financeiro" value={saldo} prefix={saldo >= 0 ? <ArrowUpOutlined /> : <ArrowDownOutlined />} precision={2} styles={{ content: { fontSize: 18, color: saldo >= 0 ? '#52c41a' : '#ff4d4f' } }} />
+          <Card size="small" style={kpiCardStyle(saldo >= 0 ? '#06d6a0' : '#ef476f')}>
+            <Statistic title="Saldo Financeiro" value={saldo} prefix={saldo >= 0 ? <ArrowUpOutlined /> : <ArrowDownOutlined />} precision={2} styles={{ content: { fontSize: 17, fontWeight: 700, color: saldo >= 0 ? '#06d6a0' : '#ef476f' } }} />
           </Card>
         </Col>
       </Row>
@@ -238,26 +243,33 @@ export default function RelatoriosPage() {
         <>
           <Row gutter={[16, 16]}>
             <Col xs={24} lg={16}>
-              <Card size="small" title={<><RiseOutlined style={{ color: '#1677ff', marginRight: 6 }} />Receita por Mês</>}>
-                <ResponsiveContainer width="100%" height={280}>
-                  <AreaChart data={vendasPorMes}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="mes" style={{ fontSize: 11 }} />
-                    <YAxis style={{ fontSize: 11 }} />
-                    <Tooltip formatter={(v) => fmt(Number(v))} />
-                    <Area type="monotone" dataKey="receita" stroke="#1677ff" fill="#1677ff" fillOpacity={0.15} name="Receita" />
+              <Card size="small" style={chartCardStyle} title={<><RiseOutlined style={{ color: '#4361ee', marginRight: 6 }} />Receita por Mês</>}>
+                <ResponsiveContainer width="100%" height={300}>
+                  <AreaChart data={vendasPorMes} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="gradReceita" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#4361ee" stopOpacity={0.3} />
+                        <stop offset="100%" stopColor="#4361ee" stopOpacity={0.02} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis dataKey="mes" tick={{ fontSize: 12, fill: '#8c8c8c' }} axisLine={{ stroke: '#e8e8e8' }} tickLine={false} />
+                    <YAxis tick={{ fontSize: 12, fill: '#8c8c8c' }} axisLine={false} tickLine={false} />
+                    <Tooltip formatter={(v) => fmt(Number(v))} contentStyle={{ borderRadius: 8, border: '1px solid #f0f0f0', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }} />
+                    <Area type="monotone" dataKey="receita" stroke="#4361ee" strokeWidth={2.5} fill="url(#gradReceita)" name="Receita" />
                   </AreaChart>
                 </ResponsiveContainer>
               </Card>
             </Col>
             <Col xs={24} lg={8}>
-              <Card size="small" title={<><ShoppingCartOutlined style={{ color: '#52c41a', marginRight: 6 }} />Vendas por Status</>}>
-                <ResponsiveContainer width="100%" height={280}>
+              <Card size="small" style={chartCardStyle} title={<><ShoppingCartOutlined style={{ color: '#06d6a0', marginRight: 6 }} />Vendas por Status</>}>
+                <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
-                    <Pie data={vendasPorStatus} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`} labelLine={false} style={{ fontSize: 11 }}>
+                    <Pie data={vendasPorStatus} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={55} outerRadius={90} paddingAngle={3} cornerRadius={4}>
                       {vendasPorStatus.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                     </Pie>
-                    <Tooltip />
+                    <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid #f0f0f0', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }} />
+                    <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
                   </PieChart>
                 </ResponsiveContainer>
               </Card>
@@ -265,29 +277,29 @@ export default function RelatoriosPage() {
           </Row>
           <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
             <Col xs={24} lg={12}>
-              <Card size="small" title={<><FireOutlined style={{ color: '#ff4d4f', marginRight: 6 }} />Top Produtos por Receita</>}>
-                <ResponsiveContainer width="100%" height={260}>
-                  <BarChart data={topProdutos} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" style={{ fontSize: 11 }} />
-                    <YAxis dataKey="name" type="category" width={120} style={{ fontSize: 10 }} />
-                    <Tooltip formatter={(v) => fmt(Number(v))} />
-                    <Bar dataKey="receita" fill="#1677ff" name="Receita" radius={[0, 4, 4, 0]} />
+              <Card size="small" style={chartCardStyle} title={<><FireOutlined style={{ color: '#ef476f', marginRight: 6 }} />Top Produtos por Receita</>}>
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart data={topProdutos} layout="vertical" margin={{ top: 4, right: 16, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={false} />
+                    <XAxis type="number" tick={{ fontSize: 11, fill: '#8c8c8c' }} axisLine={false} tickLine={false} />
+                    <YAxis dataKey="name" type="category" width={110} tick={{ fontSize: 11, fill: '#595959' }} axisLine={false} tickLine={false} />
+                    <Tooltip formatter={(v) => fmt(Number(v))} contentStyle={{ borderRadius: 8, border: '1px solid #f0f0f0', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }} />
+                    <Bar dataKey="receita" fill="#4361ee" name="Receita" radius={[0, 6, 6, 0]} barSize={18} />
                   </BarChart>
                 </ResponsiveContainer>
               </Card>
             </Col>
             <Col xs={24} lg={12}>
-              <Card size="small" title={<><CrownOutlined style={{ color: '#722ed1', marginRight: 6 }} />Associados por Plano</>}>
-                <ResponsiveContainer width="100%" height={260}>
+              <Card size="small" style={chartCardStyle} title={<><CrownOutlined style={{ color: '#7209b7', marginRight: 6 }} />Associados por Plano</>}>
+                <ResponsiveContainer width="100%" height={280}>
                   <PieChart>
-                    <Pie data={assocPorPlano} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={85} label={({ name, value }) => `${name}: ${value}`} labelLine style={{ fontSize: 12 }}>
-                      <Cell fill="#1677ff" />
-                      <Cell fill="#722ed1" />
-                      <Cell fill="#faad14" />
+                    <Pie data={assocPorPlano} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={85} paddingAngle={3} cornerRadius={4}>
+                      <Cell fill="#3a86ff" />
+                      <Cell fill="#7209b7" />
+                      <Cell fill="#ffd166" />
                     </Pie>
-                    <Tooltip />
-                    <Legend />
+                    <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid #f0f0f0', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }} />
+                    <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
                   </PieChart>
                 </ResponsiveContainer>
               </Card>
@@ -304,17 +316,17 @@ export default function RelatoriosPage() {
             <Col xs={12} sm={6}><Card size="small"><Statistic title="Receita" value={receitaTotal} prefix="R$" precision={2} styles={{ content: { color: '#722ed1', fontSize: 18 } }} /></Card></Col>
             <Col xs={12} sm={6}><Card size="small"><Statistic title="Ticket Médio" value={ticketMedio} prefix="R$" precision={2} styles={{ content: { color: '#faad14', fontSize: 18 } }} /></Card></Col>
           </Row>
-          <Card size="small" title="Vendas por Mês" extra={<Button size="small" icon={<DownloadOutlined />} onClick={handleExportVendas}>Exportar CSV</Button>}>
+          <Card size="small" style={chartCardStyle} title="Vendas por Mês" extra={<Button size="small" icon={<DownloadOutlined />} onClick={handleExportVendas}>Exportar CSV</Button>}>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={vendasPorMes}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="mes" style={{ fontSize: 11 }} />
-                <YAxis yAxisId="left" style={{ fontSize: 11 }} />
-                <YAxis yAxisId="right" orientation="right" style={{ fontSize: 11 }} />
-                <Tooltip formatter={(v, name) => name === 'receita' ? fmt(Number(v)) : v} />
-                <Legend />
-                <Bar yAxisId="left" dataKey="vendas" fill="#1677ff" name="Qtd Vendas" radius={[4, 4, 0, 0]} />
-                <Bar yAxisId="right" dataKey="receita" fill="#52c41a" name="Receita" radius={[4, 4, 0, 0]} />
+              <BarChart data={vendasPorMes} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="mes" tick={{ fontSize: 12, fill: '#8c8c8c' }} axisLine={{ stroke: '#e8e8e8' }} tickLine={false} />
+                <YAxis yAxisId="left" tick={{ fontSize: 11, fill: '#8c8c8c' }} axisLine={false} tickLine={false} />
+                <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11, fill: '#8c8c8c' }} axisLine={false} tickLine={false} />
+                <Tooltip formatter={(v, name) => name === 'receita' ? fmt(Number(v)) : v} contentStyle={{ borderRadius: 8, border: '1px solid #f0f0f0', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }} />
+                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12, paddingTop: 4 }} />
+                <Bar yAxisId="left" dataKey="vendas" fill="#4361ee" name="Qtd Vendas" radius={[6, 6, 0, 0]} barSize={20} />
+                <Bar yAxisId="right" dataKey="receita" fill="#06d6a0" name="Receita" radius={[6, 6, 0, 0]} barSize={20} />
               </BarChart>
             </ResponsiveContainer>
           </Card>
@@ -339,16 +351,16 @@ export default function RelatoriosPage() {
           </Row>
           <Row gutter={[16, 16]}>
             <Col xs={24} lg={12}>
-              <Card size="small" title="Comissões por Status" extra={<Button size="small" icon={<DownloadOutlined />} onClick={handleExportComissoes}>Exportar CSV</Button>}>
+              <Card size="small" style={chartCardStyle} title="Comissões por Status" extra={<Button size="small" icon={<DownloadOutlined />} onClick={handleExportComissoes}>Exportar CSV</Button>}>
                 <ResponsiveContainer width="100%" height={280}>
                   <PieChart>
-                    <Pie data={comissoesPorStatus} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label={({ name, value }) => `${name}: ${fmt(value)}`} labelLine style={{ fontSize: 11 }}>
-                      <Cell fill="#faad14" />
-                      <Cell fill="#1677ff" />
-                      <Cell fill="#52c41a" />
+                    <Pie data={comissoesPorStatus} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={90} paddingAngle={3} cornerRadius={4}>
+                      <Cell fill="#ffd166" />
+                      <Cell fill="#3a86ff" />
+                      <Cell fill="#06d6a0" />
                     </Pie>
-                    <Tooltip formatter={(v) => fmt(Number(v))} />
-                    <Legend />
+                    <Tooltip formatter={(v) => fmt(Number(v))} contentStyle={{ borderRadius: 8, border: '1px solid #f0f0f0', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }} />
+                    <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
                   </PieChart>
                 </ResponsiveContainer>
               </Card>
@@ -377,16 +389,16 @@ export default function RelatoriosPage() {
           </Row>
           <Row gutter={[16, 16]}>
             <Col xs={24} lg={10}>
-              <Card size="small" title="Distribuição por Plano" extra={<Button size="small" icon={<DownloadOutlined />} onClick={handleExportAssociados}>Exportar CSV</Button>}>
+              <Card size="small" style={chartCardStyle} title="Distribuição por Plano" extra={<Button size="small" icon={<DownloadOutlined />} onClick={handleExportAssociados}>Exportar CSV</Button>}>
                 <ResponsiveContainer width="100%" height={280}>
                   <PieChart>
-                    <Pie data={assocPorPlano} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={90} label={({ name, value }) => `${name}: ${value}`} labelLine style={{ fontSize: 12 }}>
-                      <Cell fill="#1677ff" />
-                      <Cell fill="#722ed1" />
-                      <Cell fill="#faad14" />
+                    <Pie data={assocPorPlano} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={90} paddingAngle={3} cornerRadius={4}>
+                      <Cell fill="#3a86ff" />
+                      <Cell fill="#7209b7" />
+                      <Cell fill="#ffd166" />
                     </Pie>
-                    <Tooltip />
-                    <Legend />
+                    <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid #f0f0f0', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }} />
+                    <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12, paddingTop: 8 }} />
                   </PieChart>
                 </ResponsiveContainer>
               </Card>
@@ -416,14 +428,14 @@ export default function RelatoriosPage() {
           </Row>
           <Row gutter={[16, 16]}>
             <Col xs={24} lg={12}>
-              <Card size="small" title="Top Lojas por Vendas">
+              <Card size="small" style={chartCardStyle} title="Top Lojas por Vendas">
                 <ResponsiveContainer width="100%" height={280}>
-                  <BarChart data={topLojas} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" style={{ fontSize: 11 }} />
-                    <YAxis dataKey="name" type="category" width={120} style={{ fontSize: 10 }} />
-                    <Tooltip />
-                    <Bar dataKey="vendas" fill="#1677ff" name="Vendas" radius={[0, 4, 4, 0]} />
+                  <BarChart data={topLojas} layout="vertical" margin={{ top: 4, right: 16, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={false} />
+                    <XAxis type="number" tick={{ fontSize: 11, fill: '#8c8c8c' }} axisLine={false} tickLine={false} />
+                    <YAxis dataKey="name" type="category" width={110} tick={{ fontSize: 11, fill: '#595959' }} axisLine={false} tickLine={false} />
+                    <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid #f0f0f0', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }} />
+                    <Bar dataKey="vendas" fill="#4361ee" name="Vendas" radius={[0, 6, 6, 0]} barSize={18} />
                   </BarChart>
                 </ResponsiveContainer>
               </Card>

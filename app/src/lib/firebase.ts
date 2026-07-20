@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, connectAuthEmulator } from 'firebase/auth';
-import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
-import { getStorage, connectStorageEmulator } from 'firebase/storage';
+import type { Firestore } from 'firebase/firestore';
+import type { FirebaseStorage } from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyDgbTuXzez0jpdbYv0sTY1oGwR2MaQ3ZPE',
@@ -15,13 +15,37 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
 
 if (import.meta.env.DEV && import.meta.env.VITE_USE_EMULATORS === 'true') {
   connectAuthEmulator(auth, 'http://localhost:9099');
-  connectFirestoreEmulator(db, 'localhost', 8080);
-  connectStorageEmulator(storage, 'localhost', 9199);
+}
+
+let _dbPromise: Promise<Firestore> | null = null;
+export function getDb(): Promise<Firestore> {
+  if (!_dbPromise) {
+    _dbPromise = import('firebase/firestore').then(({ getFirestore, connectFirestoreEmulator }) => {
+      const db = getFirestore(app);
+      if (import.meta.env.DEV && import.meta.env.VITE_USE_EMULATORS === 'true') {
+        try { connectFirestoreEmulator(db, 'localhost', 8080); } catch { /* already connected */ }
+      }
+      return db;
+    });
+  }
+  return _dbPromise;
+}
+
+let _storagePromise: Promise<FirebaseStorage> | null = null;
+export function getStorageInstance(): Promise<FirebaseStorage> {
+  if (!_storagePromise) {
+    _storagePromise = import('firebase/storage').then(({ getStorage, connectStorageEmulator }) => {
+      const storage = getStorage(app);
+      if (import.meta.env.DEV && import.meta.env.VITE_USE_EMULATORS === 'true') {
+        try { connectStorageEmulator(storage, 'localhost', 9199); } catch { /* already connected */ }
+      }
+      return storage;
+    });
+  }
+  return _storagePromise;
 }
 
 export default app;

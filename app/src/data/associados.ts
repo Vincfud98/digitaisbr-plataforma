@@ -111,8 +111,8 @@ export const mockAssociados: Associado[] = names.map((name, i) => {
     niche: niches[i],
     bio: bios[i],
     instagram: `@${slug}`,
-    youtube: i % 3 === 0 ? name.split(' ')[0] + ' Channel' : undefined,
-    tiktok: i % 2 === 0 ? `@${slug}` : undefined,
+    youtube: i % 3 === 0 ? name.split(' ')[0] + ' Channel' : '',
+    tiktok: i % 2 === 0 ? `@${slug}` : '',
     followers: Math.floor(seededRandom(i + 400) * 980000) + 1000,
     engagementRate: Math.round((seededRandom(i + 500) * 8 + 1.5) * 10) / 10,
   };
